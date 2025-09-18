@@ -1,5 +1,3 @@
-import { QueryClient, QueryClientConfig } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 
-export const client = (options?: QueryClientConfig) => {
-  return new QueryClient({ ...options });
-};
+export const client = new QueryClient();
