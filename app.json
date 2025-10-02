@@ -22,7 +22,6 @@
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png",
-      "publicPath": "/VibeVault/",
       "build": {
         "output": "dist"
       }
@@ -40,7 +39,8 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "publicPath": "/VibeVault"
     }
   }
 }
