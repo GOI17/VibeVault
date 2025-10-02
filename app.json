@@ -22,7 +22,7 @@
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png",
-      "baseUrl": "/VibeVault",
+      "publicPath": "/VibeVault",
       "build": {
         "output": "dist"
       }
