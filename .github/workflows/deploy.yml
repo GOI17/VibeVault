@@ -36,6 +36,9 @@ jobs:
         env:
           EXPO_PUBLIC_URL: /VibeVault
 
+      - name: Fix asset paths
+        run: node scripts/fix-paths.js
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
