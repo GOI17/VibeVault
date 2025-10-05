@@ -42,7 +42,26 @@ function create404() {
   }
 }
 
+// Add redirect for missing trailing slash
+function fixTrailingSlash() {
+  const indexPath = path.join(__dirname, "dist", "index.html");
+  let html = fs.readFileSync(indexPath, "utf8");
+
+  const trailingSlashScript = `
+    <script>
+      // Ensure trailing slash for base path
+      if (window.location.pathname === '/VibeVault') {
+        window.location.replace('/VibeVault/');
+      }
+    </script>`;
+
+  html = html.replace("</head>", `${trailingSlashScript}\n</head>`);
+  fs.writeFileSync(indexPath, html);
+  console.log("Added trailing slash redirect");
+}
+
 const distPath = path.join(__dirname, "dist");
 fixPaths(distPath, [".html", ".js", ".css"]);
 create404();
+fixTrailingSlash();
 console.log("All files fixed!");
