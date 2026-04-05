@@ -1,0 +1,66 @@
+- generic [ref=e8]:
+  - generic [ref=e9]:
+    - generic [ref=e10]:
+      - img [ref=e13]
+      - generic [ref=e16]:
+        - generic [ref=e17]: 
+        - textbox "Search" [ref=e18]
+      - generic [ref=e20] [cursor=pointer]: 
+    - generic [ref=e22]:
+      - generic [ref=e24] [cursor=pointer]: For You
+      - generic [ref=e26] [cursor=pointer]: Trending
+      - generic [ref=e28] [cursor=pointer]: Movies
+      - generic [ref=e30] [cursor=pointer]: Series
+  - generic [ref=e32]:
+    - generic [ref=e72]:
+      - generic [ref=e76] [cursor=pointer]:
+        - generic [ref=e77]
+        - generic [ref=e87]
+      - generic [ref=e93] [cursor=pointer]:
+        - generic [ref=e94]
+        - generic [ref=e104]
+      - generic [ref=e110] [cursor=pointer]:
+        - generic [ref=e111]
+        - generic [ref=e121]
+      - generic [ref=e127] [cursor=pointer]:
+        - generic [ref=e128]
+        - generic [ref=e138]
+      - generic [ref=e144] [cursor=pointer]:
+        - generic [ref=e145]
+        - generic [ref=e155]
+      - generic [ref=e161] [cursor=pointer]:
+        - generic [ref=e162]
+        - generic [ref=e172]
+      - generic [ref=e178] [cursor=pointer]:
+        - generic [ref=e179]
+        - generic [ref=e189]
+      - generic [ref=e195] [cursor=pointer]:
+        - generic [ref=e196]
+        - generic [ref=e206]
+      - generic [ref=e212] [cursor=pointer]:
+        - generic [ref=e213]
+        - generic [ref=e223]
+      - generic [ref=e229] [cursor=pointer]:
+        - generic [ref=e230]
+        - generic [ref=e241]
+      - generic [ref=e247] [cursor=pointer]:
+        - generic [ref=e248]
+        - generic [ref=e258]
+      - generic [ref=e264] [cursor=pointer]:
+        - generic [ref=e265]
+        - generic [ref=e275]
+      - generic [ref=e281] [cursor=pointer]:
+        - generic [ref=e282]
+        - generic [ref=e292]
+    - tablist [ref=e41]:
+      - tab "  Home" [selected] [ref=e43] [cursor=pointer]:
+        - generic [ref=e44]
+        - generic [ref=e49]: Home
+      - tab "  Favorites" [ref=e51] [cursor=pointer]:
+        - generic [ref=e52]
+        - generic [ref=e57]: Favorites
+
+## Checkpoint
+- Date: 2026-04-05
+- Surface: cmux browser surface:21 (narrow)
+- Result: Home shell uses the light editorial header, category chips, masonry grid, and bottom nav in the Stitch-style layout.

@@ -93,6 +93,27 @@ Check out the live web version: [https://goi17.github.io/VibeVault](https://goi1
 - `npm run web` - Run in web browser
 - `npm run lint` - Run ESLint for code quality
 
+## 🌐 Browser checks
+
+- Use **cmux-browser** for visual/browser verification.
+- Evidence and fallback rules live in [`docs/browser-workflow.md`](docs/browser-workflow.md).
+- Legacy Playwright artifacts are read-only and should not be extended in this change context.
+- Verify the policy with `npm run verify:browser-policy`.
+
+### Phase 1 UI compliance harness
+
+- Run `npm run verify:stitch-ui-updates-phase1` to check the 10 phase-1 shell and route invariants.
+- `PASS` / exit code `0`: all scenarios matched the current UI shell policy.
+- `FAIL` / exit code `1`: one or more scenarios drifted; inspect the failing scenario ids in stdout.
+- `BLOCKED`: the harness does not depend on Playwright or a browser surface; use cmux-browser for visual validation instead.
+
+### Verification output
+
+- `PASS` / exit code `0`: the documented policy scenarios are present and consistent.
+- `FAIL` / exit code `1`: one or more policy scenarios are missing.
+- `BLOCKED`: cmux is unavailable; do not fall back to Playwright.
+- Output labels: PASS / FAIL / BLOCKED.
+
 ## 🚀 Deployment
 
 The app is automatically deployed to GitHub Pages using GitHub Actions.
