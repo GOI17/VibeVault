@@ -1,0 +1,28 @@
+# Home Parity Fixes Design
+
+## Approach
+
+Make the Home shell visually match the approved reference with minimal surface-area change:
+
+1. Keep the shared `Header` as the only Home chrome owner.
+2. Tune header spacing, search pill sizing, avatar balance, and chip appearance.
+3. Refine masonry card shells, overlay chips, and metadata hierarchy.
+4. Rebalance the bottom tabs with theme-aware spacing and sizing.
+5. Validate on phone and wider viewport using cmux-browser.
+
+## Constraints
+
+- Preserve current search navigation.
+- Preserve favorite mutation behavior.
+- Avoid repository, domain, or data-flow changes.
+- Keep the masonry layout toggle hidden on Home only.
+
+## Risks
+
+- Shared masonry styling can affect Favorites/Search if not scoped carefully.
+- Header spacing changes can expose extra top gaps if paired incorrectly with stack layout.
+- Tab bar sizing may feel cramped on narrow devices if icon and label sizes are too large.
+
+## Rollback
+
+If parity regresses, revert the header, masonry, and tab bar style updates first; behavior should remain intact because the change is visual-only.

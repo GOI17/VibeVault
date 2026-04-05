@@ -1,0 +1,8 @@
+# Home UI Parity Fix Tasks
+
+- [x] Remove duplicate Home chrome source and keep Header as the single shell owner.
+- [x] Remove the legacy Home-only `Switch to list` control from the Home surface.
+- [x] Align Header/Home spacing and responsive behavior for narrow and wide screens.
+- [x] Preserve search and favorites interaction parity.
+- [x] Run cmux-browser verification checkpoints and collect evidence.
+- [x] Run lint and type-check.

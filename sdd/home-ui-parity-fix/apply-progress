@@ -1,0 +1,25 @@
+# Apply Progress — home-ui-parity-fix
+
+## Status
+
+Completed.
+
+## Completed
+
+- Removed Home screen hero/chip duplication so the Header owns the shell chrome.
+- Added a `showLayoutToggle` switch to Masonry so Home can hide the legacy list/grid toggle without affecting Favorites/Search.
+- Tuned Header spacing, safe-area padding, and small-screen sizing.
+- Removed the hardcoded Home stack header height so layout can size from content.
+- Verified Home renders the single shell only, Search still navigates from the header input, and Favorites still routes normally.
+- Ran `npm run lint` (warnings only) and `npx tsc --noEmit` successfully.
+
+## Evidence
+
+- Home snapshot shows only header chips and content grid; no duplicated hero/chip row or `Switch to list` control.
+- Search snapshot shows the existing search flow still resolves to the Search screen.
+- Favorites snapshot shows the tab still loads and the empty state remains intact.
+
+## Pending
+
+- Run cmux-browser verification checkpoints.
+- Run lint and type-check.

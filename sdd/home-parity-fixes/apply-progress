@@ -1,0 +1,28 @@
+# Apply Progress — home-parity-fixes
+
+## Status
+
+Completed.
+
+## Completed
+
+- Tuned the shared Home header spacing, chip sizing, search pill proportions, and avatar balance for narrow and wide layouts.
+- Refined masonry card shells, title/subtitle hierarchy, action badge sizing, and overlay styling for better media parity.
+- Rebalanced the bottom tab bar with theme-aware spacing, icon sizing, and label rhythm.
+- Preserved search navigation and favorite behavior; no repository or domain changes were introduced.
+- Created the home-parity-fixes SDD artifacts and marked the task checklist complete.
+
+## Evidence
+
+- Phone-width cmux-browser validation.
+- Wider-viewport cmux-browser validation.
+- `npm run lint`
+- `npx tsc --noEmit`
+
+## Notes
+
+- `npm run lint` still reports pre-existing repo baseline issues outside the Home parity scope; the touched UI files lint cleanly with targeted ESLint.
+
+## Rollback
+
+- Revert the header, masonry, and tab-bar style changes if visual parity regresses; behavior remains isolated.

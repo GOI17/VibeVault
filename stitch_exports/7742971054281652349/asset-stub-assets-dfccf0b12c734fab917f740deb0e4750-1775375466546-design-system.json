@@ -1,0 +1,21 @@
+{
+  "assetId": "dfccf0b12c734fab917f740deb0e4750",
+  "inputScreenId": "asset-stub-assets-dfccf0b12c734fab917f740deb0e4750-1775375466546",
+  "displayName": "Lumina Archive",
+  "source": "stitch_list_design_systems(projectId=7742971054281652349)",
+  "note": "Stitch returned this design system inline (no downloadable hosted URL provided for this asset).",
+  "theme": {
+    "colorMode": "LIGHT",
+    "colorVariant": "FIDELITY",
+    "headlineFont": "MANROPE",
+    "bodyFont": "INTER",
+    "labelFont": "INTER",
+    "roundness": "ROUND_EIGHT",
+    "customColor": "#D35400",
+    "overridePrimaryColor": "#D35400",
+    "overrideSecondaryColor": "#2E86C1",
+    "overrideNeutralColor": "#1A1C1E",
+    "spacingScale": 3
+  },
+  "designMd": "# Design System: The Editorial Curator\n\n## 1. Overview & Creative North Star\nThe \"Creative North Star\" for this design system is **The Digital Curator**.\n\nIn an era of information fatigue, this system moves away from the \"infinite grid\" of standard database apps toward a high-end editorial experience. It treats a user’s collection of movies and books not as rows of data, but as a curated exhibition. We achieve this through **Intentional Asymmetry** and **Tonal Depth**.\n\nInstead of rigid, boxed-in layouts, we use breathing room and overlapping elements to create a sense of movement. This system rejects the \"template\" look by prioritizing large-scale typography and visual content over structural lines, ensuring the interface feels like a premium digital coffee table book.\n\n## 2. Color Philosophy\nOur palette is a dual-soul system: a warm, \"Sun-Drenched Gallery\" (Light Mode) and a deep, \"Midnight Archive\" (Dark Mode).\n\nPrimary: #9e3d00\nSecondary: #006397\n\n## 3. Typography\nHero/section emphasis with Manrope and body/metadata with Inter.\n\n## 4. Elevation & Depth\nDepth via tonal layering (surface tiers) rather than heavy shadows.\n\n## 5. Signature Components\nExhibit-style rounded cards, floating FAB, glassmorphism bottom nav, pill-style category tabs.\n\n## 6. Do's and Don'ts\nPrefer whitespace + surface hierarchy over hard lines; avoid pure black in dark mode; keep icon clutter low."
+}

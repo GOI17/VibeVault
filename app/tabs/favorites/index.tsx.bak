@@ -1,0 +1,626 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  ScrollView,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useWindowDimensions,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import { Formik } from "formik";
+import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import MasonryList from "@/components/Masonry";
+import { queryOptions } from "@/constants/query";
+import { signInWithGoogle } from "@/app/utils/googleAuth";
+import { uploadToDrive, downloadFromDrive } from "@/app/utils/googleDrive";
+
+const isValidUrl = (string: string) => {
+  try {
+    new URL(string);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export default function Index() {
+  const queryClient = useQueryClient();
+  const { data, isLoading, error } = useQuery(queryOptions.movies.favorites);
+  const { mutate: markAsFavorite } = useMutation({
+    ...queryOptions.movies.markAsFavorite,
+  });
+  const [isFormVisible, setIsFormVisible] = useState(true);
+  const [showFormModal, setShowFormModal] = useState(false);
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 720;
+
+  if (isLoading) {
+    return (
+      <ScrollView style={{ backgroundColor: "#000000", flex: 1 }}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <Text style={{ color: "#FFFFFF", fontSize: 18 }}>
+            Loading favorites...
+          </Text>
+        </View>
+      </ScrollView>
+    );
+  }
+
+  if (error) {
+    return (
+      <ScrollView style={{ backgroundColor: "#000000", flex: 1 }}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <Text style={{ color: "#FFFFFF", fontSize: 18 }}>
+            Error loading favorites
+          </Text>
+          <Text style={{ color: "#CCCCCC", fontSize: 14, marginTop: 10 }}>
+            {error.message}
+          </Text>
+        </View>
+      </ScrollView>
+    );
+  }
+
+  if (isDesktop) {
+    return (
+      <View
+        style={{ flex: 1, flexDirection: "row", backgroundColor: "#000000" }}
+      >
+        <View
+          style={{
+            width: isFormVisible ? 300 : 50,
+            padding: isFormVisible ? 20 : 10,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => setIsFormVisible(!isFormVisible)}
+            style={{
+              position: "absolute",
+              right: 5,
+              top: "50%",
+              marginTop: -15,
+              backgroundColor: "#333333",
+              padding: 5,
+              borderRadius: 5,
+            }}
+          >
+            <Text style={{ color: "#FFFFFF", fontSize: 14 }}>
+              {isFormVisible ? "«" : "»"}
+            </Text>
+          </TouchableOpacity>
+          {isFormVisible && (
+            <View>
+              <Text
+                style={{ color: "#FFFFFF", fontSize: 18, marginBottom: 10 }}
+              >
+                Add Custom Movie
+              </Text>
+              <Formik
+                initialValues={{ title: "", url: "", platform: "" }}
+                validateOnBlur={false}
+                validateOnChange={false}
+                validate={(values) => {
+                  const errors: Record<string, string> = {};
+                  if (!values.title) {
+                    errors.title = "Required";
+                  }
+                  if (values.url && !isValidUrl(values.url)) {
+                    errors.url = "Invalid URL";
+                  }
+                  if (!values.platform) {
+                    errors.platform = "Required";
+                  }
+                  return errors;
+                }}
+                onSubmit={(values, { setSubmitting, resetForm }) => {
+                  setSubmitting(false);
+                  markAsFavorite({
+                    id: Date.now().toString(), // simple ID
+                    primaryTitle: values.title,
+                    url: values.url,
+                    platform: values.platform,
+                  });
+                  resetForm();
+                }}
+              >
+                {({
+                  handleChange,
+                  handleSubmit,
+                  values,
+                  isSubmitting,
+                  setFieldValue,
+                  errors,
+                }) => (
+                  <View>
+                    <TextInput
+                      style={{
+                        height: 40,
+                        borderColor: "#E50914",
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        paddingHorizontal: 10,
+                        color: "#FFFFFF",
+                        backgroundColor: "#333333",
+                        marginBottom: 5,
+                      }}
+                      placeholder="Movie Title"
+                      placeholderTextColor="#CCCCCC"
+                      value={values.title}
+                      onChangeText={handleChange("title")}
+                    />
+                    {errors.title && (
+                      <Text
+                        style={{
+                          color: "#FF0000",
+                          fontSize: 12,
+                          marginBottom: 10,
+                        }}
+                      >
+                        {errors.title}
+                      </Text>
+                    )}
+                    <TextInput
+                      style={{
+                        height: 40,
+                        borderColor: "#E50914",
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        paddingHorizontal: 10,
+                        color: "#FFFFFF",
+                        backgroundColor: "#333333",
+                        marginBottom: 5,
+                      }}
+                      placeholder="Image URL (optional)"
+                      placeholderTextColor="#CCCCCC"
+                      value={values.url}
+                      onChangeText={handleChange("url")}
+                    />
+                    {errors.url && (
+                      <Text
+                        style={{
+                          color: "#FF0000",
+                          fontSize: 12,
+                          marginBottom: 10,
+                        }}
+                      >
+                        {errors.url}
+                      </Text>
+                    )}
+                    <Picker
+                      selectedValue={values.platform}
+                      onValueChange={(itemValue) =>
+                        setFieldValue("platform", itemValue)
+                      }
+                      style={{
+                        height: 40,
+                        borderColor: "#E50914",
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        backgroundColor: "#333333",
+                        color: "#FFFFFF",
+                        paddingHorizontal: 10,
+                        marginBottom: 5,
+                      }}
+                    >
+                      <Picker.Item label="Select Platform" value="" />
+                      <Picker.Item label="Netflix" value="Netflix" />
+                      <Picker.Item label="Hulu" value="Hulu" />
+                      <Picker.Item label="Disney+" value="Disney+" />
+                      <Picker.Item label="Amazon Prime" value="Amazon Prime" />
+                      <Picker.Item label="HBO Max" value="HBO Max" />
+                      <Picker.Item label="Apple TV+" value="Apple TV+" />
+                    </Picker>
+                    {errors.platform && (
+                      <Text
+                        style={{
+                          color: "#FF0000",
+                          fontSize: 12,
+                          marginBottom: 10,
+                        }}
+                      >
+                        {errors.platform}
+                      </Text>
+                    )}
+                    <TouchableOpacity
+                      onPress={() => handleSubmit()}
+                      disabled={
+                        isSubmitting || !values.title || !values.platform
+                      }
+                      style={{
+                        backgroundColor: "#E50914",
+                        padding: 10,
+                        borderRadius: 5,
+                        alignItems: "center",
+                        marginBottom: 10,
+                      }}
+                    >
+                      <Text style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                        Add to Favorites
+                      </Text>
+                    </TouchableOpacity>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <TouchableOpacity
+                        onPress={async () => {
+                          const auth = await signInWithGoogle();
+                          if (auth) {
+                            try {
+                              await uploadToDrive(data);
+                              alert("Backup successful");
+                            } catch {
+                              alert("Backup failed");
+                            }
+                          }
+                        }}
+                        style={{
+                          backgroundColor: "#4285F4",
+                          padding: 10,
+                          borderRadius: 5,
+                          flex: 1,
+                          marginRight: 5,
+                          alignItems: "center",
+                        }}
+                      >
+                        <Text style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                          Backup
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={async () => {
+                          const auth = await signInWithGoogle();
+                          if (auth) {
+                            try {
+                              const restoredData = await downloadFromDrive();
+                              await AsyncStorage.setItem(
+                                "favorite_movies",
+                                JSON.stringify(restoredData),
+                              );
+                              queryClient.invalidateQueries({
+                                queryKey: ["movies", "favorites"],
+                              });
+                              alert("Restore successful");
+                            } catch {
+                              alert("Restore failed");
+                            }
+                          }
+                        }}
+                        style={{
+                          backgroundColor: "#34A853",
+                          padding: 10,
+                          borderRadius: 5,
+                          flex: 1,
+                          marginLeft: 5,
+                          alignItems: "center",
+                        }}
+                      >
+                        <Text style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                          Restore
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+              </Formik>
+            </View>
+          )}
+        </View>
+        <ScrollView style={{ flex: 1 }}>
+          <MasonryList
+            data={
+              data?.map((item) => ({
+                key: item.id,
+                imageSrc: item.url,
+                title: item.primaryTitle,
+              })) || []
+            }
+            isFavorites={true}
+          />
+        </ScrollView>
+      </View>
+    );
+  } else {
+    return (
+      <View style={{ flex: 1, backgroundColor: "#000000" }}>
+        <ScrollView style={{ flex: 1 }}>
+          <MasonryList
+            data={
+              data?.map((item) => ({
+                key: item.id,
+                imageSrc: item.url,
+                title: item.primaryTitle,
+              })) || []
+            }
+            isFavorites={true}
+          />
+        </ScrollView>
+        <TouchableOpacity
+          onPress={() => setShowFormModal(true)}
+          style={{
+            position: "absolute",
+            bottom: 20,
+            right: 20,
+            backgroundColor: "#E50914",
+            width: 60,
+            height: 60,
+            borderRadius: 30,
+            justifyContent: "center",
+            alignItems: "center",
+            elevation: 5,
+          }}
+        >
+          <Text style={{ color: "#FFFFFF", fontSize: 24 }}>+</Text>
+        </TouchableOpacity>
+        {showFormModal && (
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0,0,0,0.8)",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <View
+              style={{
+                width: "90%",
+                backgroundColor: "#000000",
+                padding: 20,
+                borderRadius: 10,
+                borderColor: "#E50914",
+                borderWidth: 1,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => setShowFormModal(false)}
+                style={{
+                  position: "absolute",
+                  top: 10,
+                  right: 10,
+                  backgroundColor: "#333333",
+                  padding: 5,
+                  borderRadius: 5,
+                }}
+              >
+                <Text style={{ color: "#FFFFFF", fontSize: 16 }}>×</Text>
+              </TouchableOpacity>
+              <Text
+                style={{ color: "#FFFFFF", fontSize: 18, marginBottom: 10 }}
+              >
+                Add Custom Movie
+              </Text>
+              <Formik
+                initialValues={{ title: "", url: "", platform: "" }}
+                validateOnBlur={false}
+                validateOnChange={false}
+                validate={(values) => {
+                  const errors: Record<string, string> = {};
+                  if (!values.title) {
+                    errors.title = "Required";
+                  }
+                  if (values.url && !isValidUrl(values.url)) {
+                    errors.url = "Invalid URL";
+                  }
+                  if (!values.platform) {
+                    errors.platform = "Required";
+                  }
+                  return errors;
+                }}
+                onSubmit={(values, { setSubmitting, resetForm }) => {
+                  setSubmitting(false);
+                  markAsFavorite({
+                    id: Date.now().toString(), // simple ID
+                    primaryTitle: values.title,
+                    url: values.url,
+                    platform: values.platform,
+                  });
+                  resetForm();
+                  setShowFormModal(false);
+                }}
+              >
+                {({
+                  handleChange,
+                  handleSubmit,
+                  values,
+                  isSubmitting,
+                  setFieldValue,
+                  errors,
+                }) => (
+                  <View>
+                    <TextInput
+                      style={{
+                        height: 40,
+                        borderColor: "#E50914",
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        paddingHorizontal: 10,
+                        color: "#FFFFFF",
+                        backgroundColor: "#333333",
+                        marginBottom: 5,
+                      }}
+                      placeholder="Movie Title"
+                      placeholderTextColor="#CCCCCC"
+                      value={values.title}
+                      onChangeText={handleChange("title")}
+                    />
+                    {errors.title && (
+                      <Text
+                        style={{
+                          color: "#FF0000",
+                          fontSize: 12,
+                          marginBottom: 10,
+                        }}
+                      >
+                        {errors.title}
+                      </Text>
+                    )}
+                    <TextInput
+                      style={{
+                        height: 40,
+                        borderColor: "#E50914",
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        paddingHorizontal: 10,
+                        color: "#FFFFFF",
+                        backgroundColor: "#333333",
+                        marginBottom: 5,
+                      }}
+                      placeholder="Image URL (optional)"
+                      placeholderTextColor="#CCCCCC"
+                      value={values.url}
+                      onChangeText={handleChange("url")}
+                    />
+                    {errors.url && (
+                      <Text
+                        style={{
+                          color: "#FF0000",
+                          fontSize: 12,
+                          marginBottom: 10,
+                        }}
+                      >
+                        {errors.url}
+                      </Text>
+                    )}
+                    <Picker
+                      selectedValue={values.platform}
+                      onValueChange={(itemValue) =>
+                        setFieldValue("platform", itemValue)
+                      }
+                      style={{
+                        height: 40,
+                        borderColor: "#E50914",
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        backgroundColor: "#333333",
+                        color: "#FFFFFF",
+                        paddingHorizontal: 10,
+                        marginBottom: 5,
+                      }}
+                    >
+                      <Picker.Item label="Select Platform" value="" />
+                      <Picker.Item label="Netflix" value="Netflix" />
+                      <Picker.Item label="Hulu" value="Hulu" />
+                      <Picker.Item label="Disney+" value="Disney+" />
+                      <Picker.Item label="Amazon Prime" value="Amazon Prime" />
+                      <Picker.Item label="HBO Max" value="HBO Max" />
+                      <Picker.Item label="Apple TV+" value="Apple TV+" />
+                    </Picker>
+                    {errors.platform && (
+                      <Text
+                        style={{
+                          color: "#FF0000",
+                          fontSize: 12,
+                          marginBottom: 10,
+                        }}
+                      >
+                        {errors.platform}
+                      </Text>
+                    )}
+                    <TouchableOpacity
+                      onPress={() => handleSubmit()}
+                      disabled={
+                        isSubmitting || !values.title || !values.platform
+                      }
+                      style={{
+                        backgroundColor: "#E50914",
+                        padding: 10,
+                        borderRadius: 5,
+                        alignItems: "center",
+                        marginBottom: 10,
+                      }}
+                    >
+                      <Text style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                        Add to Favorites
+                      </Text>
+                    </TouchableOpacity>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <TouchableOpacity
+                        onPress={async () => {
+                          const auth = await signInWithGoogle();
+                          if (auth) {
+                            try {
+                              await uploadToDrive(data);
+                              alert("Backup successful");
+                            } catch {
+                              alert("Backup failed");
+                            }
+                          }
+                        }}
+                        style={{
+                          backgroundColor: "#4285F4",
+                          padding: 10,
+                          borderRadius: 5,
+                          flex: 1,
+                          marginRight: 5,
+                          alignItems: "center",
+                        }}
+                      >
+                        <Text style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                          Backup
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={async () => {
+                          const auth = await signInWithGoogle();
+                          if (auth) {
+                            try {
+                              await downloadFromDrive();
+                              // Update favorites with restoredData
+                              alert("Restore successful");
+                            } catch {
+                              alert("Restore failed");
+                            }
+                          }
+                        }}
+                        style={{
+                          backgroundColor: "#34A853",
+                          padding: 10,
+                          borderRadius: 5,
+                          flex: 1,
+                          marginLeft: 5,
+                          alignItems: "center",
+                        }}
+                      >
+                        <Text style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                          Restore
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+              </Formik>
+            </View>
+          </View>
+        )}
+      </View>
+    );
+  }
+}

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Curator - My Favorites</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#cce5ff",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#ffb595",
+                        "on-tertiary-fixed": "#001a41",
+                        "primary-container": "#c64f00",
+                        "surface": "#f9f8f3",
+                        "secondary-fixed-dim": "#92ccff",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#71c0fe",
+                        "surface-container": "#eeeef0",
+                        "outline": "#8c7166",
+                        "primary-fixed": "#ffdbcd",
+                        "on-secondary-container": "#004d77",
+                        "surface-dim": "#dadadc",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "outline-variant": "#e0c0b2",
+                        "error-container": "#ffdad6",
+                        "inverse-primary": "#ffb595",
+                        "inverse-on-surface": "#f0f0f3",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-container": "#fffbff",
+                        "on-primary-fixed": "#351000",
+                        "surface-bright": "#f9f8f3",
+                        "on-tertiary-fixed-variant": "#004494",
+                        "error": "#ba1a1a",
+                        "tertiary": "#0058bd",
+                        "surface-variant": "#e2e2e5",
+                        "tertiary-container": "#0070ec",
+                        "background": "#f9f8f3",
+                        "surface-container-highest": "#e2e2e5",
+                        "surface-container-high": "#e8e8ea",
+                        "inverse-surface": "#2f3133",
+                        "primary": "#9e3d00",
+                        "tertiary-fixed": "#d8e2ff",
+                        "on-secondary-fixed-variant": "#004b73",
+                        "on-surface-variant": "#717171",
+                        "on-secondary-fixed": "#001d31",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#f3f3f6",
+                        "on-surface": "#1a1c1e",
+                        "on-primary-fixed-variant": "#7c2e00",
+                        "surface-tint": "#a23f00",
+                        "on-tertiary-container": "#fefcff",
+                        "on-tertiary": "#ffffff",
+                        "secondary": "#006397",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#1a1c1e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "1.25rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body {
+            min-height: 100dvh;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 bg-surface/90 backdrop-blur-md flex justify-between items-center px-5 py-4">
+<div class="flex items-center">
+<span class="material-symbols-outlined text-on-surface-variant text-2xl" data-icon="search">search</span>
+</div>
+<div class="text-lg font-bold text-on-surface tracking-tight font-headline">Curator</div>
+<div class="w-9 h-9 rounded-full overflow-hidden border border-surface-container-high">
+<img alt="User profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwsU9FxSoZKmac34wRY5qafwLa_xyU5PWcP3VqvzZw4hw3fh8YkMBJBEhdQA2o0FfRWXaKFlwo9uvqvuvaaXF2t_8JlCYfpWhnesC0wqR3r17YRo_G4N6thsRO70FFhCK_OOTzGlrXls2kcjfk05d2_TT3ccNAJ_aV_ymypDeCVPaR9N5VkIQbgkxnhjsVy2XiMZvaxWoknQ_OWjq2cd2brEZEb8yUABrP8yQnKv2iFOiJeYwsXBouZ_dGooOoZsKWfLiB4X4REW4"/>
+</div>
+</header>
+<main class="px-5 pt-2">
+<h1 class="text-4xl font-bold text-on-surface tracking-tight mb-6">My Favorites</h1>
+<!-- Filter Tabs (Styled like IMAGE_4) -->
+<div class="flex gap-2 overflow-x-auto pb-6 no-scrollbar">
+<button class="px-8 py-2.5 rounded-full text-lg font-medium bg-white text-on-surface border border-surface-container-high shadow-sm">All</button>
+<button class="px-8 py-2.5 rounded-full text-lg font-medium text-on-surface-variant hover:bg-surface-container-high transition-colors">Movies</button>
+<button class="px-8 py-2.5 rounded-full text-lg font-medium text-on-surface-variant hover:bg-surface-container-high transition-colors">TV</button>
+<button class="px-8 py-2.5 rounded-full text-lg font-medium text-on-surface-variant hover:bg-surface-container-high transition-colors">Music</button>
+<button class="px-8 py-2.5 rounded-full text-lg font-medium text-on-surface-variant hover:bg-surface-container-high transition-colors">Books</button>
+</div>
+<!-- Masonry-like Grid (Matching IMAGE_4's layout logic) -->
+<div class="grid grid-cols-2 gap-x-4 gap-y-6">
+<!-- Item 1: Movie -->
+<div class="flex flex-col">
+<div class="aspect-[4/5] relative rounded-[1.5rem] overflow-hidden mb-3 bg-surface-container-low shadow-sm">
+<img alt="Dune: Part Two" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqz7GPps53d-IzLQ1n-v1i4m3ntyXEylU9kdj9ZGwNCpZiQd4lSWmRd8SrXug7NEb-JSB0YDdSphsut43IdZYEtJNoxmZp1xv2bJDQxpQlJPrT1BBeK0vwmfJDx6n0VvqL7t5xglcbho3dsX-GU4s8oplbBdcK1x5qTjrsDOTPjlwtQp4eUe0oyPiSwyl2cgZaemQB3QlpWcAgDkgoajkjKLbUznrN_r6ZLcVhbSCsrgLR2kYc1SKcAL0xEIsn-N314LKZYW2Nv4M"/>
+<button class="absolute top-3 right-3 text-white">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+<button class="absolute bottom-3 right-3 text-white">
+<span class="material-symbols-outlined text-[20px]">ios_share</span>
+</button>
+</div>
+<h3 class="text-[15px] font-semibold text-on-surface leading-tight">Dune: Part Two</h3>
+<p class="text-[13px] text-on-surface-variant">Sci-Fi • Movie</p>
+</div>
+<!-- Item 2: Music -->
+<div class="flex flex-col">
+<div class="aspect-square relative rounded-[1.5rem] overflow-hidden mb-3 bg-surface-container-low shadow-sm">
+<img alt="The New Abnormal" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPLRDrt5rOmkwE6PlSdQQPPiE8-jE6dlZtDvbErk_8vm5HRJhbhlvJMFntljm1ZAVF9GkW0VL6_Q98OjWSmWUnXVPStFk_TpF7tft0oDbziTb2M5TjolArR3m1AnWVGf4133SgPk5RSblRt6kBBcwqVg05cWXMLzAcQvB58xB7uJlB2TQarf0lAwb05gW9B9wZP-83JqZw75Ya56RjxnFudKucDwGzx7A3nAHFNEJBNYM8gmN1FmFQZAKbqv7e6vKHT12Zz69GGWw"/>
+<button class="absolute top-3 right-3 text-white/50">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+<h3 class="text-[15px] font-semibold text-on-surface leading-tight">The New Abnormal</h3>
+<p class="text-[13px] text-on-surface-variant">Indie Rock • Album</p>
+</div>
+<!-- Item 3: Movie -->
+<div class="flex flex-col -mt-4">
+<div class="aspect-[3/4] relative rounded-[1.5rem] overflow-hidden mb-3 bg-surface-container-low shadow-sm">
+<img alt="The Purentic" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBedSF6Mbg1AlVwAsemvlsKyMUpMUAqGk18l9hD5dhDu7ga_sYHL96Set0z1FAn-RKSyGi_98-ACN6AY5nohwNxHAjU8lFzKzphv5qeFtBB5MXkcP2sEFhPOb_kyOAziuEL1Qh87d_cosFeghYYtC6XtWHU-Gs3NU34eMEt0NC-54pTcUpJRJRyLPhhzigrXPHyEIlw04HxPbiZBPTCpnpBF_j3QScqhKvBFhkpY05C783aRN3-CTq9WWV63ukjK4yTXE672uhSf-Y"/>
+<button class="absolute top-3 right-3 text-white">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+<button class="absolute bottom-3 right-3 text-white">
+<span class="material-symbols-outlined text-[20px]">ios_share</span>
+</button>
+</div>
+<h3 class="text-[15px] font-semibold text-on-surface leading-tight">Interstellar</h3>
+<p class="text-[13px] text-on-surface-variant">Sci-Fi • Movie</p>
+</div>
+<!-- Item 4: Series -->
+<div class="flex flex-col">
+<div class="aspect-[4/5] relative rounded-[1.5rem] overflow-hidden mb-3 bg-surface-container-low shadow-sm">
+<img alt="Severance" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARLbopAti6b4yb1VPXlLojQNXhCLOVeERaK_DcR5E8qZeJdjTj_AYpAd6MsmYlTB9sM-FymkBUdFWkrvRe6vk6sn42x3CTIaIA2gvyV3IpTxHt6tgrdR0U9QSuhNDcik23SL1NvX57Te23L25IlFa0GdqX6-Vn-nq9p62RYBpVDFh0dI_F-ZwsW03Vem42DcEUDqcEf80Afj-PKd6rGQG8-_ARnyvfEgszGV2u5bLsgiQmu0OK5O2C3_ivuRYY8M4_kHCAmwKQfrw"/>
+<button class="absolute top-3 right-3 text-white">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+<h3 class="text-[15px] font-semibold text-on-surface leading-tight">Severance</h3>
+<p class="text-[13px] text-on-surface-variant">Thriller • TV Series</p>
+</div>
+<!-- Item 5: Book -->
+<div class="flex flex-col">
+<div class="aspect-[4/5] relative rounded-[1.5rem] overflow-hidden mb-3 bg-surface-container-low shadow-sm">
+<img alt="The Great Gatsby" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdlQ8jB69kt81WPF_8eY0S7yXpXIKKJ8S59T6wP17f08X00d7NqV3uJ9cJp56xSTxtFmvIQnX03yWF360aCcXNCL1gZJHwAmVkB8p78Df8Z9owiCOUEQLjrAouc5nF1TAGlMEYmHL2XofUoxE7YTpUdZX92RSEMbD8eWFOBsZJpzl189J6HDPK8lT8k_IqTl2VYz16WnEId4EPEajx_U09Io5FQZCumjZjrmQvdkYtzF9BcNfGAzMIiEHc2YfkrbgnKI0z6jXXiUw"/>
+<button class="absolute top-3 right-3 text-white">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+<h3 class="text-[15px] font-semibold text-on-surface leading-tight">The Great Gatsby</h3>
+<p class="text-[13px] text-on-surface-variant">F. Scott Fitzgerald • Book</p>
+</div>
+<!-- Item 6: Wide Asymmetry (Succession) -->
+<div class="col-span-2 flex flex-col mt-2">
+<div class="aspect-[21/10] relative rounded-[1.5rem] overflow-hidden mb-3 bg-surface-container-low shadow-sm">
+<img alt="Succession" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAulQCToXJDgUasnpHXJdXklNBfuK9wElHNEhzlA4RZ2-QrXzyutGasjUg_Cj_FKuIR_yotOprbHrPf639XcAuPiO5YesAg-0rA_0R1AhH_woS5OnPmBiUkC06u8000JC7GQQSl6SEs09R_fbnfDtc2K7Lq3Oe-nlBvASay9gSOejoNWhsio4lRbLOja51ZHhKmabzAWt3mdlqySLe9ShwKYbJshE8NUyrQF_zt3g8EcdkBHazXzIKKvJhuYQ7eAsibcSToTbcqO-k"/>
+<button class="absolute top-3 right-3 text-white">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+<h3 class="text-[15px] font-semibold text-on-surface leading-tight">Succession</h3>
+<p class="text-[13px] text-on-surface-variant">Drama • TV Series</p>
+</div>
+</div>
+</main>
+<!-- FAB (Styled like IMAGE_4) -->
+<button class="fixed bottom-24 right-5 w-[60px] h-[60px] bg-[#6782a1] text-white rounded-full flex items-center justify-center shadow-xl z-40 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+<!-- BottomNavBar (Styled like IMAGE_4) -->
+<nav class="fixed bottom-0 w-full z-50 bg-white/95 backdrop-blur-md border-t border-surface-container-high px-4 pb-8 pt-3">
+<div class="flex justify-around items-center">
+<div class="flex flex-col items-center gap-1 text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined text-[28px]" data-icon="home">home</span>
+<span class="text-[11px] font-medium">Home</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined text-[28px]" data-icon="explore">explore</span>
+<span class="text-[11px] font-medium">Discover</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined text-[28px]" data-icon="show_chart">show_chart</span>
+<span class="text-[11px] font-medium">Activity</span>
+</div>
+<!-- Active State -->
+<div class="flex flex-col items-center gap-1 text-[#2f3133]">
+<span class="material-symbols-outlined text-[28px]" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="text-[11px] font-semibold">Profile</span>
+</div>
+</div>
+</nav>
+</body></html>

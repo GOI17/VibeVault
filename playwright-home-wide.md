@@ -1,0 +1,51 @@
+- generic [ref=e8]:
+  - generic [ref=e9]:
+    - generic [ref=e10]:
+      - img [ref=e13]
+      - generic [ref=e16]:
+        - generic [ref=e17]: 
+        - textbox "Search" [ref=e18]
+      - generic [ref=e20] [cursor=pointer]: 
+    - generic [ref=e22]:
+      - generic [ref=e24] [cursor=pointer]: For You
+      - generic [ref=e26] [cursor=pointer]: Trending
+      - generic [ref=e28] [cursor=pointer]: Movies
+      - generic [ref=e30] [cursor=pointer]: Series
+  - generic [ref=e32]:
+    - generic [ref=e45]:
+      - generic [ref=e51]:
+        - generic [ref=e55] [cursor=pointer]
+        - generic [ref=e72] [cursor=pointer]
+        - generic [ref=e89] [cursor=pointer]
+        - generic [ref=e106] [cursor=pointer]
+        - generic [ref=e123] [cursor=pointer]
+      - generic [ref=e143]:
+        - generic [ref=e147] [cursor=pointer]
+        - generic [ref=e164] [cursor=pointer]
+        - generic [ref=e181] [cursor=pointer]
+        - generic [ref=e199] [cursor=pointer]
+        - generic [ref=e216] [cursor=pointer]
+      - generic [ref=e235]:
+        - generic [ref=e239] [cursor=pointer]
+        - generic [ref=e256] [cursor=pointer]
+        - generic [ref=e273] [cursor=pointer]
+        - generic [ref=e290] [cursor=pointer]
+        - generic [ref=e307] [cursor=pointer]
+      - generic [ref=e327]:
+        - generic [ref=e331] [cursor=pointer]
+        - generic [ref=e348] [cursor=pointer]
+        - generic [ref=e365] [cursor=pointer]
+        - generic [ref=e382] [cursor=pointer]
+        - generic [ref=e400] [cursor=pointer]
+    - tablist [ref=e416]:
+      - tab "  Home" [selected] [ref=e418] [cursor=pointer]:
+        - generic [ref=e419]
+        - generic [ref=e424]: Home
+      - tab "  Favorites" [ref=e426] [cursor=pointer]:
+        - generic [ref=e427]
+        - generic [ref=e432]: Favorites
+
+## Checkpoint
+- Date: 2026-04-05
+- Surface: cmux browser surface:22 (wide)
+- Result: Home shell remains consistent at wider width with the same light chrome, masonry rhythm, and tab bar.

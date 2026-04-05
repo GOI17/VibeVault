@@ -1,14 +1,19 @@
-import React, { PropsWithChildren, useRef } from "react";
+import { PropsWithChildren, useRef, type ReactElement } from "react";
 import { Pressable, Platform } from "react-native";
 import Toast from 'react-native-toast-message';
 
 const DOUBLE_PRESS_DELAY = 300; // time in ms to consider a double press
 
+interface DoublePressProps extends PropsWithChildren {
+  onDoublePress: () => void;
+  action?: 'add' | 'remove';
+}
+
 export default function DoublePress({
   onDoublePress,
   children,
   action = 'add',
-}: PropsWithChildren<{ onDoublePress: () => void; action?: 'add' | 'remove' }>) {
+}: DoublePressProps): ReactElement {
   const lastPress = useRef(0);
 
   const handlePress = () => {
@@ -24,7 +29,7 @@ export default function DoublePress({
         text1: 'Double Tap to Favorite',
         text2: action === 'add' ? 'Press one more time to add to favorites' : 'Press one more time to remove from favorites',
         visibilityTime: 2000,
-        position: 'center',
+        position: 'top',
       });
     }
     lastPress.current = now;
