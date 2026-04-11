@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -15,12 +18,23 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./*"],
-      "@/domain/*": ["./src/domain/*"],
-      "@/repositories/*": ["./src/repositories/*"],
-      "@/providers/*": ["./src/providers/*"]
+      "@/*": [
+        "./*"
+      ],
+      "@/domain/*": [
+        "./src/domain/*"
+      ],
+      "@/repositories/*": [
+        "./src/repositories/*"
+      ],
+      "@/providers/*": [
+        "./src/providers/*"
+      ]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", "expo-env.d.ts", ".expo/types/**/*.ts"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
   "extends": "expo/tsconfig.base"
 }
