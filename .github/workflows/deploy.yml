@@ -39,6 +39,7 @@ jobs:
       - name: Build Expo web app
         run: npx expo export -p web
         env:
+          EXPO_PUBLIC_API_URL: ${{ vars.API_URL }}
           EXPO_PUBLIC_URL: /VibeVault
 
       - name: Fix asset paths
