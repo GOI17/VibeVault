@@ -1,8 +1,10 @@
-import { MasonryFlashList } from "@shopify/flash-list";
+import { FlashList } from "@shopify/flash-list";
 import { useState } from "react";
 import type { ReactElement } from "react";
 import { View, Pressable, Text, StyleSheet, useWindowDimensions } from "react-native";
 
+import type { FavoriteSource } from "@/domain/entities/Favorite";
+import type { Season } from "@/domain/entities/Movie";
 import { Colors } from "@/constants/Colors";
 import { EmptyState } from "./EmptyState";
 import { MasonryItem } from "./MasonryItem";
@@ -12,6 +14,12 @@ export interface MasonryItemData {
   title: string;
   imageSrc?: string;
   mediaType?: "movie" | "series";
+  description?: string;
+  cast?: string[];
+  releaseDate?: string;
+  whereToWatch?: string[];
+  seasons?: Season[];
+  source?: FavoriteSource;
 }
 
 interface MasonryListProps {
@@ -25,6 +33,7 @@ interface MasonryListProps {
   recentlyAddedIds?: ReadonlySet<string>;
   onAddFavorite?: (item: MasonryItemData) => void;
   onRemoveFavorite?: (item: MasonryItemData) => void;
+  onOpenDetails?: (item: MasonryItemData) => void;
 }
 
 export default function MasonryList({
@@ -38,6 +47,7 @@ export default function MasonryList({
   recentlyAddedIds,
   onAddFavorite,
   onRemoveFavorite,
+  onOpenDetails,
 }: MasonryListProps): ReactElement {
   const [view, setView] = useState<"grid" | "list">("grid");
   const { width } = useWindowDimensions();
@@ -57,6 +67,12 @@ export default function MasonryList({
     return <EmptyState />;
   }
 
+  const favoriteMembershipKey = JSON.stringify({
+    favoriteIds: favoriteIds ? Array.from(favoriteIds).sort() : [],
+    recentlyAddedIds: recentlyAddedIds ? Array.from(recentlyAddedIds).sort() : [],
+    view,
+  });
+
   return (
     <View style={{ flex: 1, marginTop: offsetTop }}>
       {showLayoutToggle && width < 768 && (
@@ -75,18 +91,18 @@ export default function MasonryList({
           </Text>
         </Pressable>
       )}
-      <MasonryFlashList
+      <FlashList<MasonryItemData>
         numColumns={numColumns}
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingBottom: 96,
           paddingTop: topInset,
-          paddingHorizontal: 12,
+          paddingHorizontal: 16,
         }}
-        estimatedItemSize={view === "grid" ? 320 : 132}
-        keyExtractor={(item) => item.key}
+        keyExtractor={(item: MasonryItemData) => item.key}
         data={data}
-        renderItem={({ item, index }) => {
+        extraData={favoriteMembershipKey}
+        renderItem={({ item, index }: { item: MasonryItemData; index: number }) => {
           const isFavorite = favoriteIds?.has(item.key) || recentlyAddedIds?.has(item.key) || false;
 
           return (
@@ -96,6 +112,7 @@ export default function MasonryList({
               view={view}
               onAddFavorite={() => onAddFavorite?.(item)}
               onRemoveFavorite={() => onRemoveFavorite?.(item)}
+              onOpenDetails={() => onOpenDetails?.(item)}
               fallbackImage={fallbackImage}
               index={index}
             />
