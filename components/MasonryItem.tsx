@@ -12,6 +12,7 @@ interface MasonryItemProps {
   view: "grid" | "list";
   onAddFavorite: () => void;
   onRemoveFavorite: () => void;
+  onOpenDetails?: () => void;
   fallbackImage: ImageProps["placeholder"];
   index: number;
 }
@@ -41,6 +42,7 @@ export function MasonryItem({
   view,
   onAddFavorite,
   onRemoveFavorite,
+  onOpenDetails,
   fallbackImage,
   index,
 }: MasonryItemProps): ReactElement {
@@ -65,7 +67,7 @@ export function MasonryItem({
   // List view with favorite overlay
   if (isFavorite && view === "list") {
     return (
-      <DoublePress onDoublePress={onRemoveFavorite} action="remove">
+      <DoublePress onDoublePress={onRemoveFavorite} onSinglePress={onOpenDetails} action="remove">
         <View style={[styles.listCard, { backgroundColor: palette.shellSurface }]}> 
           {overlayActions}
           <Image
@@ -99,7 +101,7 @@ export function MasonryItem({
   // List view regular
   if (view === "list") {
     return (
-      <DoublePress onDoublePress={onAddFavorite} action="add">
+      <DoublePress onDoublePress={onAddFavorite} onSinglePress={onOpenDetails} action="add">
         <View style={[styles.listCard, { backgroundColor: palette.shellSurface }]}>
           {overlayActions}
           <Image
@@ -128,7 +130,7 @@ export function MasonryItem({
   // Grid view with favorite overlay
   if (isFavorite && view === "grid") {
     return (
-      <DoublePress onDoublePress={onRemoveFavorite} action="remove">
+      <DoublePress onDoublePress={onRemoveFavorite} onSinglePress={onOpenDetails} action="remove">
         <View style={[styles.gridCard, { backgroundColor: palette.shellSurface }]}> 
           <View style={styles.mediaWrap}>
             <Image
@@ -163,7 +165,7 @@ export function MasonryItem({
 
   // Grid view regular
   return (
-    <DoublePress onDoublePress={onAddFavorite} action="add">
+    <DoublePress onDoublePress={onAddFavorite} onSinglePress={onOpenDetails} action="add">
       <View style={[styles.gridCard, { backgroundColor: palette.shellSurface }]}> 
         <View style={styles.mediaWrap}>
           <Image
@@ -235,11 +237,6 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     padding: 6,
     borderRadius: 24,
-    shadowColor: "#000000",
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
   },
   gridImage: {
     width: "100%",
