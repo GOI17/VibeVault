@@ -1,18 +1,18 @@
 import type { IMovieRepository } from "@/domain/repositories/IMovieRepository";
-import type { Movie, MovieSearchResponse } from "@/domain/entities/Movie";
+import type { MovieDetails, MovieSearchResponse } from "@/domain/entities/Movie";
 
 /**
  * Mock implementation of IMovieRepository for testing
  */
 export class MockMovieRepository implements IMovieRepository {
   private mockData: MovieSearchResponse = { titles: [] };
-  private movieById: Map<string, Movie> = new Map();
+  private movieById: Map<string, MovieDetails> = new Map();
 
   setMockData(data: MovieSearchResponse): void {
     this.mockData = data;
   }
 
-  setMockMovie(movie: Movie): void {
+  setMockMovie(movie: MovieDetails): void {
     this.movieById.set(movie.id, movie);
   }
 
@@ -24,7 +24,7 @@ export class MockMovieRepository implements IMovieRepository {
     return this.mockData;
   }
 
-  async getById(id: string): Promise<Movie | null> {
+  async getById(id: string): Promise<MovieDetails | null> {
     return this.movieById.get(id) || null;
   }
 

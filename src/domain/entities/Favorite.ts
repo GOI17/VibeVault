@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MovieSchema } from "./Movie";
+import { MovieSchema, SeasonSchema } from "./Movie";
 
 /**
  * Media type enum for favorites
@@ -21,6 +21,27 @@ export const PlatformEnum = z.enum([
 ]);
 export type Platform = z.infer<typeof PlatformEnum>;
 
+export const FavoriteSourceEnum = z.enum(["catalog", "manual"]);
+export type FavoriteSource = z.infer<typeof FavoriteSourceEnum>;
+
+const LEGACY_MANUAL_ID_REGEX = /^\d{12,}$/;
+
+function inferFavoriteSource(input: { id: string; platform?: Platform }): FavoriteSource {
+  if (input.id.startsWith("custom-")) {
+    return "manual";
+  }
+
+  if (input.platform) {
+    return "manual";
+  }
+
+  if (LEGACY_MANUAL_ID_REGEX.test(input.id)) {
+    return "manual";
+  }
+
+  return "catalog";
+}
+
 /**
  * Zod schema for Favorite entity
  * Represents a user's favorite movie or series with metadata
@@ -31,7 +52,51 @@ export const FavoriteSchema = z.object({
   mediaType: MediaTypeEnum, // NEW: required field
   url: z.string().optional(), // Optional per product decision
   platform: PlatformEnum.optional(), // Optional per product decision
+  description: z.string().optional(),
+  cast: z.array(z.string()).optional(),
+  releaseDate: z.string().optional(),
+  whereToWatch: z.array(z.string()).optional(),
+  seasons: z.array(SeasonSchema).optional(),
+  source: FavoriteSourceEnum.optional(),
   addedAt: z.string().datetime().optional(), // ISO 8601 datetime string
+});
+
+const RequiredFavoriteTextSchema = z.string().trim().min(1);
+const RequiredFavoriteArraySchema = z.array(RequiredFavoriteTextSchema).min(1);
+
+export const FavoriteWithDetailsSchema = FavoriteSchema.extend({
+  description: RequiredFavoriteTextSchema,
+  cast: RequiredFavoriteArraySchema,
+  releaseDate: RequiredFavoriteTextSchema,
+  whereToWatch: RequiredFavoriteArraySchema,
+  seasons: z.array(SeasonSchema).optional(),
+}).superRefine((favorite, ctx) => {
+  if (favorite.mediaType !== "series" || favorite.source !== "manual") {
+    return;
+  }
+
+  if (!favorite.seasons || favorite.seasons.length === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["seasons"],
+      message: "Series favorites must include at least one season.",
+    });
+    return;
+  }
+
+  const hasInvalidSeason = favorite.seasons.some(
+    (season) =>
+      season.episodes.length === 0 ||
+      season.episodes.some((episode) => !episode.releaseDate?.trim())
+  );
+
+  if (hasInvalidSeason) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["seasons"],
+      message: "Every series episode must include a release date.",
+    });
+  }
 });
 
 /**
@@ -75,12 +140,20 @@ export function validateFavorite(data: unknown): Favorite {
   return FavoriteSchema.parse(data);
 }
 
+export function validateFavoriteWithDetails(data: unknown): Favorite {
+  return FavoriteWithDetailsSchema.parse(data);
+}
+
 /**
  * Validates an array of favorites
  * Throws ZodError if validation fails
  */
 export function validateFavorites(data: unknown): Favorite[] {
   return FavoriteArraySchema.parse(data);
+}
+
+export function validateFavoritesWithDetails(data: unknown): Favorite[] {
+  return z.array(FavoriteWithDetailsSchema).parse(data);
 }
 
 /**
@@ -127,6 +200,14 @@ export function migrateLegacyFavorite(data: unknown): Favorite {
       const parsedPlatform = PlatformEnum.safeParse(parsed.platform);
       return parsedPlatform.success ? parsedPlatform.data : undefined;
     })(),
+    source: inferFavoriteSource({
+      id: parsed.id,
+      platform: (() => {
+        if (!parsed.platform) return undefined;
+        const parsedPlatform = PlatformEnum.safeParse(parsed.platform);
+        return parsedPlatform.success ? parsedPlatform.data : undefined;
+      })(),
+    }),
     addedAt,
   };
 }
@@ -144,7 +225,15 @@ export function validateAndMigrateFavorites(data: unknown): Favorite[] {
     // Try new schema first
     const newResult = FavoriteSchema.safeParse(item);
     if (newResult.success) {
-      return newResult.data;
+      return {
+        ...newResult.data,
+        source:
+          newResult.data.source ||
+          inferFavoriteSource({
+            id: newResult.data.id,
+            platform: newResult.data.platform,
+          }),
+      };
     }
 
     // Fall back to legacy migration
@@ -178,6 +267,7 @@ export function createFavorite(
     title: movie.primaryTitle, // Map primaryTitle → title
     mediaType: "movie", // Default to movie for TMDB movies
     url: movie.primaryImage?.url,
+    source: "catalog",
     ...overrides,
   });
 

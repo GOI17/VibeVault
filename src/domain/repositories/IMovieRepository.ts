@@ -1,4 +1,4 @@
-import { Movie, MovieSearchResponse } from "@/domain/entities/Movie";
+import { MovieDetails, MovieSearchResponse } from "@/domain/entities/Movie";
 
 /**
  * Repository interface for Movie operations
@@ -25,5 +25,5 @@ export interface IMovieRepository {
    * @param id Movie ID
    * @returns Movie or null if not found
    */
-  getById(id: string): Promise<Movie | null>;
+  getById(id: string): Promise<MovieDetails | null>;
 }

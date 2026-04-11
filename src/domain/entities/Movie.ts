@@ -1,5 +1,28 @@
 import { z } from "zod";
 
+export const EpisodeSchema = z.object({
+  episodeNumber: z.number(),
+  title: z.string(),
+  releaseDate: z.string().optional(),
+});
+
+export const SeasonSchema = z.object({
+  seasonNumber: z.number(),
+  title: z.string().optional(),
+  episodes: z.array(EpisodeSchema),
+});
+
+const RequiredTextSchema = z.string().trim().min(1);
+
+export const EpisodeDetailsSchema = EpisodeSchema.extend({
+  title: RequiredTextSchema,
+  releaseDate: RequiredTextSchema,
+});
+
+export const SeasonDetailsSchema = SeasonSchema.extend({
+  episodes: z.array(EpisodeDetailsSchema).min(1),
+});
+
 /**
  * Zod schema for Movie entity
  * Represents a movie from TMDB API with all relevant fields
@@ -31,6 +54,10 @@ export const MovieSchema = z.object({
   endYear: z.number().optional(),
   runtimeSeconds: z.number().optional(),
   plot: z.string().optional(),
+  cast: z.array(z.string()).optional(),
+  releaseDate: z.string().optional(),
+  whereToWatch: z.array(z.string()).optional(),
+  seasons: z.array(SeasonSchema).optional(),
   isAdult: z.boolean().optional(),
   originCountries: z
     .array(
@@ -56,11 +83,37 @@ export const MovieSchema = z.object({
     .optional(),
 });
 
+export const MovieDetailsSchema = MovieSchema.extend({
+  plot: RequiredTextSchema,
+  cast: z.array(RequiredTextSchema).min(1),
+  releaseDate: RequiredTextSchema,
+  whereToWatch: z.array(RequiredTextSchema).min(1),
+  seasons: z.array(SeasonDetailsSchema).optional(),
+}).superRefine((movie, ctx) => {
+  const normalizedType = movie.type.toLowerCase();
+  const isSeries = normalizedType.includes("tv") || normalizedType.includes("series");
+
+  if (!isSeries) {
+    return;
+  }
+
+  if (!movie.seasons || movie.seasons.length === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["seasons"],
+      message: "Series titles must include at least one season with episodes.",
+    });
+  }
+});
+
 /**
  * TypeScript type inferred from MovieSchema
  * Use this for type annotations throughout the app
  */
 export type Movie = z.infer<typeof MovieSchema>;
+export type MovieDetails = z.infer<typeof MovieDetailsSchema>;
+export type Episode = z.infer<typeof EpisodeSchema>;
+export type Season = z.infer<typeof SeasonSchema>;
 
 /**
  * Schema for validating an array of movies
@@ -109,6 +162,10 @@ export function toSearchResultItem(movie: Movie): MovieSearchResultItem {
  */
 export function validateMovie(data: unknown): Movie {
   return MovieSchema.parse(data);
+}
+
+export function validateMovieDetails(data: unknown): MovieDetails {
+  return MovieDetailsSchema.parse(data);
 }
 
 /**

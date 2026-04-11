@@ -19,10 +19,12 @@ import "react-native-reanimated";
 import Header from "@/components/Header";
 import { Colors } from "@/constants/Colors";
 import { client } from "@/constants/RQClient";
+import { SeasonSchema } from "@/domain/entities/Movie";
 import { RepositoryProvider } from "@/providers/RepositoryProvider";
 import NotFoundScreen from "./+not-found";
 import TabNavigator from "./tabs/_layout";
 import SearchScreen from "./home/search/query";
+import DetailsScreen from "./home/details/[id]";
 import type { RootStackParamList } from "./navigation/types";
 
 interface ToastInfoProps {
@@ -100,6 +102,47 @@ const linking: LinkingOptions<RootStackParamList> = {
         },
       },
       Search: 'search',
+      Details: {
+        path: 'details/:id',
+        parse: {
+          cast: (value: string) =>
+            value
+              .split(',')
+              .map((entry) => entry.trim())
+              .filter(Boolean),
+          whereToWatch: (value: string) =>
+            value
+              .split(',')
+              .map((entry) => entry.trim())
+              .filter(Boolean),
+          seasons: (value: string) => {
+            try {
+              const parsed: unknown = JSON.parse(value);
+              const seasonsResult = SeasonSchema.array().safeParse(parsed);
+              return seasonsResult.success ? seasonsResult.data : undefined;
+            } catch {
+              return undefined;
+            }
+          },
+        },
+        stringify: {
+          cast: (value: unknown) =>
+            Array.isArray(value)
+              ? value.map((entry) => String(entry ?? '').trim()).filter(Boolean).join(', ')
+              : String(value ?? ''),
+          whereToWatch: (value: unknown) =>
+            Array.isArray(value)
+              ? value.map((entry) => String(entry ?? '').trim()).filter(Boolean).join(', ')
+              : String(value ?? ''),
+          seasons: (value: unknown) => {
+            try {
+              return JSON.stringify(value);
+            } catch {
+              return '';
+            }
+          },
+        },
+      },
       NotFound: '404',
     },
   },
@@ -152,6 +195,42 @@ export default function RootLayout(): ReactElement | null {
                     </View>
                   ),
                 }}
+              />
+              <Stack.Screen
+                name="Details"
+                component={DetailsScreen}
+                options={({ navigation }) => ({
+                  title: "Details",
+                  headerStyle: { backgroundColor: Colors.light.shellBackground },
+                  headerTintColor: Colors.light.text,
+                  headerLeft: (props) => (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        padding: 10,
+                        backgroundColor: Colors.light.shellBackground,
+                      }}
+                    >
+                      <HeaderBackButton
+                        {...props}
+                        tintColor={Colors.light.text}
+                        onPress={() => {
+                          if (navigation.canGoBack()) {
+                            navigation.goBack();
+                            return;
+                          }
+
+                          navigation.replace("Tabs", { screen: "Home" });
+                        }}
+                      />
+                      <Image
+                        style={{ width: 50, height: 30, resizeMode: "contain" }}
+                        source={require("../assets/images/logo.png")}
+                      />
+                    </View>
+                  ),
+                })}
               />
               <Stack.Screen name="NotFound" component={NotFoundScreen} />
             </Stack.Navigator>
