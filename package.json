@@ -2,6 +2,7 @@
   "name": "vibevault",
   "main": "App.tsx",
   "version": "1.0.0",
+  "packageManager": "pnpm@9.15.9",
   "homepage": "https://goi17.github.io/VibeVault",
   "scripts": {
     "start": "node ./scripts/start-clean.js",
