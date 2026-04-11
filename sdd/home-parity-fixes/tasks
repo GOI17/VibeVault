@@ -1,9 +1,0 @@
-# Home Parity Fixes Tasks
-
-- [x] Runtime sync baseline: stop stale node/expo before validation launches.
-- [x] Header/search/chips visual parity fixes.
-- [x] Card hierarchy + overlay/metadata parity fixes.
-- [x] Bottom tab spacing/balance parity fixes.
-- [x] cmux-browser checkpoints at phone and wider viewport.
-- [x] Lint + type-check gates.
-- [x] Risk/rollback checks and task updates.
