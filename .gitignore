@@ -36,10 +36,29 @@ playwright-*.log
 *.pem
 
 # local env files
+.env
 .env*.local
+.env.*
+!.env.example
+
+# generated backups
+*.bak
 
 # typescript
 *.tsbuildinfo
 
 app-example
 .collaborator
+
+# SDD / local agent artifacts
+.atl/
+
+# generated exports / local evidence
+stitch_exports/
+header-*.md
+issue*.md
+issue*.png
+
+# local agent runtime state
+.opencode/
+.sisyphus/
