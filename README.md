@@ -63,9 +63,12 @@ Use `.env.example` as the template:
 cp .env.example .env
 ```
 
-Populate values for:
+Populate required value:
 
 - `EXPO_PUBLIC_API_URL`
+
+Optional (only if using Google auth / backup flows):
+
 - `EXPO_PUBLIC_GOOGLE_CLIENT_ID`
 - `EXPO_PUBLIC_ANDROID_CLIENT_ID`
 - `EXPO_PUBLIC_IOS_CLIENT_ID`
