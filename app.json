@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "vibevault",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.ios.vibevault",
       "supportsTablet": true
@@ -17,8 +16,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true
+      }
     },
     "web": {
       "bundler": "metro",
@@ -36,10 +34,6 @@
         }
       ],
       "expo-secure-store"
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "publicPath": "/VibeVault"
-    }
+    ]
   }
 }
