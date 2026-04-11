@@ -1,179 +1,137 @@
 # VibeVault 🎬
 
-A sleek, Netflix-inspired movie discovery and favorites app built with React Native and Expo. Browse movies, create your personal watchlist, and enjoy a cinematic experience on mobile and web.
+VibeVault is a React Native + Expo app for discovering titles, managing favorites, and viewing detailed movie/series metadata on mobile and web.
 
-## 🌟 Features
+## What the app does
 
-- **Movie Discovery**: Browse a curated collection of movies with beautiful posters
-- **Smart Favorites**: Double-tap any movie to add/remove from your favorites
-- **Custom Movie Addition**: Add your own movies with custom details
-- **Responsive Design**: Optimized for mobile, tablet, and web platforms
-- **Dark Theme**: Netflix-inspired dark UI with red accents
-- **Search Functionality**: Find movies by title
-- **Grid/List Views**: Switch between grid and list layouts
-- **Toast Notifications**: Helpful guidance for user interactions
+- Browse a curated home feed.
+- Search titles from the header flow.
+- Open a dedicated **Details** screen (title, synopsis, cast, release date, where-to-watch, and seasons/episodes for series).
+- Add/remove favorites with double press.
+- Create manual favorites and filter favorites by media type.
+- Backup and restore favorites through the configured backup repository.
 
-## 🚀 Live Demo
+## Tech stack (current)
 
-Check out the live web version: [https://goi17.github.io/VibeVault](https://goi17.github.io/VibeVault)
+- Expo SDK 55
+- React Native 0.83 + React 19
+- React Navigation (Stack + Bottom Tabs)
+- TanStack Query for server/cache state
+- AsyncStorage for local favorites persistence
+- Zod/Formik for input validation
 
-## 🛠️ Tech Stack
+> Routing is React Navigation-based (`App.js` + `app/_layout.tsx`), not Expo Router.
 
-- **Framework**: [Expo](https://expo.dev/) with React Native
-- **Routing**: [Expo Router](https://docs.expo.dev/router/introduction/)
-- **State Management**: [TanStack Query](https://tanstack.com/query)
-- **Styling**: React Native StyleSheet with Themed Components
-- **Icons**: [Expo Vector Icons](https://docs.expo.dev/guides/icons/)
-- **Forms**: [Formik](https://formik.org/) with validation
-- **Notifications**: [React Native Toast Message](https://github.com/calintamas/react-native-toast-message)
-- **Async Storage**: For local data persistence
+## Architecture snapshot
 
-## 📱 Screenshots
+```text
+app/
+  _layout.tsx                # Root navigation container + stack wiring
+  tabs/_layout.tsx           # Bottom tabs (Home, Favorites)
+  home/search/query.tsx      # Search screen entry
+  home/details/[id].tsx      # Details screen entry
 
-*Add screenshots of your app here*
+containers/                  # Screen-level orchestration (queries, mapping, mutations)
+components/                  # Reusable UI + views
+src/domain/                  # Entities and repository contracts
+src/repositories/            # API/storage/backup implementations
+src/providers/               # Repository dependency injection
+constants/                   # Colors, query keys, query client
+scripts/                     # Validation and workflow scripts
+```
 
-## 🏁 Getting Started
+## Quick start
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- npm or yarn
-- Expo CLI: `npm install -g @expo/cli`
+- Node.js 18+
+- npm (canonical package manager for this repo)
 
-### Installation
+### Install
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/goi17/VibeVault.git
-   cd VibeVault
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npx expo start
-   ```
-
-4. Open the app:
-   - **iOS**: Press `i` in the terminal
-   - **Android**: Press `a` in the terminal
-   - **Web**: Press `w` in the terminal
-   - **Expo Go**: Scan the QR code with the Expo Go app
-
-## 📖 Usage
-
-### Adding Movies to Favorites
-- Browse movies on the home screen
-- Double-tap any movie to add it to your favorites
-- The app will show a toast notification guiding you through the process
-
-### Managing Favorites
-- Switch to the Favorites tab to view your saved movies
-- Double-tap favorites to remove them
-- Use the "Add Custom Movie" form to add movies manually
-
-### Custom Movie Addition
-- On larger screens: Use the sidebar form
-- On mobile: Tap the "+" button to open the modal form
-- Fill in movie details and submit
-
-### View Options
-- On screens wider than 768px: Toggle between grid and list views
-- Responsive design adapts to your device
-
-## 🔧 Available Scripts
-
-- `npm start` - Start the Expo development server
-- `npm run android` - Run on Android emulator
-- `npm run ios` - Run on iOS simulator
-- `npm run web` - Run in web browser
-- `npm run lint` - Run ESLint for code quality
-
-## 🌐 Browser checks
-
-- Use **cmux-browser** for visual/browser verification.
-- Evidence and fallback rules live in [`docs/browser-workflow.md`](docs/browser-workflow.md).
-- Legacy Playwright artifacts are read-only and should not be extended in this change context.
-- Verify the policy with `npm run verify:browser-policy`.
-
-### Phase 1 UI compliance harness
-
-- Run `npm run verify:stitch-ui-updates-phase1` to check the 10 phase-1 shell and route invariants.
-- `PASS` / exit code `0`: all scenarios matched the current UI shell policy.
-- `FAIL` / exit code `1`: one or more scenarios drifted; inspect the failing scenario ids in stdout.
-- `BLOCKED`: the harness does not depend on Playwright or a browser surface; use cmux-browser for visual validation instead.
-
-### Verification output
-
-- `PASS` / exit code `0`: the documented policy scenarios are present and consistent.
-- `FAIL` / exit code `1`: one or more policy scenarios are missing.
-- `BLOCKED`: cmux is unavailable; do not fall back to Playwright.
-- Output labels: PASS / FAIL / BLOCKED.
-
-## 🚀 Deployment
-
-The app is automatically deployed to GitHub Pages using GitHub Actions.
-
-### Web Deployment
-The web version is built and deployed automatically when you push to the main branch.
-
-### Mobile Deployment
-- **iOS**: Use `eas build --platform ios`
-- **Android**: Use `eas build --platform android`
-
-## 📁 Project Structure
-
-```
-VibeVault/
-├── app/                    # Main application code
-│   ├── (tabs)/            # Tab-based navigation
-│   │   ├── (home)/        # Home screen
-│   │   ├── favorites/     # Favorites screen
-│   │   └── _layout.tsx    # Tab layout
-│   ├── search/            # Search functionality
-│   └── _layout.tsx        # Root layout
-├── components/            # Reusable components
-│   ├── ui/               # UI components
-│   ├── DoublePressTouchable.tsx
-│   ├── Masonry.tsx       # Movie grid/list component
-│   └── Themed*.tsx       # Themed components
-├── constants/            # App constants
-│   ├── Colors.ts         # Color scheme
-│   ├── query.ts          # API queries and mutations
-│   └── RQClient.ts       # React Query client
-├── hooks/                # Custom hooks
-├── assets/               # Images and fonts
-└── scripts/              # Utility scripts
+```bash
+git clone https://github.com/GOI17/VibeVault.git
+cd VibeVault
+npm install
 ```
 
-## 🤝 Contributing
+### Environment variables
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+Use `.env.example` as the template:
 
-## 📄 License
+```bash
+cp .env.example .env
+```
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Populate values for:
 
-## 🙏 Acknowledgments
+- `EXPO_PUBLIC_API_URL`
+- `EXPO_PUBLIC_GOOGLE_CLIENT_ID`
+- `EXPO_PUBLIC_ANDROID_CLIENT_ID`
+- `EXPO_PUBLIC_IOS_CLIENT_ID`
 
-- [Expo](https://expo.dev/) for the amazing React Native framework
-- [Netflix](https://www.netflix.com/) for design inspiration
-- [IMDb](https://www.imdb.com/) for movie data
-- All the amazing open-source contributors
+### Run
 
-## 📞 Support
+```bash
+npm start
+```
 
-If you have any questions or issues, please open an issue on GitHub or contact the maintainers.
+Then choose a target from Expo CLI (`i` / `a` / `w`) or use dedicated scripts below.
 
----
+## Scripts
 
-Made with ❤️ and lots of 🎬
-# redirect-repo-for-gh-pages
+- `npm start` — start via `scripts/start-clean.js`
+- `npm run start:expo` — raw Expo start
+- `npm run android` — run Android target
+- `npm run ios` — run iOS target
+- `npm run web` — run web target
+- `npm run lint` — run Expo ESLint
+- `npm run reset-project` — legacy compatibility helper (non-destructive, deprecated)
+- `./node_modules/.bin/tsc --noEmit` — TypeScript check
+- `npm run verify:browser-policy` — browser policy harness
+- `npm run verify:stitch-ui-updates-phase1` — phase-1 UI invariants harness
+- `npm run predeploy` — export web build to `dist`
+- `npm run deploy` — publish `dist` to GitHub Pages via `gh-pages`
+
+## Verification workflow
+
+- Static checks:
+  - `npm run lint`
+  - `./node_modules/.bin/tsc --noEmit`
+- Browser-policy checks:
+  - `npm run verify:browser-policy`
+- UI policy checks:
+  - `npm run verify:stitch-ui-updates-phase1`
+
+For browser/visual checks, follow `docs/browser-workflow.md`.
+
+## Deployment
+
+Canonical web deployment path:
+
+```bash
+npm run predeploy
+npm run deploy
+```
+
+`homepage` is configured for GitHub Pages at `https://goi17.github.io/VibeVault`.
+
+## Web zoom policy
+
+- VibeVault applies a web zoom policy at app bootstrap (`App.js`) to reduce accidental zoom behaviors where technically appropriate.
+- The runtime policy keeps the viewport baseline at `initial-scale=1` and applies `touch-action: manipulation`.
+- Inputs are forced to `font-size: 16px` on web to avoid iOS focus-zoom behavior.
+- This is a best-effort web policy; browser accessibility zoom controls may still override restrictions.
+
+## GitHub issue workflow
+
+- Use issue forms under `.github/ISSUE_TEMPLATE/`:
+  - Bug report
+  - Feature request
+- Blank issues are disabled.
+- New issues are labeled `status:needs-review`.
+- Maintainers add `status:approved` before implementation PRs.
+
+## License
+
+MIT — see `LICENSE`.
