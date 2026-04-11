@@ -160,13 +160,15 @@ async function main() {
     ),
     scenario(
       "7/10",
-      "Search remains reachable from the shared shell",
+      "Search stays visible and reachable from the shared shell",
       [FILES.rootLayout, FILES.header, FILES.search, FILES.searchContainer],
       () =>
         contains(sources.rootLayout, "Home: 'home'") &&
         contains(sources.rootLayout, "Favorites: 'favorites'") &&
         contains(sources.rootLayout, "Search: 'search'") &&
         contains(sources.header, 'navigate("Search", { query })') &&
+        contains(sources.header, "{renderSearchBar()}") &&
+        !contains(sources.header, 'accessibilityLabel="Open search"') &&
         contains(sources.search, "useRoute<RouteProp<RootStackParamList, \"Search\">>()") &&
         contains(sources.search, "<SearchContainer query={query} />") &&
         contains(sources.searchContainer, "queryOptions.movies.all(query)"),
