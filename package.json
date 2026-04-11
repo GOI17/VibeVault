@@ -1,6 +1,6 @@
 {
   "name": "vibevault",
-  "main": "App.js",
+  "main": "App.tsx",
   "version": "1.0.0",
   "homepage": "https://goi17.github.io/VibeVault",
   "scripts": {
