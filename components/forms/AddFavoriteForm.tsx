@@ -5,32 +5,88 @@ import { z } from "zod";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 import type { ReactElement } from "react";
 
+import { ManualSeriesSeasonsSchema } from "@/domain/entities/ManualFavorite";
+
+const RequiredText = (label: string) => z.string().trim().min(1, `${label} is required`);
+const RequiredCsvText = (label: string) =>
+  z
+    .string()
+    .trim()
+    .min(1, `${label} is required`)
+    .refine(
+      (value) =>
+        value
+          .split(",")
+          .map((part) => part.trim())
+          .filter(Boolean).length > 0,
+      `${label} must include at least one item`
+    );
+
 /**
  * Zod schema for form validation
  * Validates favorite input data
  */
-export const AddFavoriteFormSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  mediaType: z.enum(["movie", "series"]),
-  url: z
-    .string()
-    .refine(
-      (val) => {
-        if (!val) return true; // Optional field per product decision
-        try {
-          new URL(val);
-          return true;
-        } catch {
-          return false;
-        }
-      },
-      { message: "Invalid URL format" }
-    )
-    .optional(),
-  platform: z
-    .enum(["Spotify", "Deezer", "Tidal", "Netflix", "Hulu", "Disney+"])
-    .optional(), // Optional per product decision
-});
+export const AddFavoriteFormSchema = z
+  .object({
+    title: RequiredText("Title"),
+    mediaType: z.enum(["movie", "series"]),
+    url: z
+      .string()
+      .refine(
+        (val) => {
+          if (!val) return true; // Optional field per product decision
+          try {
+            new URL(val);
+            return true;
+          } catch {
+            return false;
+          }
+        },
+        { message: "Invalid URL format" }
+      )
+      .optional(),
+    platform: z
+      .enum(["Spotify", "Deezer", "Tidal", "Netflix", "Hulu", "Disney+"])
+      .optional(), // Optional per product decision
+    description: RequiredText("Description"),
+    cast: RequiredCsvText("Cast"),
+    releaseDate: RequiredText("Release date"),
+    whereToWatch: RequiredCsvText("Where to watch"),
+    seasonsPayload: z.string().optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.mediaType !== "series") {
+      return;
+    }
+
+    if (!value.seasonsPayload || value.seasonsPayload.trim().length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["seasonsPayload"],
+        message: "Seasons and episodes JSON is required for series",
+      });
+      return;
+    }
+
+    try {
+      const parsed: unknown = JSON.parse(value.seasonsPayload);
+      const result = ManualSeriesSeasonsSchema.safeParse(parsed);
+
+      if (!result.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["seasonsPayload"],
+          message: "Invalid seasons JSON format",
+        });
+      }
+    } catch {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["seasonsPayload"],
+        message: "Invalid JSON syntax for seasons",
+      });
+    }
+  });
 
 /**
  * Type for form values
@@ -48,7 +104,17 @@ interface AddFavoriteFormProps {
 export function AddFavoriteForm({ onSubmit }: AddFavoriteFormProps): ReactElement {
   return (
     <Formik<AddFavoriteFormValues>
-      initialValues={{ title: "", mediaType: "movie", url: "", platform: undefined }}
+      initialValues={{
+        title: "",
+        mediaType: "movie",
+        url: "",
+        platform: undefined,
+        description: "",
+        cast: "",
+        releaseDate: "",
+        whereToWatch: "",
+        seasonsPayload: "",
+      }}
       validateOnBlur={false}
       validateOnChange={false}
       validationSchema={toFormikValidationSchema(AddFavoriteFormSchema)}
@@ -184,6 +250,121 @@ export function AddFavoriteForm({ onSubmit }: AddFavoriteFormProps): ReactElemen
             >
               {errors.platform}
             </Text>
+          )}
+          <TextInput
+            style={{
+              minHeight: 72,
+              borderColor: "#E50914",
+              borderWidth: 1,
+              borderRadius: 5,
+              paddingHorizontal: 10,
+              paddingVertical: 8,
+              color: "#FFFFFF",
+              backgroundColor: "#333333",
+              marginBottom: 5,
+              textAlignVertical: "top",
+            }}
+            multiline
+            placeholder="Description / Synopsis"
+            placeholderTextColor="#CCCCCC"
+            value={values.description}
+            onChangeText={handleChange("description")}
+          />
+          {errors.description && (
+            <Text style={{ color: "#FF0000", fontSize: 12, marginBottom: 10 }}>
+              {errors.description}
+            </Text>
+          )}
+          <TextInput
+            style={{
+              height: 40,
+              borderColor: "#E50914",
+              borderWidth: 1,
+              borderRadius: 5,
+              paddingHorizontal: 10,
+              color: "#FFFFFF",
+              backgroundColor: "#333333",
+              marginBottom: 5,
+            }}
+            placeholder="Cast (comma-separated)"
+            placeholderTextColor="#CCCCCC"
+            value={values.cast}
+            onChangeText={handleChange("cast")}
+          />
+          {errors.cast && (
+            <Text style={{ color: "#FF0000", fontSize: 12, marginBottom: 10 }}>
+              {errors.cast}
+            </Text>
+          )}
+          <TextInput
+            style={{
+              height: 40,
+              borderColor: "#E50914",
+              borderWidth: 1,
+              borderRadius: 5,
+              paddingHorizontal: 10,
+              color: "#FFFFFF",
+              backgroundColor: "#333333",
+              marginBottom: 5,
+            }}
+            placeholder="Release date (e.g. 2024-09-10)"
+            placeholderTextColor="#CCCCCC"
+            value={values.releaseDate}
+            onChangeText={handleChange("releaseDate")}
+          />
+          {errors.releaseDate && (
+            <Text style={{ color: "#FF0000", fontSize: 12, marginBottom: 10 }}>
+              {errors.releaseDate}
+            </Text>
+          )}
+          <TextInput
+            style={{
+              height: 40,
+              borderColor: "#E50914",
+              borderWidth: 1,
+              borderRadius: 5,
+              paddingHorizontal: 10,
+              color: "#FFFFFF",
+              backgroundColor: "#333333",
+              marginBottom: 5,
+            }}
+            placeholder="Where to watch (comma-separated)"
+            placeholderTextColor="#CCCCCC"
+            value={values.whereToWatch}
+            onChangeText={handleChange("whereToWatch")}
+          />
+          {errors.whereToWatch && (
+            <Text style={{ color: "#FF0000", fontSize: 12, marginBottom: 10 }}>
+              {errors.whereToWatch}
+            </Text>
+          )}
+          {values.mediaType === "series" && (
+            <>
+              <TextInput
+                style={{
+                  minHeight: 96,
+                  borderColor: "#E50914",
+                  borderWidth: 1,
+                  borderRadius: 5,
+                  paddingHorizontal: 10,
+                  paddingVertical: 8,
+                  color: "#FFFFFF",
+                  backgroundColor: "#333333",
+                  marginBottom: 5,
+                  textAlignVertical: "top",
+                }}
+                multiline
+                placeholder='Seasons JSON (e.g. [{"seasonNumber":1,"episodes":[{"episodeNumber":1,"title":"Pilot","releaseDate":"2024-01-01"}]}])'
+                placeholderTextColor="#CCCCCC"
+                value={values.seasonsPayload}
+                onChangeText={handleChange("seasonsPayload")}
+              />
+              {errors.seasonsPayload && (
+                <Text style={{ color: "#FF0000", fontSize: 12, marginBottom: 10 }}>
+                  {errors.seasonsPayload}
+                </Text>
+              )}
+            </>
           )}
           <TouchableOpacity
             onPress={() => handleSubmit()}

@@ -51,7 +51,7 @@ export class AsyncStorageFavoriteRepository implements IFavoriteRepository {
         return;
       }
 
-      const parsed = JSON.parse(storage);
+      const parsed: unknown = JSON.parse(storage);
 
       if (!Array.isArray(parsed) || parsed.length === 0) {
         await AsyncStorage.setItem(MIGRATION_FLAG, "true");
@@ -79,7 +79,7 @@ export class AsyncStorageFavoriteRepository implements IFavoriteRepository {
     }
 
     try {
-      const parsed = JSON.parse(storage);
+      const parsed: unknown = JSON.parse(storage);
 
       // Validate and migrate data (handles old formats)
       if (Array.isArray(parsed)) {
@@ -206,7 +206,7 @@ export class AsyncStorageFavoriteRepository implements IFavoriteRepository {
    */
   async importFromJSON(json: string): Promise<Favorite[]> {
     try {
-      const parsed = JSON.parse(json);
+      const parsed: unknown = JSON.parse(json);
 
       if (!Array.isArray(parsed)) {
         throw new Error("Invalid import format: expected array");

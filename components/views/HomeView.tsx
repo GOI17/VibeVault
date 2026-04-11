@@ -10,9 +10,9 @@ interface HomeViewProps {
   errorMessage?: string;
   movies: MasonryItemData[];
   favoriteIds: ReadonlySet<string>;
-  recentlyAddedIds: ReadonlySet<string>;
   onAddFavorite: (item: MasonryItemData) => void;
   onRemoveFavorite: (item: MasonryItemData) => void;
+  onOpenDetails: (item: MasonryItemData) => void;
 }
 
 export function HomeView({
@@ -20,9 +20,9 @@ export function HomeView({
   errorMessage,
   movies,
   favoriteIds,
-  recentlyAddedIds,
   onAddFavorite,
   onRemoveFavorite,
+  onOpenDetails,
 }: HomeViewProps): ReactElement {
   const palette = Colors.light;
   const categories = ["Movies", "TV", "Music", "Books"];
@@ -87,9 +87,9 @@ export function HomeView({
           showLayoutToggle={false}
           topInset={0}
           favoriteIds={favoriteIds}
-          recentlyAddedIds={recentlyAddedIds}
           onAddFavorite={onAddFavorite}
           onRemoveFavorite={onRemoveFavorite}
+          onOpenDetails={onOpenDetails}
         />
       </View>
     </SafeAreaView>

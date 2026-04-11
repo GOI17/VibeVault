@@ -1,17 +1,17 @@
 import { useState, type ReactElement } from "react";
-import { useWindowDimensions } from "react-native";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigation, type NavigationProp } from "@react-navigation/native";
 
+import type { RootStackParamList } from "@/app/navigation/types";
 import { FavoritesView } from "@/components/views/FavoritesView";
-import type { AddFavoriteFormValues } from "@/components/forms/AddFavoriteForm";
 import { queryOptions } from "@/constants/query";
 import { useFavoriteMutations } from "@/hooks/useFavoriteMutations";
-import { useBackupMutations } from "@/hooks/useBackupMutations";
 import { useRepositories } from "@/providers/RepositoryProvider";
 
 type FilterOption = "movie" | "series" | undefined;
 
 export function FavoritesContainer(): ReactElement {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { favoriteRepository } = useRepositories();
   const [filter, setFilter] = useState<FilterOption>(undefined);
   const { data, isLoading, error } = useQuery({
@@ -19,30 +19,22 @@ export function FavoritesContainer(): ReactElement {
     queryFn: () => favoriteRepository.getByMediaType(filter),
   });
   const { addFavorite, removeFavorite } = useFavoriteMutations();
-  const { backupFavorites, restoreFavorites, isBackingUp, isRestoring } = useBackupMutations();
-  const [showFormModal, setShowFormModal] = useState(false);
-  const { width } = useWindowDimensions();
-  const isDesktop = width >= 720;
-
-  const handleAddFavorite = (values: AddFavoriteFormValues) => {
-    addFavorite({
-      id: Date.now().toString(),
-      title: values.title,
-      mediaType: values.mediaType,
-      url: values.url,
-      platform: values.platform,
-    });
-  };
 
   const favoriteIds = new Set(data?.map((item) => item.id) ?? []);
 
   const masonryData =
     data?.map((item) => ({
-      key: item.id,
-      imageSrc: item.url,
-      title: item.title,
-      mediaType: item.mediaType,
-    })) || [];
+        key: item.id,
+        imageSrc: item.url,
+        title: item.title,
+        mediaType: item.mediaType,
+        description: item.description,
+        cast: item.cast,
+        releaseDate: item.releaseDate,
+        whereToWatch: item.whereToWatch || (item.platform ? [item.platform] : undefined),
+        seasons: item.seasons,
+        source: item.source,
+      })) || [];
 
   return (
     <FavoritesView
@@ -58,17 +50,32 @@ export function FavoritesContainer(): ReactElement {
           title: item.title,
           mediaType: item.mediaType || "movie",
           url: item.imageSrc,
+          description: item.description || "No disponible",
+          cast: item.cast && item.cast.length > 0 ? item.cast : ["No disponible"],
+          releaseDate: item.releaseDate || "No disponible",
+          whereToWatch:
+            item.whereToWatch && item.whereToWatch.length > 0
+              ? item.whereToWatch
+              : ["No disponible"],
+          seasons: item.seasons,
+          source: "catalog",
         })
       }
       onRemoveFavorite={(item) => removeFavorite(item.key)}
-      onSubmitFavorite={handleAddFavorite}
-      onBackup={() => data && backupFavorites(data)}
-      onRestore={restoreFavorites}
-      isBackingUp={isBackingUp}
-      isRestoring={isRestoring}
-      showFormModal={showFormModal}
-      setShowFormModal={setShowFormModal}
-      isDesktop={isDesktop}
+      onOpenDetails={(item) =>
+        navigation.navigate("Details", {
+          id: item.key,
+          title: item.title,
+          mediaType: item.mediaType || "movie",
+          imageSrc: item.imageSrc,
+          description: item.description,
+          cast: item.cast,
+          releaseDate: item.releaseDate,
+          whereToWatch: item.whereToWatch,
+          seasons: item.seasons,
+          source: item.source,
+        })
+      }
     />
   );
 }
