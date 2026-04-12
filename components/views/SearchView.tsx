@@ -10,7 +10,6 @@ interface SearchViewProps {
   errorMessage?: string;
   data: MasonryItemData[];
   favoriteIds: ReadonlySet<string>;
-  onSearchQuery: (query: string) => void;
   onAddFavorite: (item: MasonryItemData) => void;
   onRemoveFavorite: (item: MasonryItemData) => void;
   onOpenDetails: (item: MasonryItemData) => void;
@@ -22,7 +21,6 @@ export function SearchView({
   errorMessage,
   data,
   favoriteIds,
-  onSearchQuery: _onSearchQuery,
   onAddFavorite,
   onRemoveFavorite,
   onOpenDetails,

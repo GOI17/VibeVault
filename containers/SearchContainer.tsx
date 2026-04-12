@@ -53,7 +53,6 @@ export function SearchContainer({ query }: SearchContainerProps): ReactElement {
       errorMessage={error?.message}
       data={mappedData}
       favoriteIds={favoriteIds}
-      onSearchQuery={setActiveQuery}
       onAddFavorite={(item) =>
         addFavorite({
           id: item.key,
