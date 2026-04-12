@@ -4,8 +4,8 @@ import { View, Text, TouchableOpacity } from "react-native";
 import MasonryList from "@/components/Masonry";
 import type { MasonryItemData } from "@/components/Masonry";
 import { LoadingState, ErrorState } from "@/components/FeedbackStates";
-import { Colors } from "@/constants/Colors";
 import type { MediaType } from "@/constants/query";
+import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 type FilterOption = MediaType | undefined;
 
@@ -18,6 +18,7 @@ const FILTER_OPTIONS: { label: string; value: FilterOption }[] = [
 interface FavoritesViewProps {
   filter: FilterOption;
   onFilterChange: (value: FilterOption) => void;
+  onGoHome: () => void;
   isLoading: boolean;
   errorMessage?: string;
   masonryData: MasonryItemData[];
@@ -30,6 +31,7 @@ interface FavoritesViewProps {
 export function FavoritesView({
   filter,
   onFilterChange,
+  onGoHome,
   isLoading,
   errorMessage,
   masonryData,
@@ -38,7 +40,7 @@ export function FavoritesView({
   onRemoveFavorite,
   onOpenDetails,
 }: FavoritesViewProps): ReactElement {
-  const palette = Colors.light;
+  const { palette } = useThemePreference();
 
   if (isLoading) return <LoadingState message="Loading favorites..." />;
   if (errorMessage) return <ErrorState message="Error loading favorites" error={new Error(errorMessage)} />;
@@ -46,20 +48,25 @@ export function FavoritesView({
   return (
     <View style={{ flex: 1, backgroundColor: palette.shellBackground }}>
       <View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: 8, gap: 10 }}>
-        <Text
-          style={{
-            color: palette.shellMutedText,
-            fontSize: 12,
-            fontWeight: "700",
-            letterSpacing: 0.8,
-            textTransform: "uppercase",
-          }}
-        >
-          Curator
-        </Text>
         <Text style={{ color: palette.text, fontSize: 30, lineHeight: 34, fontWeight: "800", letterSpacing: -0.6 }}>
           My Favorites
         </Text>
+        <TouchableOpacity
+          onPress={onGoHome}
+          accessibilityRole="button"
+          accessibilityLabel="Go back to Home"
+          style={{
+            alignSelf: "flex-start",
+            paddingHorizontal: 14,
+            paddingVertical: 8,
+            borderRadius: 16,
+            backgroundColor: palette.shellSurface,
+            borderWidth: 1,
+            borderColor: palette.shellBorder,
+          }}
+        >
+          <Text style={{ color: palette.text, fontWeight: "600" }}>Go to Home</Text>
+        </TouchableOpacity>
         <View style={{ flexDirection: "row", gap: 10 }}>
           {FILTER_OPTIONS.map((option) => (
             <TouchableOpacity
