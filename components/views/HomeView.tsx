@@ -3,7 +3,7 @@ import { View, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import MasonryList, { type MasonryItemData } from "@/components/Masonry";
-import { Colors } from "@/constants/Colors";
+import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 interface HomeViewProps {
   isLoading: boolean;
@@ -24,7 +24,7 @@ export function HomeView({
   onRemoveFavorite,
   onOpenDetails,
 }: HomeViewProps): ReactElement {
-  const palette = Colors.light;
+  const { palette } = useThemePreference();
   const categories = ["Movies", "TV", "Music", "Books"];
 
   if (isLoading) {

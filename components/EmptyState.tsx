@@ -1,8 +1,6 @@
 import { View, Text } from "react-native";
 import type { ReactElement } from "react";
-import { Colors } from "@/constants/Colors";
-
-const palette = Colors.light;
+import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 interface EmptyStateProps {
   title?: string;
@@ -13,6 +11,8 @@ export function EmptyState({
   title = "No favorites yet! 🎬",
   message = "Double-tap movies on the home screen to add them here, or use the add form to create custom entries.",
 }: EmptyStateProps): ReactElement {
+  const { palette } = useThemePreference();
+
   return (
     <View
       style={{

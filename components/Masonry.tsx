@@ -5,7 +5,7 @@ import { View, Pressable, Text, StyleSheet, useWindowDimensions } from "react-na
 
 import type { FavoriteSource } from "@/domain/entities/Favorite";
 import type { Season } from "@/domain/entities/Movie";
-import { Colors } from "@/constants/Colors";
+import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 import { EmptyState } from "./EmptyState";
 import { MasonryItem } from "./MasonryItem";
 
@@ -51,7 +51,7 @@ export default function MasonryList({
 }: MasonryListProps): ReactElement {
   const [view, setView] = useState<"grid" | "list">("grid");
   const { width } = useWindowDimensions();
-  const palette = Colors.light;
+  const { palette } = useThemePreference();
   const fallbackImage = require("../assets/images/logo.png");
 
   const numColumns =
