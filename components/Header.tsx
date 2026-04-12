@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigation, type NavigationProp } from "@react-navigation/native";
+import { useNavigation, useNavigationState, type NavigationProp } from "@react-navigation/native";
 import {
   Modal,
   Pressable,
@@ -13,9 +13,38 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { LeftHeaderContent } from "@/components/common/LeftHeaderContent";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { RootStackParamList } from "@/app/navigation/types";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
+
+interface NavigationStateNode {
+  index: number;
+  routes: NavigationRouteNode[];
+}
+
+interface NavigationRouteNode {
+  name?: string;
+  state?: unknown;
+}
+
+function isNavigationStateNode(value: unknown): value is NavigationStateNode {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as { index?: unknown; routes?: unknown };
+  return typeof candidate.index === "number" && Array.isArray(candidate.routes);
+}
+
+function getActiveRouteName(state: unknown): string | null {
+  if (!isNavigationStateNode(state)) {
+    return null;
+  }
+
+  const activeRoute = state.routes[state.index];
+  return typeof activeRoute?.name === "string" ? activeRoute.name : null;
+}
 
 export default function Header(): React.ReactElement {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -27,6 +56,14 @@ export default function Header(): React.ReactElement {
   const { theme: activeTheme, palette, toggleTheme } = useThemePreference();
   const isCompact = width < 390;
   const toggleLabel = activeTheme === "light" ? "Toggle dark mode" : "Toggle light mode";
+  const isFavoritesRoute = useNavigationState((state) => {
+    const activeRootRoute = state.routes[state.index];
+    if (activeRootRoute?.name !== "Tabs") {
+      return false;
+    }
+
+    return getActiveRouteName(activeRootRoute.state) === "Favorites";
+  });
 
   const submitSearch = React.useCallback(() => {
     const query = searchQuery.trim();
@@ -68,6 +105,15 @@ export default function Header(): React.ReactElement {
     closeMenu();
   }, [closeMenu, toggleTheme]);
 
+  const handleBackPress = React.useCallback(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+
+    navigation.navigate("Tabs", { screen: "Home" });
+  }, [navigation]);
+
   const renderSearchBar = () => (
     <View
       style={[
@@ -78,20 +124,24 @@ export default function Header(): React.ReactElement {
         },
       ]}
     >
-      <TouchableOpacity
-        onPress={searchQuery ? clearSearch : undefined}
-        style={styles.leadingAction}
-        accessibilityRole={searchQuery ? "button" : undefined}
-        accessibilityLabel={searchQuery ? "Clear search" : "Search"}
-        hitSlop={8}
-        disabled={!searchQuery}
-      >
-        <IconSymbol
-          name={searchQuery ? "xmark.circle.fill" : "magnifyingglass"}
-          color={palette.shellMutedText}
-          size={16}
-        />
-      </TouchableOpacity>
+      {isFavoritesRoute ? (
+        <LeftHeaderContent showBackButton onBackPress={handleBackPress} tintColor={palette.shellMutedText} compact />
+      ) : (
+        <TouchableOpacity
+          onPress={searchQuery ? clearSearch : undefined}
+          style={styles.leadingAction}
+          accessibilityRole={searchQuery ? "button" : undefined}
+          accessibilityLabel={searchQuery ? "Clear search" : "Search"}
+          hitSlop={8}
+          disabled={!searchQuery}
+        >
+          <IconSymbol
+            name={searchQuery ? "xmark.circle.fill" : "magnifyingglass"}
+            color={palette.shellMutedText}
+            size={16}
+          />
+        </TouchableOpacity>
+      )}
       <TextInput
         ref={inputRef}
         style={[styles.searchInput, { color: palette.text }]}
