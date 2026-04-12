@@ -7,16 +7,16 @@ import type { LinkingOptions } from "@react-navigation/native";
 import { useMemo, type ReactElement } from "react";
 
 import { createStackNavigator } from "@react-navigation/stack";
+import type { StackNavigationProp } from "@react-navigation/stack";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { HeaderBackButton } from "@react-navigation/elements";
 import { useFonts } from "expo-font";
-import { Image } from "expo-image";
 import { View, Text } from "react-native";
 import Toast from "react-native-toast-message";
 import type { ToastConfig } from "react-native-toast-message";
 import "react-native-reanimated";
 
 import Header from "@/components/Header";
+import { LeftHeaderContent } from "@/components/common/LeftHeaderContent";
 import { client } from "@/constants/RQClient";
 import { SeasonSchema } from "@/domain/entities/Movie";
 import { RepositoryProvider } from "@/providers/RepositoryProvider";
@@ -88,6 +88,17 @@ function ThemedToast(): ReactElement {
 }
 
 const Stack = createStackNavigator<RootStackParamList>();
+
+function handleBackPress(navigation: StackNavigationProp<RootStackParamList>): () => void {
+  return () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+
+    navigation.replace("Tabs", { screen: "Home" });
+  };
+}
 
 const linking: LinkingOptions<RootStackParamList> = {
   prefixes: ['http://localhost:8081', 'exp://localhost:8081'],
@@ -181,27 +192,20 @@ function RootNavigator(): ReactElement {
           <Stack.Screen
             name="Search"
             component={SearchScreen}
-            options={{
+            options={({ navigation }) => ({
               title: "Search",
               headerStyle: { backgroundColor: palette.shellBackground },
               headerTintColor: palette.text,
-              headerLeft: (props) => (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    padding: 10,
-                    backgroundColor: palette.shellBackground,
-                  }}
-                >
-                  <HeaderBackButton {...props} tintColor={palette.text} />
-                  <Image
-                    style={{ width: 50, height: 30, resizeMode: "contain" }}
-                    source={require("../assets/images/logo.png")}
-                  />
-                </View>
+              headerLeft: () => (
+                <LeftHeaderContent
+                  showBackButton
+                  onBackPress={handleBackPress(navigation)}
+                  tintColor={palette.text}
+                  showLogo
+                  backgroundColor={palette.shellBackground}
+                />
               ),
-            }}
+            })}
           />
           <Stack.Screen
             name="Details"
@@ -210,32 +214,14 @@ function RootNavigator(): ReactElement {
               title: "Details",
               headerStyle: { backgroundColor: palette.shellBackground },
               headerTintColor: palette.text,
-              headerLeft: (props) => (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    padding: 10,
-                    backgroundColor: palette.shellBackground,
-                  }}
-                >
-                  <HeaderBackButton
-                    {...props}
-                    tintColor={palette.text}
-                    onPress={() => {
-                      if (navigation.canGoBack()) {
-                        navigation.goBack();
-                        return;
-                      }
-
-                      navigation.replace("Tabs", { screen: "Home" });
-                    }}
-                  />
-                  <Image
-                    style={{ width: 50, height: 30, resizeMode: "contain" }}
-                    source={require("../assets/images/logo.png")}
-                  />
-                </View>
+              headerLeft: () => (
+                <LeftHeaderContent
+                  showBackButton
+                  onBackPress={handleBackPress(navigation)}
+                  tintColor={palette.text}
+                  showLogo
+                  backgroundColor={palette.shellBackground}
+                />
               ),
             })}
           />
