@@ -40,6 +40,7 @@ export function FavoritesContainer(): ReactElement {
     <FavoritesView
       filter={filter}
       onFilterChange={setFilter}
+      onGoHome={() => navigation.navigate("Tabs", { screen: "Home" })}
       isLoading={isLoading}
       errorMessage={error?.message}
       masonryData={masonryData}
