@@ -2,7 +2,7 @@ import { type ReactElement } from "react";
 import { View, Text } from "react-native";
 
 import MasonryList, { type MasonryItemData } from "@/components/Masonry";
-import { Colors } from "@/constants/Colors";
+import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 interface SearchViewProps {
   query: string;
@@ -15,8 +15,6 @@ interface SearchViewProps {
   onOpenDetails: (item: MasonryItemData) => void;
 }
 
-const palette = Colors.light;
-
 export function SearchView({
   query,
   isLoading,
@@ -27,6 +25,8 @@ export function SearchView({
   onRemoveFavorite,
   onOpenDetails,
 }: SearchViewProps): ReactElement {
+  const { palette } = useThemePreference();
+
   if (isLoading) {
     return (
       <View style={{ backgroundColor: palette.shellBackground, flex: 1 }}>

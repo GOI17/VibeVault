@@ -3,11 +3,10 @@ import * as React from "react";
 import type { ReactElement } from "react";
 import { Modal, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 
-import { Colors } from "@/constants/Colors";
 import type { TabParamList } from "@/app/navigation/types";
-import { AddFavoriteForm, type AddFavoriteFormValues } from "@/components/forms/AddFavoriteForm";
-import { parseManualSeriesSeasonsPayload } from "@/domain/entities/ManualFavorite";
-import { useFavoriteMutations } from "@/hooks/useFavoriteMutations";
+import { AddFavoriteForm } from "@/components/forms/AddFavoriteForm";
+import { useManualFavoriteSubmission } from "@/hooks/useManualFavoriteSubmission";
+import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 import HomeScreen from "./home";
 import FavoritesScreen from "./favorites";
@@ -15,43 +14,12 @@ import FavoritesScreen from "./favorites";
 const Stack = createStackNavigator<TabParamList>();
 
 export default function TabNavigator(): ReactElement {
-  const palette = Colors.light;
-  const { addFavorite } = useFavoriteMutations();
+  const { palette } = useThemePreference();
   const [showFormModal, setShowFormModal] = React.useState(false);
   const { width } = useWindowDimensions();
   const isDesktop = width >= 720;
 
-  const handleAddFavorite = React.useCallback((values: AddFavoriteFormValues) => {
-    const cast = values.cast
-      .split(",")
-      .map((member) => member.trim())
-      .filter(Boolean);
-
-    const whereToWatch = values.whereToWatch
-      .split(",")
-      .map((platform) => platform.trim())
-      .filter(Boolean);
-
-    const seasons =
-      values.mediaType === "series" && values.seasonsPayload
-        ? parseManualSeriesSeasonsPayload(values.seasonsPayload)
-        : undefined;
-
-    addFavorite({
-      id: `custom-${Date.now()}`,
-      title: values.title,
-      mediaType: values.mediaType,
-      url: values.url,
-      platform: values.platform,
-      description: values.description,
-      cast,
-      releaseDate: values.releaseDate,
-      whereToWatch,
-      seasons,
-      source: "manual",
-    });
-    setShowFormModal(false);
-  }, [addFavorite]);
+  const handleAddFavorite = useManualFavoriteSubmission(() => setShowFormModal(false));
 
   return (
     <View style={{ flex: 1 }}>
@@ -100,7 +68,7 @@ export default function TabNavigator(): ReactElement {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "rgba(23,16,28,0.32)",
+            backgroundColor: palette.shellOverlay,
             justifyContent: "center",
             alignItems: "center",
             padding: 20,

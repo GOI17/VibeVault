@@ -13,23 +13,19 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import { Colors } from "@/constants/Colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { RootStackParamList } from "@/app/navigation/types";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 export default function Header(): React.ReactElement {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const systemScheme = useColorScheme() === "dark" ? "dark" : "light";
   const inputRef = React.useRef<TextInput>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [menuOpen, setMenuOpen] = React.useState(false);
-  const [themeOverride, setThemeOverride] = React.useState<"light" | "dark" | null>(null);
+  const { theme: activeTheme, palette, toggleTheme } = useThemePreference();
   const isCompact = width < 390;
-  const activeTheme = themeOverride ?? systemScheme;
-  const palette = Colors[activeTheme];
   const toggleLabel = activeTheme === "light" ? "Toggle dark mode" : "Toggle light mode";
 
   const submitSearch = React.useCallback(() => {
@@ -67,12 +63,10 @@ export default function Header(): React.ReactElement {
     closeMenu();
   }, [closeMenu]);
 
-  const toggleTheme = React.useCallback(() => {
-    const nextTheme = activeTheme === "light" ? "dark" : "light";
-    setThemeOverride(nextTheme);
-
+  const handleToggleTheme = React.useCallback(() => {
+    toggleTheme();
     closeMenu();
-  }, [activeTheme, closeMenu]);
+  }, [closeMenu, toggleTheme]);
 
   const renderSearchBar = () => (
     <View
@@ -114,7 +108,7 @@ export default function Header(): React.ReactElement {
         onPress={submitSearch}
         style={[styles.searchAction, { backgroundColor: palette.shellChipActive }]}
       >
-        <IconSymbol name="arrow.up.right" color="#FFFFFF" size={14} />
+        <IconSymbol name="arrow.up.right" color={palette.shellChipTextActive} size={14} />
       </TouchableOpacity>
     </View>
   );
@@ -152,7 +146,7 @@ export default function Header(): React.ReactElement {
         animationType="fade"
         onRequestClose={closeMenu}
       >
-        <Pressable style={styles.menuOverlay} onPress={closeMenu}>
+        <Pressable style={[styles.menuOverlay, { backgroundColor: palette.shellOverlay }]} onPress={closeMenu}>
           <Pressable
             style={[
               styles.menuPanel,
@@ -187,7 +181,7 @@ export default function Header(): React.ReactElement {
 
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={toggleTheme}
+              onPress={handleToggleTheme}
               accessibilityRole="button"
               accessibilityLabel={toggleLabel}
             >

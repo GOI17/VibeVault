@@ -6,6 +6,7 @@ import { toFormikValidationSchema } from "zod-formik-adapter";
 import type { ReactElement } from "react";
 
 import { ManualSeriesSeasonsSchema } from "@/domain/entities/ManualFavorite";
+import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 const RequiredText = (label: string) => z.string().trim().min(1, `${label} is required`);
 const RequiredCsvText = (label: string) =>
@@ -102,6 +103,8 @@ interface AddFavoriteFormProps {
  * Uses Zod validation via Formik adapter
  */
 export function AddFavoriteForm({ onSubmit }: AddFavoriteFormProps): ReactElement {
+  const { palette } = useThemePreference();
+
   return (
     <Formik<AddFavoriteFormValues>
       initialValues={{
@@ -136,23 +139,23 @@ export function AddFavoriteForm({ onSubmit }: AddFavoriteFormProps): ReactElemen
           <TextInput
             style={{
               height: 40,
-              borderColor: "#E50914",
+              borderColor: palette.tint,
               borderWidth: 1,
               borderRadius: 5,
               paddingHorizontal: 10,
-              color: "#FFFFFF",
-              backgroundColor: "#333333",
+              color: palette.text,
+              backgroundColor: palette.shellSurfaceAlt,
               marginBottom: 5,
             }}
             placeholder="Title"
-            placeholderTextColor="#CCCCCC"
+            placeholderTextColor={palette.shellMutedText}
             value={values.title}
             onChangeText={handleChange("title")}
           />
           {errors.title && (
             <Text
               style={{
-                color: "#FF0000",
+                color: palette.tint,
                 fontSize: 12,
                 marginBottom: 10,
               }}
@@ -167,11 +170,11 @@ export function AddFavoriteForm({ onSubmit }: AddFavoriteFormProps): ReactElemen
             }
             style={{
               height: 40,
-              borderColor: "#E50914",
+              borderColor: palette.tint,
               borderWidth: 1,
               borderRadius: 5,
-              backgroundColor: "#333333",
-              color: "#FFFFFF",
+              backgroundColor: palette.shellSurfaceAlt,
+              color: palette.text,
               marginBottom: 5,
             }}
           >
@@ -181,7 +184,7 @@ export function AddFavoriteForm({ onSubmit }: AddFavoriteFormProps): ReactElemen
           {errors.mediaType && (
             <Text
               style={{
-                color: "#FF0000",
+                color: palette.tint,
                 fontSize: 12,
                 marginBottom: 10,
               }}
@@ -192,23 +195,23 @@ export function AddFavoriteForm({ onSubmit }: AddFavoriteFormProps): ReactElemen
           <TextInput
             style={{
               height: 40,
-              borderColor: "#E50914",
+              borderColor: palette.tint,
               borderWidth: 1,
               borderRadius: 5,
               paddingHorizontal: 10,
-              color: "#FFFFFF",
-              backgroundColor: "#333333",
+              color: palette.text,
+              backgroundColor: palette.shellSurfaceAlt,
               marginBottom: 5,
             }}
             placeholder="Image URL (optional)"
-            placeholderTextColor="#CCCCCC"
+            placeholderTextColor={palette.shellMutedText}
             value={values.url}
             onChangeText={handleChange("url")}
           />
           {errors.url && (
             <Text
               style={{
-                color: "#FF0000",
+                color: palette.tint,
                 fontSize: 12,
                 marginBottom: 10,
               }}
@@ -223,11 +226,11 @@ export function AddFavoriteForm({ onSubmit }: AddFavoriteFormProps): ReactElemen
             }
             style={{
               height: 40,
-              borderColor: "#E50914",
+              borderColor: palette.tint,
               borderWidth: 1,
               borderRadius: 5,
-              backgroundColor: "#333333",
-              color: "#FFFFFF",
+              backgroundColor: palette.shellSurfaceAlt,
+              color: palette.text,
               paddingHorizontal: 10,
               marginBottom: 5,
             }}
@@ -243,7 +246,7 @@ export function AddFavoriteForm({ onSubmit }: AddFavoriteFormProps): ReactElemen
           {errors.platform && (
             <Text
               style={{
-                color: "#FF0000",
+                color: palette.tint,
                 fontSize: 12,
                 marginBottom: 10,
               }}
@@ -254,87 +257,87 @@ export function AddFavoriteForm({ onSubmit }: AddFavoriteFormProps): ReactElemen
           <TextInput
             style={{
               minHeight: 72,
-              borderColor: "#E50914",
+              borderColor: palette.tint,
               borderWidth: 1,
               borderRadius: 5,
               paddingHorizontal: 10,
               paddingVertical: 8,
-              color: "#FFFFFF",
-              backgroundColor: "#333333",
+              color: palette.text,
+              backgroundColor: palette.shellSurfaceAlt,
               marginBottom: 5,
               textAlignVertical: "top",
             }}
             multiline
             placeholder="Description / Synopsis"
-            placeholderTextColor="#CCCCCC"
+            placeholderTextColor={palette.shellMutedText}
             value={values.description}
             onChangeText={handleChange("description")}
           />
           {errors.description && (
-            <Text style={{ color: "#FF0000", fontSize: 12, marginBottom: 10 }}>
+            <Text style={{ color: palette.tint, fontSize: 12, marginBottom: 10 }}>
               {errors.description}
             </Text>
           )}
           <TextInput
             style={{
               height: 40,
-              borderColor: "#E50914",
+              borderColor: palette.tint,
               borderWidth: 1,
               borderRadius: 5,
               paddingHorizontal: 10,
-              color: "#FFFFFF",
-              backgroundColor: "#333333",
+              color: palette.text,
+              backgroundColor: palette.shellSurfaceAlt,
               marginBottom: 5,
             }}
             placeholder="Cast (comma-separated)"
-            placeholderTextColor="#CCCCCC"
+            placeholderTextColor={palette.shellMutedText}
             value={values.cast}
             onChangeText={handleChange("cast")}
           />
           {errors.cast && (
-            <Text style={{ color: "#FF0000", fontSize: 12, marginBottom: 10 }}>
+            <Text style={{ color: palette.tint, fontSize: 12, marginBottom: 10 }}>
               {errors.cast}
             </Text>
           )}
           <TextInput
             style={{
               height: 40,
-              borderColor: "#E50914",
+              borderColor: palette.tint,
               borderWidth: 1,
               borderRadius: 5,
               paddingHorizontal: 10,
-              color: "#FFFFFF",
-              backgroundColor: "#333333",
+              color: palette.text,
+              backgroundColor: palette.shellSurfaceAlt,
               marginBottom: 5,
             }}
             placeholder="Release date (e.g. 2024-09-10)"
-            placeholderTextColor="#CCCCCC"
+            placeholderTextColor={palette.shellMutedText}
             value={values.releaseDate}
             onChangeText={handleChange("releaseDate")}
           />
           {errors.releaseDate && (
-            <Text style={{ color: "#FF0000", fontSize: 12, marginBottom: 10 }}>
+            <Text style={{ color: palette.tint, fontSize: 12, marginBottom: 10 }}>
               {errors.releaseDate}
             </Text>
           )}
           <TextInput
             style={{
               height: 40,
-              borderColor: "#E50914",
+              borderColor: palette.tint,
               borderWidth: 1,
               borderRadius: 5,
               paddingHorizontal: 10,
-              color: "#FFFFFF",
-              backgroundColor: "#333333",
+              color: palette.text,
+              backgroundColor: palette.shellSurfaceAlt,
               marginBottom: 5,
             }}
             placeholder="Where to watch (comma-separated)"
-            placeholderTextColor="#CCCCCC"
+            placeholderTextColor={palette.shellMutedText}
             value={values.whereToWatch}
             onChangeText={handleChange("whereToWatch")}
           />
           {errors.whereToWatch && (
-            <Text style={{ color: "#FF0000", fontSize: 12, marginBottom: 10 }}>
+            <Text style={{ color: palette.tint, fontSize: 12, marginBottom: 10 }}>
               {errors.whereToWatch}
             </Text>
           )}
@@ -343,24 +346,24 @@ export function AddFavoriteForm({ onSubmit }: AddFavoriteFormProps): ReactElemen
               <TextInput
                 style={{
                   minHeight: 96,
-                  borderColor: "#E50914",
+                  borderColor: palette.tint,
                   borderWidth: 1,
                   borderRadius: 5,
                   paddingHorizontal: 10,
                   paddingVertical: 8,
-                  color: "#FFFFFF",
-                  backgroundColor: "#333333",
+                  color: palette.text,
+                  backgroundColor: palette.shellSurfaceAlt,
                   marginBottom: 5,
                   textAlignVertical: "top",
                 }}
                 multiline
                 placeholder='Seasons JSON (e.g. [{"seasonNumber":1,"episodes":[{"episodeNumber":1,"title":"Pilot","releaseDate":"2024-01-01"}]}])'
-                placeholderTextColor="#CCCCCC"
+                placeholderTextColor={palette.shellMutedText}
                 value={values.seasonsPayload}
                 onChangeText={handleChange("seasonsPayload")}
               />
               {errors.seasonsPayload && (
-                <Text style={{ color: "#FF0000", fontSize: 12, marginBottom: 10 }}>
+                <Text style={{ color: palette.tint, fontSize: 12, marginBottom: 10 }}>
                   {errors.seasonsPayload}
                 </Text>
               )}
@@ -370,14 +373,14 @@ export function AddFavoriteForm({ onSubmit }: AddFavoriteFormProps): ReactElemen
             onPress={() => handleSubmit()}
             disabled={isSubmitting || !values.title}
             style={{
-              backgroundColor: "#E50914",
+              backgroundColor: palette.shellChipActive,
               padding: 10,
               borderRadius: 5,
               alignItems: "center",
               marginBottom: 10,
             }}
           >
-            <Text style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+            <Text style={{ color: palette.shellChipTextActive, fontWeight: "bold" }}>
               Add to Favorites
             </Text>
           </TouchableOpacity>

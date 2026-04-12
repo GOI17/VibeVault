@@ -1,8 +1,6 @@
 import { View, Text } from "react-native";
 import type { ReactElement } from "react";
-import { Colors } from "@/constants/Colors";
-
-const palette = Colors.light;
+import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 interface LoadingStateProps {
   message?: string;
@@ -14,6 +12,8 @@ interface ErrorStateProps {
 }
 
 export function LoadingState({ message = "Loading..." }: LoadingStateProps): ReactElement {
+  const { palette } = useThemePreference();
+
   return (
     <View
       style={{
@@ -33,6 +33,8 @@ export function ErrorState({
   message,
   error,
 }: ErrorStateProps): ReactElement {
+  const { palette } = useThemePreference();
+
   return (
     <View
       style={{

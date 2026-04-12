@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 import type { Season } from "@/domain/entities/Movie";
-import { Colors } from "@/constants/Colors";
+import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 interface DetailsViewProps {
   isLoading: boolean;
@@ -30,7 +30,7 @@ export function DetailsView({
   imageSrc,
   mediaType,
 }: DetailsViewProps): ReactElement {
-  const palette = Colors.light;
+  const { palette } = useThemePreference();
   const fallbackImage = require("../../assets/images/logo.png");
 
   if (isLoading) {

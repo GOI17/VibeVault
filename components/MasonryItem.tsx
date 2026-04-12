@@ -1,10 +1,10 @@
 import { View, Text, StyleSheet } from "react-native";
 import { Image, type ImageProps } from "expo-image";
 import DoublePress from "./DoublePressTouchable";
-import { Colors } from "@/constants/Colors";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import type { MasonryItemData } from "./Masonry";
 import type { ReactElement } from "react";
+import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 interface MasonryItemProps {
   item: MasonryItemData;
@@ -19,17 +19,19 @@ interface MasonryItemProps {
 
 interface MediaTypeBadgeProps {
   mediaType?: "movie" | "series";
+  backgroundColor: string;
+  textColor: string;
 }
 
 /**
  * Media type badge component
  */
-const MediaTypeBadge = ({ mediaType }: MediaTypeBadgeProps): ReactElement | null => {
+const MediaTypeBadge = ({ mediaType, backgroundColor, textColor }: MediaTypeBadgeProps): ReactElement | null => {
   if (!mediaType) return null;
 
   return (
-    <View style={styles.mediaBadge}>
-      <Text style={styles.mediaBadgeText}>
+    <View style={[styles.mediaBadge, { backgroundColor }]}> 
+      <Text style={[styles.mediaBadgeText, { color: textColor }]}>
         {mediaType === "movie" ? "MOVIE" : "SERIES"}
       </Text>
     </View>
@@ -46,20 +48,22 @@ export function MasonryItem({
   fallbackImage,
   index,
 }: MasonryItemProps): ReactElement {
-  const palette = Colors.light;
+  const { theme, palette } = useThemePreference();
   const imageAspectRatio = [1.35, 1.0, 1.15, 0.85, 1.25][index % 5];
+  const actionChipBackground = theme === "dark" ? "rgba(10, 12, 18, 0.78)" : "rgba(255,255,255,0.78)";
+  const mediaBadgeBackground = theme === "dark" ? "rgba(10, 12, 18, 0.82)" : "rgba(255,255,255,0.82)";
 
   const overlayActions = (
-    <View style={styles.actionRow}>
-      <View style={styles.actionChip}>
+      <View style={styles.actionRow}>
+      <View style={[styles.actionChip, { backgroundColor: actionChipBackground }]}>
         <IconSymbol
           name={isFavorite ? "heart.fill" : "heart"}
-          color={isFavorite ? "#E50914" : "#FFFFFF"}
+          color={isFavorite ? palette.tint : palette.text}
           size={14}
         />
       </View>
-      <View style={styles.actionChip}>
-        <IconSymbol name="square.and.arrow.up" color="#FFFFFF" size={14} />
+      <View style={[styles.actionChip, { backgroundColor: actionChipBackground }]}>
+        <IconSymbol name="square.and.arrow.up" color={palette.text} size={14} />
       </View>
     </View>
   );
@@ -91,7 +95,7 @@ export function MasonryItem({
           <View
             style={[styles.favoriteOverlay, { backgroundColor: palette.shellOverlay }]}
           >
-            <Text style={{ color: "#FFFFFF" }}>Marked as favorite</Text>
+            <Text style={{ color: palette.shellFabForeground }}>Marked as favorite</Text>
           </View>
         </View>
       </DoublePress>
@@ -138,10 +142,10 @@ export function MasonryItem({
               source={{ uri: item.imageSrc }}
               style={[styles.gridImage, { aspectRatio: imageAspectRatio }]}
             />
-            <MediaTypeBadge mediaType={item.mediaType} />
+            <MediaTypeBadge mediaType={item.mediaType} backgroundColor={mediaBadgeBackground} textColor={palette.text} />
             {overlayActions}
-            <View style={[styles.favoriteOverlay, { backgroundColor: palette.shellOverlay }]}>
-              <Text style={{ color: "#FFFFFF" }}>Marked as favorite</Text>
+            <View style={[styles.favoriteOverlay, { backgroundColor: palette.shellOverlay }]}> 
+              <Text style={{ color: palette.shellFabForeground }}>Marked as favorite</Text>
             </View>
           </View>
           <View style={styles.gridTextBlock}>
@@ -173,7 +177,7 @@ export function MasonryItem({
             source={{ uri: item.imageSrc }}
             style={[styles.gridImage, { aspectRatio: imageAspectRatio }]}
           />
-            <MediaTypeBadge mediaType={item.mediaType} />
+          <MediaTypeBadge mediaType={item.mediaType} backgroundColor={mediaBadgeBackground} textColor={palette.text} />
             {overlayActions}
           </View>
         <View style={styles.gridTextBlock}>
@@ -200,14 +204,12 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 8,
     left: 8,
-    backgroundColor: "rgba(255,255,255,0.82)",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 999,
     zIndex: 10,
   },
   mediaBadgeText: {
-    color: "#31262E",
     fontSize: 10,
     fontWeight: "700",
   },
@@ -223,7 +225,6 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: "rgba(255,255,255,0.78)",
     justifyContent: "center",
     alignItems: "center",
   },

@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import type { ReactElement } from "react";
+import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 interface BackupControlsProps {
   onBackup: () => void;
@@ -14,6 +15,8 @@ export function BackupControls({
   isBackingUp = false,
   isRestoring = false,
 }: BackupControlsProps): ReactElement {
+  const { palette } = useThemePreference();
+
   return (
     <View
       style={{
@@ -25,7 +28,7 @@ export function BackupControls({
         onPress={onBackup}
         disabled={isBackingUp}
         style={{
-          backgroundColor: "#4285F4",
+          backgroundColor: palette.shellChipActive,
           padding: 10,
           borderRadius: 5,
           flex: 1,
@@ -34,7 +37,7 @@ export function BackupControls({
           opacity: isBackingUp ? 0.7 : 1,
         }}
       >
-        <Text style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+        <Text style={{ color: palette.shellChipTextActive, fontWeight: "bold" }}>
           {isBackingUp ? "Backing up..." : "Backup"}
         </Text>
       </TouchableOpacity>
@@ -42,7 +45,9 @@ export function BackupControls({
         onPress={onRestore}
         disabled={isRestoring}
         style={{
-          backgroundColor: "#34A853",
+          backgroundColor: palette.shellSurface,
+          borderWidth: 1,
+          borderColor: palette.shellBorder,
           padding: 10,
           borderRadius: 5,
           flex: 1,
@@ -51,7 +56,7 @@ export function BackupControls({
           opacity: isRestoring ? 0.7 : 1,
         }}
       >
-        <Text style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+        <Text style={{ color: palette.text, fontWeight: "bold" }}>
           {isRestoring ? "Restoring..." : "Restore"}
         </Text>
       </TouchableOpacity>
