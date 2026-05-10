@@ -7,23 +7,25 @@ import {
   Text,
   TouchableOpacity,
   View,
-  TextInput,
   useWindowDimensions,
   Keyboard,
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { SearchInputWithSuggestions } from "@/components/navigation/SearchInputWithSuggestions";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { RootStackParamList } from "@/app/navigation/types";
+import type { MovieSuggestion } from "@/domain/entities/Movie";
+import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 export default function Header(): React.ReactElement {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const inputRef = React.useRef<TextInput>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const { suggestions } = useSearchSuggestions(searchQuery);
   const { theme: activeTheme, palette, toggleTheme } = useThemePreference();
   const isCompact = width < 390;
   const toggleLabel = activeTheme === "light" ? "Toggle dark mode" : "Toggle light mode";
@@ -35,9 +37,18 @@ export default function Header(): React.ReactElement {
     navigation.navigate("Search", { query });
   }, [navigation, searchQuery]);
 
-  const clearSearch = React.useCallback(() => {
-    setSearchQuery("");
-    requestAnimationFrame(() => inputRef.current?.focus());
+  const openSuggestionDetails = React.useCallback((suggestion: MovieSuggestion) => {
+    Keyboard.dismiss();
+    navigation.navigate("Details", {
+      id: suggestion.id,
+      title: suggestion.title,
+      mediaType: suggestion.mediaType,
+      source: "catalog",
+    });
+  }, [navigation]);
+
+  const fillSuggestion = React.useCallback((suggestion: MovieSuggestion) => {
+    setSearchQuery(suggestion.title);
   }, []);
 
   const openMenu = React.useCallback(() => {
@@ -68,51 +79,6 @@ export default function Header(): React.ReactElement {
     closeMenu();
   }, [closeMenu, toggleTheme]);
 
-  const renderSearchBar = () => (
-    <View
-      style={[
-        styles.searchBar,
-        {
-          backgroundColor: palette.shellSurface,
-          borderColor: palette.shellBorder,
-        },
-      ]}
-    >
-      <TouchableOpacity
-        onPress={searchQuery ? clearSearch : undefined}
-        style={styles.leadingAction}
-        accessibilityRole={searchQuery ? "button" : undefined}
-        accessibilityLabel={searchQuery ? "Clear search" : "Search"}
-        hitSlop={8}
-        disabled={!searchQuery}
-      >
-        <IconSymbol
-          name={searchQuery ? "xmark.circle.fill" : "magnifyingglass"}
-          color={palette.shellMutedText}
-          size={16}
-        />
-      </TouchableOpacity>
-      <TextInput
-        ref={inputRef}
-        style={[styles.searchInput, { color: palette.text }]}
-        placeholder="Search titles"
-        placeholderTextColor={palette.shellMutedText}
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        autoCapitalize="none"
-        autoCorrect={false}
-        returnKeyType="search"
-        onSubmitEditing={submitSearch}
-      />
-      <TouchableOpacity
-        onPress={submitSearch}
-        style={[styles.searchAction, { backgroundColor: palette.shellChipActive }]}
-      >
-        <IconSymbol name="arrow.up.right" color={palette.shellChipTextActive} size={14} />
-      </TouchableOpacity>
-    </View>
-  );
-
   return (
     <View
       style={[
@@ -126,7 +92,14 @@ export default function Header(): React.ReactElement {
       ]}
     >
       <View style={styles.topRow}>
-        {renderSearchBar()}
+        <SearchInputWithSuggestions
+          value={searchQuery}
+          suggestions={suggestions}
+          onChangeText={setSearchQuery}
+          onSubmit={submitSearch}
+          onPressSuggestion={openSuggestionDetails}
+          onFillSuggestion={fillSuggestion}
+        />
 
         <View style={styles.rightCluster}>
           <TouchableOpacity
@@ -212,37 +185,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
-  searchBar: {
-    minHeight: 44,
-    flex: 1,
-    minWidth: 0,
-    borderWidth: 1,
-    borderRadius: 18,
-    paddingLeft: 10,
-    paddingRight: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  searchAction: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  leadingAction: {
-    width: 24,
-    height: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    paddingVertical: 0,
-    minWidth: 0,
-  },
   avatarButton: {
     width: 38,
     height: 38,
@@ -271,5 +213,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
   },
-  chipsContainer: {},
 });
