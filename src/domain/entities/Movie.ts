@@ -115,6 +115,30 @@ export type MovieDetails = z.infer<typeof MovieDetailsSchema>;
 export type Episode = z.infer<typeof EpisodeSchema>;
 export type Season = z.infer<typeof SeasonSchema>;
 
+export const MovieSuggestionSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  mediaType: z.enum(["movie", "series"]),
+  year: z.number().optional(),
+});
+
+export type MovieSuggestion = z.infer<typeof MovieSuggestionSchema>;
+
+export function inferMovieMediaType(type: string | undefined): MovieSuggestion["mediaType"] {
+  const normalizedType = type?.toLowerCase() ?? "";
+
+  return normalizedType.includes("tv") || normalizedType.includes("series") ? "series" : "movie";
+}
+
+export function toMovieSuggestion(movie: Movie): MovieSuggestion {
+  return MovieSuggestionSchema.parse({
+    id: movie.id,
+    title: movie.primaryTitle,
+    mediaType: inferMovieMediaType(movie.type),
+    year: movie.startYear,
+  });
+}
+
 /**
  * Schema for validating an array of movies
  */
@@ -181,7 +205,7 @@ export function validateMovies(data: unknown): Movie[] {
  */
 export function safeValidateMovie(
   data: unknown
-): { success: true; data: Movie } | { success: false; error: z.ZodError } {
+): { success: true; data: Movie } | { success: false; error: z.ZodError<unknown> } {
   const result = MovieSchema.safeParse(data);
   if (result.success) {
     return { success: true, data: result.data };
