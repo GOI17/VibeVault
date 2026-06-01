@@ -5,6 +5,10 @@
 - If failed, list only concrete file/line rule violations.
 - Do not run shell commands or external tools during review; review staged code statically.
 
+## Project Guardrails
+- Start with `docs/agent-guide.md` after reading this file to choose task-specific project context.
+- Keep `README.md` human-facing; put long-lived project knowledge in scoped `docs/` files.
+
 ## TypeScript
 - Use explicit types for public interfaces and exported functions.
 - Avoid `any`; prefer specific types or `unknown` with narrowing.
