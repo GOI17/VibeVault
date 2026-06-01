@@ -8,6 +8,10 @@ type MoviesAllQuery = {
   queryKey: ["movies", "all", string];
 };
 
+type MoviesSuggestionsQuery = {
+  queryKey: ["movies", "suggestions", string];
+};
+
 type FavoritesByMediaTypeQuery = {
   queryKey: ["movies", "favorites", MediaType | "all"];
 };
@@ -17,6 +21,11 @@ export const queryOptions = {
     all: (query: string): MoviesAllQuery => {
       return {
         queryKey: ["movies", "all", query],
+      };
+    },
+    suggestions: (query: string): MoviesSuggestionsQuery => {
+      return {
+        queryKey: ["movies", "suggestions", query],
       };
     },
     random: {

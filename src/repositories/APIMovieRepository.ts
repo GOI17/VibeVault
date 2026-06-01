@@ -5,8 +5,9 @@ import {
   MovieDetailsSchema,
   MovieSchema,
   MovieSearchResponseSchema,
+  toMovieSuggestion,
 } from "@/domain/entities/Movie";
-import type { Movie, MovieDetails, MovieSearchResponse } from "@/domain/entities/Movie";
+import type { Movie, MovieDetails, MovieSearchResponse, MovieSuggestion } from "@/domain/entities/Movie";
 
 /**
  * Zod schemas for API validation
@@ -345,6 +346,12 @@ export class APIMovieRepository implements IMovieRepository {
     );
 
     return MovieSearchResponseSchema.parse({ titles: movies });
+  }
+
+  async suggest(query: string): Promise<MovieSuggestion[]> {
+    const results = await this.search(query);
+
+    return results.titles.slice(0, 5).map(toMovieSuggestion);
   }
 
   async getRandom(): Promise<MovieSearchResponse> {

@@ -1,4 +1,4 @@
-import { MovieDetails, MovieSearchResponse } from "@/domain/entities/Movie";
+import { MovieDetails, MovieSearchResponse, MovieSuggestion } from "@/domain/entities/Movie";
 
 /**
  * Repository interface for Movie operations
@@ -12,6 +12,14 @@ export interface IMovieRepository {
    * @throws Error if API request fails
    */
   search(query: string): Promise<MovieSearchResponse>;
+
+  /**
+   * Get lightweight title suggestions by query string
+   * @param query Search query
+   * @returns Up to five lightweight suggestions for autocomplete
+   * @throws Error if API request fails
+   */
+  suggest(query: string): Promise<MovieSuggestion[]>;
 
   /**
    * Get random movies
