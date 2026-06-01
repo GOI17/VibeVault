@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigation, type NavigationProp } from "@react-navigation/native";
+import { useNavigation, useNavigationState, type NavigationProp } from "@react-navigation/native";
 import {
   Modal,
   Pressable,
@@ -13,11 +13,40 @@ import {
 import Toast from "react-native-toast-message";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { SearchInputWithSuggestions } from "@/components/navigation/SearchInputWithSuggestions";
+import { LeftHeaderContent } from "@/components/common/LeftHeaderContent";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { RootStackParamList } from "@/app/navigation/types";
 import type { MovieSuggestion } from "@/domain/entities/Movie";
 import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
+
+interface NavigationStateNode {
+  index: number;
+  routes: NavigationRouteNode[];
+}
+
+interface NavigationRouteNode {
+  name?: string;
+  state?: unknown;
+}
+
+function isNavigationStateNode(value: unknown): value is NavigationStateNode {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as { index?: unknown; routes?: unknown };
+  return typeof candidate.index === "number" && Array.isArray(candidate.routes);
+}
+
+function getActiveRouteName(state: unknown): string | null {
+  if (!isNavigationStateNode(state)) {
+    return null;
+  }
+
+  const activeRoute = state.routes[state.index];
+  return typeof activeRoute?.name === "string" ? activeRoute.name : null;
+}
 
 export default function Header(): React.ReactElement {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -29,6 +58,14 @@ export default function Header(): React.ReactElement {
   const { theme: activeTheme, palette, toggleTheme } = useThemePreference();
   const isCompact = width < 390;
   const toggleLabel = activeTheme === "light" ? "Toggle dark mode" : "Toggle light mode";
+  const isFavoritesRoute = useNavigationState((state) => {
+    const activeRootRoute = state.routes[state.index];
+    if (activeRootRoute?.name !== "Tabs") {
+      return false;
+    }
+
+    return getActiveRouteName(activeRootRoute.state) === "Favorites";
+  });
 
   const submitSearch = React.useCallback(() => {
     const query = searchQuery.trim();
@@ -79,6 +116,15 @@ export default function Header(): React.ReactElement {
     closeMenu();
   }, [closeMenu, toggleTheme]);
 
+  const handleBackPress = React.useCallback(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+
+    navigation.navigate("Tabs", { screen: "Home" });
+  }, [navigation]);
+
   return (
     <View
       style={[
@@ -99,6 +145,11 @@ export default function Header(): React.ReactElement {
           onSubmit={submitSearch}
           onPressSuggestion={openSuggestionDetails}
           onFillSuggestion={fillSuggestion}
+          leadingAccessory={
+            isFavoritesRoute ? (
+              <LeftHeaderContent showBackButton onBackPress={handleBackPress} tintColor={palette.shellMutedText} compact />
+            ) : undefined
+          }
         />
 
         <View style={styles.rightCluster}>

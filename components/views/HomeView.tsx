@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import MasonryList, { type MasonryItemData } from "@/components/Masonry";
@@ -25,7 +25,6 @@ export function HomeView({
   onOpenDetails,
 }: HomeViewProps): ReactElement {
   const { palette } = useThemePreference();
-  const categories = ["Movies", "TV", "Music", "Books"];
 
   if (isLoading) {
     return (
@@ -50,36 +49,6 @@ export function HomeView({
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: palette.shellBackground }} edges={["left", "right"]}>
-      <View style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 10 }}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
-          {categories.map((category) => {
-            const active = category === "Movies";
-            return (
-              <View
-                key={category}
-                style={{
-                  paddingHorizontal: 18,
-                  paddingVertical: 8,
-                  borderRadius: 999,
-                  backgroundColor: active ? palette.shellSurface : palette.shellSurfaceAlt,
-                  borderWidth: 1,
-                  borderColor: active ? palette.shellBorder : "transparent",
-                }}
-              >
-                <Text
-                  style={{
-                    color: active ? palette.text : palette.shellMutedText,
-                    fontWeight: active ? "700" : "500",
-                  }}
-                >
-                  {category}
-                </Text>
-              </View>
-            );
-          })}
-        </ScrollView>
-      </View>
-
       <View style={{ flex: 1 }}>
         <MasonryList
           data={movies}

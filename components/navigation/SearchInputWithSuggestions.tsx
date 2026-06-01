@@ -1,4 +1,4 @@
-import React, { type ReactElement } from "react";
+import React, { type ReactElement, type ReactNode } from "react";
 import {
   StyleSheet,
   Text,
@@ -18,6 +18,7 @@ interface SearchInputWithSuggestionsProps {
   onSubmit: () => void;
   onPressSuggestion: (suggestion: MovieSuggestion) => void;
   onFillSuggestion: (suggestion: MovieSuggestion) => void;
+  leadingAccessory?: ReactNode;
 }
 
 function formatSuggestionMetadata(suggestion: MovieSuggestion): string {
@@ -33,6 +34,7 @@ export function SearchInputWithSuggestions({
   onSubmit,
   onPressSuggestion,
   onFillSuggestion,
+  leadingAccessory,
 }: SearchInputWithSuggestionsProps): ReactElement {
   const inputRef = React.useRef<TextInput>(null);
   const blurTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -103,20 +105,22 @@ export function SearchInputWithSuggestions({
           },
         ]}
       >
-        <TouchableOpacity
-          onPress={hasValue ? clearSearch : undefined}
-          style={styles.leadingAction}
-          accessibilityRole={hasValue ? "button" : undefined}
-          accessibilityLabel={hasValue ? "Clear search" : "Search"}
-          hitSlop={8}
-          disabled={!hasValue}
-        >
-          <IconSymbol
-            name={hasValue ? "xmark.circle.fill" : "magnifyingglass"}
-            color={palette.shellMutedText}
-            size={16}
-          />
-        </TouchableOpacity>
+        {leadingAccessory ?? (
+          <TouchableOpacity
+            onPress={hasValue ? clearSearch : undefined}
+            style={styles.leadingAction}
+            accessibilityRole={hasValue ? "button" : undefined}
+            accessibilityLabel={hasValue ? "Clear search" : "Search"}
+            hitSlop={8}
+            disabled={!hasValue}
+          >
+            <IconSymbol
+              name={hasValue ? "xmark.circle.fill" : "magnifyingglass"}
+              color={palette.shellMutedText}
+              size={16}
+            />
+          </TouchableOpacity>
+        )}
         <TextInput
           ref={inputRef}
           style={[styles.searchInput, { color: palette.text }]}
