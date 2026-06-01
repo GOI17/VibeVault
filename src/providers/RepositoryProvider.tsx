@@ -2,16 +2,19 @@ import { createContext, useContext, useMemo, type ReactElement, type ReactNode }
 import type { IFavoriteRepository } from "@/domain/repositories/IFavoriteRepository";
 import type { IMovieRepository } from "@/domain/repositories/IMovieRepository";
 import type { IBackupRepository } from "@/domain/repositories/IBackupRepository";
+import type { IWatchedProgressRepository } from "@/domain/repositories/IWatchedProgressRepository";
 import type { Favorite } from "@/domain/entities/Favorite";
 import { AsyncStorageFavoriteRepository } from "@/repositories/AsyncStorageFavoriteRepository";
 import { APIMovieRepository } from "@/repositories/APIMovieRepository";
 import { GoogleDriveBackupRepository } from "@/repositories/GoogleDriveBackupRepository";
+import { AsyncStorageWatchedProgressRepository } from "@/repositories/AsyncStorageWatchedProgressRepository";
 import { getStoredToken, signInWithGoogle } from "@/repositories/googleAuth";
 
 interface RepositoryContextType {
   favoriteRepository: IFavoriteRepository;
   movieRepository: IMovieRepository;
   backupRepository: IBackupRepository<Favorite>;
+  watchedProgressRepository: IWatchedProgressRepository;
 }
 
 const RepositoryContext = createContext<RepositoryContextType | undefined>(
@@ -31,6 +34,7 @@ export function RepositoryProvider({ children }: RepositoryProviderProps): React
         signInWithGoogle,
         getStoredToken,
       }),
+      watchedProgressRepository: new AsyncStorageWatchedProgressRepository(),
     };
   }, []);
 
