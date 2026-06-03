@@ -5,7 +5,7 @@ import { z } from "zod";
 import { DetailsView } from "@/components/views/DetailsView";
 import type { RootStackParamList } from "@/app/navigation/types";
 import { useRepositories } from "@/providers/RepositoryProvider";
-import { SeasonSchema } from "@/domain/entities/Movie";
+import { inferMovieMediaType, SeasonSchema } from "@/domain/entities/Movie";
 import { createEpisodeWatchedKey, type WatchedEpisodeInput } from "@/domain/entities/WatchedProgress";
 import { queryOptions } from "@/constants/query";
 
@@ -94,6 +94,7 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
     mutationFn: (watched: boolean) => watchedProgressRepository.setMovieWatched(params.id, watched),
     onSuccess: () => {
       void queryClient.invalidateQueries(queryOptions.watchedProgress.movie(params.id));
+      void queryClient.invalidateQueries({ queryKey: ["watched-progress", "summary"] });
     },
   });
 
@@ -108,17 +109,13 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
     },
     onSuccess: () => {
       void queryClient.invalidateQueries(queryOptions.watchedProgress.episodes(params.id));
+      void queryClient.invalidateQueries({ queryKey: ["watched-progress", "summary"] });
     },
   });
 
   const missingDetails = !isManualFavorite && !isLoading && !error && data === null;
 
-  const resolvedType = data?.type?.toLowerCase();
-  const mediaType = resolvedType
-    ? resolvedType.includes("tv") || resolvedType.includes("series")
-      ? "series"
-      : "movie"
-    : params.mediaType || "movie";
+  const mediaType = data?.type ? inferMovieMediaType(data.type) : manualDetails?.mediaType || params.mediaType || "movie";
 
   const title = data?.primaryTitle || manualDetails?.title || params.title || "Título no disponible";
   const description = data?.plot || manualDetails?.description || params.description;

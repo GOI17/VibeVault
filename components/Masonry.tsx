@@ -20,6 +20,9 @@ export interface MasonryItemData {
   whereToWatch?: string[];
   seasons?: Season[];
   source?: FavoriteSource;
+  watchStatus?: "favorite" | "watched" | "watching" | "not-started";
+  progressLabel?: string;
+  progressPercent?: number;
 }
 
 interface MasonryListProps {
@@ -98,6 +101,7 @@ export default function MasonryList({
         </Pressable>
       )}
       <FlashList<MasonryItemData>
+        key={`${effectiveView}-${numColumns}`}
         numColumns={numColumns}
         style={{ flex: 1, minHeight: 0 }}
         contentContainerStyle={{

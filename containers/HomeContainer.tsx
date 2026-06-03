@@ -5,12 +5,14 @@ import { useMemo, type ReactElement } from "react";
 import type { RootStackParamList } from "@/app/navigation/types";
 import { HomeView } from "@/components/views/HomeView";
 import { queryOptions } from "@/constants/query";
+import { inferMovieMediaType } from "@/domain/entities/Movie";
 import { useFavoriteMutations } from "@/hooks/useFavoriteMutations";
 import { useRepositories } from "@/providers/RepositoryProvider";
+import { getWatchStatusByMediaId } from "./watchStatusViewModel";
 
 export function HomeContainer(): ReactElement {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { movieRepository, favoriteRepository } = useRepositories();
+  const { movieRepository, favoriteRepository, watchedProgressRepository } = useRepositories();
   const { data, isLoading, error } = useQuery({
     ...queryOptions.movies.random,
     queryFn: () => movieRepository.getRandom(),
@@ -29,7 +31,7 @@ export function HomeContainer(): ReactElement {
         key: item.id,
         imageSrc: item.primaryImage?.url,
         title: item.primaryTitle,
-        mediaType: (item.type?.toLowerCase().includes("tv") ? "series" : "movie") as "movie" | "series",
+        mediaType: inferMovieMediaType(item.type),
         description: item.plot,
         cast: item.cast,
         releaseDate: item.releaseDate || item.startYear?.toString(),
@@ -40,12 +42,21 @@ export function HomeContainer(): ReactElement {
   );
 
   const favoriteIds = useMemo(() => new Set(favorites?.map((item) => item.id) ?? []), [favorites]);
+  const { data: watchStatusByMediaId = {} } = useQuery({
+    queryKey: ["watched-progress", "summary", movies.map((item) => item.key).sort()],
+    queryFn: () => getWatchStatusByMediaId(movies, watchedProgressRepository),
+    enabled: movies.length > 0,
+  });
+  const moviesWithWatchStatus = movies.map((item) => ({
+    ...item,
+    ...watchStatusByMediaId[item.key],
+  }));
 
   return (
     <HomeView
       isLoading={isLoading}
       errorMessage={error?.message}
-      movies={movies}
+      movies={moviesWithWatchStatus}
       favoriteIds={favoriteIds}
       onAddFavorite={(item) =>
         addFavorite({

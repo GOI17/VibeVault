@@ -5,8 +5,10 @@ import { useEffect, useMemo, useState, type ReactElement } from "react";
 import type { RootStackParamList } from "@/app/navigation/types";
 import { SearchView } from "@/components/views/SearchView";
 import { queryOptions } from "@/constants/query";
+import { inferMovieMediaType } from "@/domain/entities/Movie";
 import { useFavoriteMutations } from "@/hooks/useFavoriteMutations";
 import { useRepositories } from "@/providers/RepositoryProvider";
+import { getWatchStatusByMediaId } from "./watchStatusViewModel";
 
 interface SearchContainerProps {
   query: string;
@@ -14,7 +16,7 @@ interface SearchContainerProps {
 
 export function SearchContainer({ query }: SearchContainerProps): ReactElement {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { movieRepository, favoriteRepository } = useRepositories();
+  const { movieRepository, favoriteRepository, watchedProgressRepository } = useRepositories();
   const { addFavorite, removeFavorite } = useFavoriteMutations();
   const [activeQuery, setActiveQuery] = useState(query);
   const [retryCount, setRetryCount] = useState(0);
@@ -58,13 +60,22 @@ export function SearchContainer({ query }: SearchContainerProps): ReactElement {
         key: item.id,
         imageSrc: item.primaryImage?.url,
         title: item.primaryTitle,
-        mediaType: ((item.type?.toLowerCase() ?? "").includes("tv") ? "series" : "movie") as "movie" | "series",
+        mediaType: inferMovieMediaType(item.type),
         description: item.plot,
         cast: item.cast,
         releaseDate: item.releaseDate || item.startYear?.toString(),
         whereToWatch: item.whereToWatch,
         seasons: item.seasons,
       })) || [];
+  const { data: watchStatusByMediaId = {} } = useQuery({
+    queryKey: ["watched-progress", "summary", mappedData.map((item) => item.key).sort()],
+    queryFn: () => getWatchStatusByMediaId(mappedData, watchedProgressRepository),
+    enabled: mappedData.length > 0,
+  });
+  const dataWithWatchStatus = mappedData.map((item) => ({
+    ...item,
+    ...watchStatusByMediaId[item.key],
+  }));
 
   return (
     <SearchView
@@ -74,7 +85,7 @@ export function SearchContainer({ query }: SearchContainerProps): ReactElement {
       retryCount={retryCount}
       maxRetries={3}
       isRetrying={isFetching && Boolean(error)}
-      data={mappedData}
+      data={dataWithWatchStatus}
       favoriteIds={favoriteIds}
       onRetrySearch={handleRetrySearch}
       onGoHome={() => navigation.navigate("Tabs", { screen: "Home" })}
