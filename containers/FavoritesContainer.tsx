@@ -65,7 +65,6 @@ export function FavoritesContainer(): ReactElement {
       onFilterChange={setFilter}
       sortDirection={sortDirection}
       onSortDirectionChange={setSortDirection}
-      onGoHome={() => navigation.navigate("Tabs", { screen: "Home" })}
       isLoading={isLoading}
       errorMessage={error?.message}
       masonryData={masonryData}
@@ -76,13 +75,13 @@ export function FavoritesContainer(): ReactElement {
           title: item.title,
           mediaType: item.mediaType || "movie",
           url: item.imageSrc,
-          description: item.description || "No disponible",
-          cast: item.cast && item.cast.length > 0 ? item.cast : ["No disponible"],
-          releaseDate: item.releaseDate || "No disponible",
+          description: item.description || "Not available",
+          cast: item.cast && item.cast.length > 0 ? item.cast : ["Not available"],
+          releaseDate: item.releaseDate || "Not available",
           whereToWatch:
             item.whereToWatch && item.whereToWatch.length > 0
               ? item.whereToWatch
-              : ["No disponible"],
+              : ["Not available"],
           seasons: item.seasons,
           source: "catalog",
         })
