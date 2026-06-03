@@ -38,10 +38,15 @@ export function SearchInputWithSuggestions({
 }: SearchInputWithSuggestionsProps): ReactElement {
   const inputRef = React.useRef<TextInput>(null);
   const blurTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [displayValue, setDisplayValue] = React.useState(value);
   const [isFocused, setIsFocused] = React.useState(false);
   const { palette } = useThemePreference();
-  const hasValue = value.trim().length > 0;
+  const hasValue = displayValue.trim().length > 0;
   const shouldShowSuggestions = isFocused && suggestions.length > 0;
+
+  React.useEffect(() => {
+    setDisplayValue(value);
+  }, [value]);
 
   React.useEffect(() => {
     return () => {
@@ -56,9 +61,18 @@ export function SearchInputWithSuggestions({
   }, []);
 
   const clearSearch = React.useCallback((): void => {
+    setDisplayValue("");
     onChangeText("");
     requestAnimationFrame(() => inputRef.current?.focus());
   }, [onChangeText]);
+
+  const handleChangeText = React.useCallback(
+    (nextValue: string): void => {
+      setDisplayValue(nextValue);
+      onChangeText(nextValue);
+    },
+    [onChangeText]
+  );
 
   const handleFocus = React.useCallback((): void => {
     if (blurTimeoutRef.current) {
@@ -99,6 +113,7 @@ export function SearchInputWithSuggestions({
       <View
         style={[
           styles.searchBar,
+          shouldShowSuggestions ? styles.searchBarWithSuggestions : undefined,
           {
             backgroundColor: palette.shellSurface,
             borderColor: palette.shellBorder,
@@ -126,8 +141,8 @@ export function SearchInputWithSuggestions({
           style={[styles.searchInput, { color: palette.text }]}
           placeholder="Search titles"
           placeholderTextColor={palette.shellMutedText}
-          value={value}
-          onChangeText={onChangeText}
+          value={displayValue}
+          onChangeText={handleChangeText}
           onFocus={handleFocus}
           onBlur={handleBlur}
           autoCapitalize="none"
@@ -208,6 +223,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
+  searchBarWithSuggestions: {
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+  },
   searchAction: {
     width: 28,
     height: 28,
@@ -229,11 +248,15 @@ const styles = StyleSheet.create({
   },
   suggestionsPanel: {
     position: "absolute",
-    top: 50,
+    top: 44,
     left: 0,
     right: 0,
     borderWidth: 1,
-    borderRadius: 16,
+    borderTopWidth: 0,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOpacity: 0.16,

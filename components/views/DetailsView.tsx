@@ -77,8 +77,6 @@ export function DetailsView({
         style={{ width: "100%", height: 260, borderRadius: 18 }}
       />
 
-      <Text style={{ color: palette.text, fontSize: 30, lineHeight: 34, fontWeight: "800" }}>{title}</Text>
-
       {mediaType === "movie" ? (
         <TouchableOpacity
           onPress={onToggleMovieWatched}
@@ -110,33 +108,33 @@ export function DetailsView({
       ) : null}
 
       <View style={{ gap: 8 }}>
-        <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>Descripción / Sinopsis</Text>
-        <Text style={{ color: palette.text, fontSize: 16, lineHeight: 24 }}>{description || "No disponible"}</Text>
+        <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>Description / Synopsis</Text>
+        <Text style={{ color: palette.text, fontSize: 16, lineHeight: 24 }}>{description || "Not available"}</Text>
       </View>
 
       <View style={{ gap: 8 }}>
-        <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>Elenco</Text>
+        <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>Cast</Text>
         <Text style={{ color: palette.text, fontSize: 16, lineHeight: 24 }}>
-          {cast && cast.length > 0 ? cast.join(", ") : "No disponible"}
+          {cast && cast.length > 0 ? cast.join(", ") : "Not available"}
         </Text>
       </View>
 
       <View style={{ gap: 8 }}>
-        <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>Fecha de estreno</Text>
-        <Text style={{ color: palette.text, fontSize: 16 }}>{releaseDate || "No disponible"}</Text>
+        <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>Release date</Text>
+        <Text style={{ color: palette.text, fontSize: 16 }}>{releaseDate || "Not available"}</Text>
       </View>
 
       <View style={{ gap: 8 }}>
-        <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>Dónde ver</Text>
+        <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>Where to watch</Text>
         <Text style={{ color: palette.text, fontSize: 16 }}>
-          {whereToWatch && whereToWatch.length > 0 ? whereToWatch.join(", ") : "No disponible"}
+          {whereToWatch && whereToWatch.length > 0 ? whereToWatch.join(", ") : "Not available"}
         </Text>
       </View>
 
       {mediaType === "series" && (
         <View style={{ gap: 10 }}>
           <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>
-            Temporadas y episodios
+            Seasons and episodes
           </Text>
           <Text style={{ color: palette.text, fontSize: 16, fontWeight: "700" }}>
             Progress: {seriesProgress.watched}/{seriesProgress.total} watched
@@ -149,7 +147,7 @@ export function DetailsView({
                 style={{ backgroundColor: palette.shellSurface, borderColor: palette.shellBorder, borderWidth: 1, borderRadius: 14, padding: 12, gap: 8 }}
               >
                 <Text style={{ color: palette.text, fontSize: 18, fontWeight: "700" }}>
-                  {season.title || `Temporada ${season.seasonNumber}`}
+                  {season.title || `Season ${season.seasonNumber}`}
                 </Text>
 
                 {season.episodes.map((episode) => {
@@ -195,7 +193,7 @@ export function DetailsView({
                           fontSize: 13,
                         }}
                       >
-                        Lanzamiento: {episode.releaseDate || "No disponible"}
+                        Release: {episode.releaseDate || "Not available"}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -203,7 +201,7 @@ export function DetailsView({
               </View>
             ))
           ) : (
-            <Text style={{ color: palette.text, fontSize: 16 }}>No hay temporadas disponibles</Text>
+            <Text style={{ color: palette.text, fontSize: 16 }}>No seasons available</Text>
           )}
         </View>
       )}

@@ -54,7 +54,7 @@ export function HomeView({
           data={movies}
           isFavorites={false}
           showLayoutToggle={false}
-          topInset={0}
+          topInset={16}
           favoriteIds={favoriteIds}
           onAddFavorite={onAddFavorite}
           onRemoveFavorite={onRemoveFavorite}
