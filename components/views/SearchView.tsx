@@ -53,6 +53,7 @@ export function SearchView({
       <MasonryList
         data={data}
         isFavorites={false}
+        forceListOnMobile
         favoriteIds={favoriteIds}
         onAddFavorite={onAddFavorite}
         onRemoveFavorite={onRemoveFavorite}

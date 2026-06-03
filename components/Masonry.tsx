@@ -27,6 +27,8 @@ interface MasonryListProps {
   isFavorites?: boolean;
   isFavoritesLoading?: boolean;
   showLayoutToggle?: boolean;
+  forceListOnMobile?: boolean;
+  mobileBreakpoint?: number;
   topInset?: number;
   offsetTop?: number;
   favoriteIds?: ReadonlySet<string>;
@@ -41,6 +43,8 @@ export default function MasonryList({
   isFavorites = false,
   isFavoritesLoading = false,
   showLayoutToggle = true,
+  forceListOnMobile = false,
+  mobileBreakpoint = 768,
   topInset = 0,
   offsetTop = 0,
   favoriteIds,
@@ -53,9 +57,11 @@ export default function MasonryList({
   const { width } = useWindowDimensions();
   const { palette } = useThemePreference();
   const fallbackImage = require("../assets/images/logo.png");
+  const isListForcedOnMobile = forceListOnMobile && width < mobileBreakpoint;
+  const effectiveView = isListForcedOnMobile ? "list" : view;
 
   const numColumns =
-    view === "list"
+    effectiveView === "list"
       ? 1
       : width >= 1100
         ? 4
@@ -70,12 +76,12 @@ export default function MasonryList({
   const favoriteMembershipKey = JSON.stringify({
     favoriteIds: favoriteIds ? Array.from(favoriteIds).sort() : [],
     recentlyAddedIds: recentlyAddedIds ? Array.from(recentlyAddedIds).sort() : [],
-    view,
+    view: effectiveView,
   });
 
   return (
     <View style={{ flex: 1, marginTop: offsetTop }}>
-      {showLayoutToggle && width < 768 && (
+      {showLayoutToggle && width < mobileBreakpoint && !isListForcedOnMobile && (
         <Pressable
           onPress={() => setView((prev) => (prev === "grid" ? "list" : "grid"))}
           style={[
@@ -109,7 +115,7 @@ export default function MasonryList({
             <MasonryItem
               item={item}
               isFavorite={isFavorite}
-              view={view}
+              view={effectiveView}
               onAddFavorite={() => onAddFavorite?.(item)}
               onRemoveFavorite={() => onRemoveFavorite?.(item)}
               onOpenDetails={() => onOpenDetails?.(item)}
