@@ -141,6 +141,30 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
     );
   }, [watchedEpisodeStatuses]);
 
+  const lastWatchedEpisodeLabel = useMemo(() => {
+    const watchedEpisodesByKey = new Map(
+      watchedEpisodeStatuses
+        .filter((episode) => episode.watched && episode.watchedAt)
+        .map((episode) => [createEpisodeWatchedKey(episode.seasonNumber, episode.episodeNumber), episode.watchedAt])
+    );
+
+    const watchedEpisodes =
+      seasons?.flatMap((season) =>
+        season.episodes.flatMap((episode) => {
+          const watchedAt = watchedEpisodesByKey.get(
+            createEpisodeWatchedKey(season.seasonNumber, episode.episodeNumber)
+          );
+
+          return watchedAt ? [{ seasonNumber: season.seasonNumber, episode, watchedAt }] : [];
+        })
+      ) ?? [];
+
+    const lastWatched = watchedEpisodes.sort((left, right) => left.watchedAt.localeCompare(right.watchedAt)).at(-1);
+    return lastWatched
+      ? `S${lastWatched.seasonNumber}E${lastWatched.episode.episodeNumber} · ${lastWatched.episode.title}`
+      : undefined;
+  }, [seasons, watchedEpisodeStatuses]);
+
   const seriesProgress = useMemo(() => {
     let watched = 0;
     let total = 0;
@@ -216,7 +240,10 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
       isMovieWatched={Boolean(watchedMovieStatus?.watched)}
       isUpdatingMovieWatched={toggleMovieWatchedMutation.isPending}
       onToggleMovieWatched={() => toggleMovieWatchedMutation.mutate(!watchedMovieStatus?.watched)}
-      watchedEpisodeKeys={watchedEpisodeKeys}
+      isEpisodeWatched={(seasonNumber, episodeNumber) =>
+        watchedEpisodeKeys.has(createEpisodeWatchedKey(seasonNumber, episodeNumber))
+      }
+      lastWatchedEpisodeLabel={lastWatchedEpisodeLabel}
       isUpdatingEpisodeWatched={toggleEpisodeWatchedMutation.isPending}
       onToggleEpisodeWatched={(seasonNumber, episodeNumber, watched) =>
         toggleEpisodeWatchedMutation.mutate({ seasonNumber, episodeNumber, watched })
