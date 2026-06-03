@@ -34,6 +34,12 @@ const MAPPING = {
   'heart.fill': 'favorite',
   'heart': 'favorite-border',
   'square.and.arrow.up': 'ios-share',
+  'movieclapper': 'movie',
+  'arrow.up.arrow.down': 'swap-vert',
+  'chevron.down': 'keyboard-arrow-down',
+  'checkmark': 'check',
+  'circle': 'radio-button-unchecked',
+  'tv': 'live-tv',
 } as const satisfies Record<string, MaterialIconName>;
 
 type IconSymbolName = keyof typeof MAPPING;

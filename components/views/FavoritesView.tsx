@@ -1,14 +1,16 @@
-import type { ReactElement } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { useState, type ReactElement } from "react";
+import { Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
 
 import MasonryList from "@/components/Masonry";
 import type { MasonryItemData } from "@/components/Masonry";
 import { LoadingState, ErrorState } from "@/components/FeedbackStates";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 import type { MediaType } from "@/constants/query";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 type FilterOption = MediaType | undefined;
 export type FavoriteSortDirection = "newest" | "oldest";
+type BottomSheetKind = "type" | "sort" | null;
 
 const FILTER_OPTIONS: { label: string; value: FilterOption }[] = [
   { label: "All", value: undefined },
@@ -21,12 +23,19 @@ const SORT_OPTIONS: { label: string; value: FavoriteSortDirection }[] = [
   { label: "Oldest", value: "oldest" },
 ];
 
+function getFilterLabel(filter: FilterOption): string {
+  return FILTER_OPTIONS.find((option) => option.value === filter)?.label ?? "All";
+}
+
+function getSortLabel(sortDirection: FavoriteSortDirection): string {
+  return SORT_OPTIONS.find((option) => option.value === sortDirection)?.label ?? "Newest";
+}
+
 interface FavoritesViewProps {
   filter: FilterOption;
   onFilterChange: (value: FilterOption) => void;
   sortDirection: FavoriteSortDirection;
   onSortDirectionChange: (value: FavoriteSortDirection) => void;
-  onGoHome: () => void;
   isLoading: boolean;
   errorMessage?: string;
   masonryData: MasonryItemData[];
@@ -41,7 +50,6 @@ export function FavoritesView({
   onFilterChange,
   sortDirection,
   onSortDirectionChange,
-  onGoHome,
   isLoading,
   errorMessage,
   masonryData,
@@ -51,95 +59,116 @@ export function FavoritesView({
   onOpenDetails,
 }: FavoritesViewProps): ReactElement {
   const { palette } = useThemePreference();
+  const [activeSheet, setActiveSheet] = useState<BottomSheetKind>(null);
+
+  const closeSheet = (): void => setActiveSheet(null);
+  const selectFilter = (value: FilterOption): void => {
+    onFilterChange(value);
+    closeSheet();
+  };
+  const selectSortDirection = (value: FavoriteSortDirection): void => {
+    onSortDirectionChange(value);
+    closeSheet();
+  };
 
   if (isLoading) return <LoadingState message="Loading favorites..." />;
   if (errorMessage) return <ErrorState message="Error loading favorites" error={new Error(errorMessage)} />;
 
   return (
     <View style={{ flex: 1, backgroundColor: palette.shellBackground }}>
-      <View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: 8, gap: 10 }}>
-        <Text style={{ color: palette.text, fontSize: 30, lineHeight: 34, fontWeight: "800", letterSpacing: -0.6 }}>
-          My Favorites
-        </Text>
-        <TouchableOpacity
-          onPress={onGoHome}
-          accessibilityRole="button"
-          accessibilityLabel="Go back to Home"
-          style={{
-            alignSelf: "flex-start",
-            paddingHorizontal: 14,
-            paddingVertical: 8,
-            borderRadius: 16,
-            backgroundColor: palette.shellSurface,
-            borderWidth: 1,
-            borderColor: palette.shellBorder,
-          }}
-        >
-          <Text style={{ color: palette.text, fontWeight: "600" }}>Go to Home</Text>
-        </TouchableOpacity>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-          {FILTER_OPTIONS.map((option) => (
-            <TouchableOpacity
-              key={option.label}
-              onPress={() => onFilterChange(option.value)}
-              style={{
-                paddingHorizontal: 16,
-                paddingVertical: 8,
-                borderRadius: 20,
-                backgroundColor: filter === option.value ? palette.shellChipActive : palette.shellSurface,
-                borderWidth: 1,
-                borderColor: filter === option.value ? palette.shellChipActive : palette.shellBorder,
-              }}
-            >
-              <Text
-                style={{
-                  color: filter === option.value ? palette.shellChipTextActive : palette.shellChipTextIdle,
-                  fontWeight: filter === option.value ? "bold" : "normal",
-                }}
-              >
-                {option.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-        <View style={{ gap: 8 }}>
-          <Text style={{ color: palette.shellMutedText, fontSize: 13, fontWeight: "700" }}>
-            Sort by date added
-          </Text>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-            {SORT_OPTIONS.map((option) => (
-              <TouchableOpacity
-                key={option.value}
-                onPress={() => onSortDirectionChange(option.value)}
-                accessibilityRole="button"
-                accessibilityLabel={`Sort favorites by date added: ${option.label.toLowerCase()} first`}
-                style={{
-                  paddingHorizontal: 16,
-                  paddingVertical: 8,
-                  borderRadius: 20,
-                  backgroundColor:
-                    sortDirection === option.value ? palette.shellChipActive : palette.shellSurface,
-                  borderWidth: 1,
-                  borderColor:
-                    sortDirection === option.value ? palette.shellChipActive : palette.shellBorder,
-                }}
-              >
-                <Text
-                  style={{
-                    color:
-                      sortDirection === option.value
-                        ? palette.shellChipTextActive
-                        : palette.shellChipTextIdle,
-                    fontWeight: sortDirection === option.value ? "bold" : "normal",
-                  }}
-                >
-                  {option.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+      <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <FilterBarButton
+            label={getFilterLabel(filter)}
+            icon="movieclapper"
+            onPress={() => setActiveSheet("type")}
+            accessibilityLabel="Open type filter"
+          />
+          <FilterBarButton
+            label={getSortLabel(sortDirection)}
+            icon="arrow.up.arrow.down"
+            onPress={() => setActiveSheet("sort")}
+            accessibilityLabel="Open sort options"
+          />
         </View>
       </View>
+
+      <Modal visible={activeSheet !== null} transparent animationType="slide" onRequestClose={closeSheet}>
+        <Pressable style={{ flex: 1, justifyContent: "flex-end", backgroundColor: palette.shellOverlay }} onPress={closeSheet}>
+          <Pressable
+            onPress={(event) => event.stopPropagation()}
+            style={{
+              margin: 16,
+              borderRadius: 26,
+              borderWidth: 1,
+              borderColor: palette.shellBorder,
+              backgroundColor: palette.shellSurface,
+              padding: 18,
+              gap: 16,
+            }}
+          >
+            <View
+              style={{
+                alignSelf: "center",
+                width: 54,
+                height: 5,
+                borderRadius: 999,
+                backgroundColor: palette.shellMutedText,
+                opacity: 0.6,
+              }}
+            />
+
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <Text style={{ color: palette.text, fontSize: 22, fontWeight: "800" }}>
+                {activeSheet === "type" ? "Type" : "Sort by"}
+              </Text>
+              <TouchableOpacity
+                onPress={closeSheet}
+                accessibilityRole="button"
+                accessibilityLabel="Close filter sheet"
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 19,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: palette.shellBackground,
+                }}
+              >
+                <IconSymbol name="xmark.circle.fill" color={palette.shellMutedText} size={28} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ gap: 8 }}>
+              {activeSheet === "type"
+                ? FILTER_OPTIONS.map((option) => {
+                    const isSelected = filter === option.value;
+                    const icon = option.value === "series" ? "tv" : "movieclapper";
+
+                    return (
+                      <SheetOption
+                        key={option.label}
+                        label={option.label}
+                        icon={icon}
+                        isSelected={isSelected}
+                        onPress={() => selectFilter(option.value)}
+                      />
+                    );
+                  })
+                : SORT_OPTIONS.map((option) => (
+                    <SheetOption
+                      key={option.value}
+                      label={option.label}
+                      icon="arrow.up.arrow.down"
+                      isSelected={sortDirection === option.value}
+                      accessibilityLabel={`Sort favorites by date added: ${option.label.toLowerCase()} first`}
+                      onPress={() => selectSortDirection(option.value)}
+                    />
+                  ))}
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       <View style={{ flex: 1 }}>
         <MasonryList
@@ -148,14 +177,91 @@ export function FavoritesView({
           isFavoritesLoading={isLoading}
           showLayoutToggle={false}
           forceListOnMobile
-          topInset={0}
+          topInset={8}
           favoriteIds={favoriteIds}
           onAddFavorite={onAddFavorite}
           onRemoveFavorite={onRemoveFavorite}
           onOpenDetails={onOpenDetails}
         />
       </View>
-
     </View>
+  );
+}
+
+interface FilterBarButtonProps {
+  label: string;
+  icon: "movieclapper" | "arrow.up.arrow.down";
+  onPress: () => void;
+  accessibilityLabel: string;
+}
+
+function FilterBarButton({ label, icon, onPress, accessibilityLabel }: FilterBarButtonProps): ReactElement {
+  const { palette } = useThemePreference();
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      style={{
+        flex: 1,
+        minHeight: 52,
+        borderRadius: 18,
+        borderWidth: 1,
+        borderColor: palette.shellBorder,
+        backgroundColor: palette.shellSurface,
+        paddingHorizontal: 16,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 10,
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10, minWidth: 0 }}>
+        <IconSymbol name={icon} color={palette.text} size={22} />
+        <Text style={{ color: palette.text, fontSize: 16, fontWeight: "700" }} numberOfLines={1}>
+          {label}
+        </Text>
+      </View>
+      <IconSymbol name="chevron.down" color={palette.shellMutedText} size={22} />
+    </TouchableOpacity>
+  );
+}
+
+interface SheetOptionProps {
+  label: string;
+  icon: "movieclapper" | "arrow.up.arrow.down" | "tv";
+  isSelected: boolean;
+  onPress: () => void;
+  accessibilityLabel?: string;
+}
+
+function SheetOption({ label, icon, isSelected, onPress, accessibilityLabel }: SheetOptionProps): ReactElement {
+  const { palette } = useThemePreference();
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: isSelected }}
+      accessibilityLabel={accessibilityLabel ?? label}
+      style={{
+        minHeight: 56,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: isSelected ? palette.shellBorder : "transparent",
+        backgroundColor: isSelected ? palette.shellBackground : "transparent",
+        paddingHorizontal: 14,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <IconSymbol name={icon} color={isSelected ? palette.shellChipActive : palette.shellMutedText} size={24} />
+        <Text style={{ color: palette.text, fontSize: 17, fontWeight: "700" }}>{label}</Text>
+      </View>
+      <IconSymbol name={isSelected ? "checkmark" : "circle"} color={isSelected ? palette.shellChipActive : palette.shellMutedText} size={26} />
+    </TouchableOpacity>
   );
 }
