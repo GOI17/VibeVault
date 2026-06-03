@@ -1,8 +1,9 @@
 import { Image } from "expo-image";
 import type { ReactElement } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import type { Season } from "@/domain/entities/Movie";
+import { createEpisodeWatchedKey } from "@/domain/entities/WatchedProgress";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 interface DetailsViewProps {
@@ -16,6 +17,13 @@ interface DetailsViewProps {
   seasons?: Season[];
   imageSrc?: string;
   mediaType: "movie" | "series";
+  isMovieWatched: boolean;
+  isUpdatingMovieWatched: boolean;
+  onToggleMovieWatched: () => void;
+  watchedEpisodeKeys: ReadonlySet<string>;
+  isUpdatingEpisodeWatched: boolean;
+  onToggleEpisodeWatched: (seasonNumber: number, episodeNumber: number, watched: boolean) => void;
+  seriesProgress: { watched: number; total: number };
 }
 
 export function DetailsView({
@@ -29,6 +37,13 @@ export function DetailsView({
   seasons,
   imageSrc,
   mediaType,
+  isMovieWatched,
+  isUpdatingMovieWatched,
+  onToggleMovieWatched,
+  watchedEpisodeKeys,
+  isUpdatingEpisodeWatched,
+  onToggleEpisodeWatched,
+  seriesProgress,
 }: DetailsViewProps): ReactElement {
   const { palette } = useThemePreference();
   const fallbackImage = require("../../assets/images/logo.png");
@@ -60,6 +75,36 @@ export function DetailsView({
 
       <Text style={{ color: palette.text, fontSize: 30, lineHeight: 34, fontWeight: "800" }}>{title}</Text>
 
+      {mediaType === "movie" ? (
+        <TouchableOpacity
+          onPress={onToggleMovieWatched}
+          disabled={isUpdatingMovieWatched}
+          accessibilityRole="button"
+          accessibilityState={{ selected: isMovieWatched, disabled: isUpdatingMovieWatched }}
+          accessibilityLabel={isMovieWatched ? "Mark movie as unwatched" : "Mark movie as watched"}
+          style={{
+            alignSelf: "flex-start",
+            backgroundColor: isMovieWatched ? palette.shellChipActive : palette.shellSurface,
+            borderColor: isMovieWatched ? palette.shellChipActive : palette.shellBorder,
+            borderRadius: 18,
+            borderWidth: 1,
+            opacity: isUpdatingMovieWatched ? 0.6 : 1,
+            paddingHorizontal: 16,
+            paddingVertical: 10,
+          }}
+        >
+          <Text
+            style={{
+              color: isMovieWatched ? palette.shellChipTextActive : palette.text,
+              fontSize: 15,
+              fontWeight: "700",
+            }}
+          >
+            {isMovieWatched ? "Watched" : "Mark as watched"}
+          </Text>
+        </TouchableOpacity>
+      ) : null}
+
       <View style={{ gap: 8 }}>
         <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>Descripción / Sinopsis</Text>
         <Text style={{ color: palette.text, fontSize: 16, lineHeight: 24 }}>{description || "No disponible"}</Text>
@@ -89,6 +134,9 @@ export function DetailsView({
           <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>
             Temporadas y episodios
           </Text>
+          <Text style={{ color: palette.text, fontSize: 16, fontWeight: "700" }}>
+            Progress: {seriesProgress.watched}/{seriesProgress.total} watched
+          </Text>
 
           {seasons && seasons.length > 0 ? (
             seasons.map((season) => (
@@ -100,16 +148,54 @@ export function DetailsView({
                   {season.title || `Temporada ${season.seasonNumber}`}
                 </Text>
 
-                {season.episodes.map((episode) => (
-                  <View key={`episode-${season.seasonNumber}-${episode.episodeNumber}`} style={{ gap: 2 }}>
-                    <Text style={{ color: palette.text, fontSize: 15 }}>
-                      E{episode.episodeNumber}. {episode.title}
-                    </Text>
-                    <Text style={{ color: palette.shellMutedText, fontSize: 13 }}>
-                      Lanzamiento: {episode.releaseDate || "No disponible"}
-                    </Text>
-                  </View>
-                ))}
+                {season.episodes.map((episode) => {
+                  const episodeKey = createEpisodeWatchedKey(season.seasonNumber, episode.episodeNumber);
+                  const isEpisodeWatched = watchedEpisodeKeys.has(episodeKey);
+
+                  return (
+                    <TouchableOpacity
+                      key={`episode-${season.seasonNumber}-${episode.episodeNumber}`}
+                      onPress={() =>
+                        onToggleEpisodeWatched(
+                          season.seasonNumber,
+                          episode.episodeNumber,
+                          !isEpisodeWatched
+                        )
+                      }
+                      disabled={isUpdatingEpisodeWatched}
+                      accessibilityRole="checkbox"
+                      accessibilityState={{ checked: isEpisodeWatched, disabled: isUpdatingEpisodeWatched }}
+                      accessibilityLabel={`${isEpisodeWatched ? "Unmark" : "Mark"} season ${season.seasonNumber} episode ${episode.episodeNumber} as watched`}
+                      style={{
+                        backgroundColor: isEpisodeWatched ? palette.shellChipActive : palette.shellBackground,
+                        borderColor: isEpisodeWatched ? palette.shellChipActive : palette.shellBorder,
+                        borderRadius: 10,
+                        borderWidth: 1,
+                        gap: 2,
+                        opacity: isUpdatingEpisodeWatched ? 0.6 : 1,
+                        padding: 10,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: isEpisodeWatched ? palette.shellChipTextActive : palette.text,
+                          fontSize: 15,
+                          fontWeight: isEpisodeWatched ? "700" : "400",
+                        }}
+                      >
+                        {isEpisodeWatched ? "✓ " : ""}E{episode.episodeNumber}. {episode.title}
+                      </Text>
+                      <Text
+                        style={{
+                          color: isEpisodeWatched ? palette.shellChipTextActive : palette.shellMutedText,
+                          fontSize: 13,
+                        }}
+                      >
+                        Lanzamiento: {episode.releaseDate || "No disponible"}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             ))
           ) : (

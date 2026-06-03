@@ -16,6 +16,14 @@ type FavoritesByMediaTypeQuery = {
   queryKey: ["movies", "favorites", MediaType | "all"];
 };
 
+type WatchedMovieQuery = {
+  queryKey: ["watched-progress", "movie", string];
+};
+
+type WatchedEpisodesQuery = {
+  queryKey: ["watched-progress", "episodes", string];
+};
+
 export const queryOptions = {
   movies: {
     all: (query: string): MoviesAllQuery => {
@@ -37,6 +45,18 @@ export const queryOptions = {
     favoritesByMediaType: (mediaType: MediaType | undefined): FavoritesByMediaTypeQuery => {
       return {
         queryKey: ["movies", "favorites", mediaType ?? "all"],
+      };
+    },
+  },
+  watchedProgress: {
+    movie: (mediaId: string): WatchedMovieQuery => {
+      return {
+        queryKey: ["watched-progress", "movie", mediaId],
+      };
+    },
+    episodes: (mediaId: string): WatchedEpisodesQuery => {
+      return {
+        queryKey: ["watched-progress", "episodes", mediaId],
       };
     },
   },
