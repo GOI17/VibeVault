@@ -51,7 +51,7 @@ export function DetailsView({
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: palette.shellBackground }}>
-        <Text style={{ color: palette.text, fontSize: 18 }}>Loading details...</Text>
+        <Text style={{ color: palette.text, fontSize: 18 }}>Loading details…</Text>
       </View>
     );
   }
@@ -66,7 +66,11 @@ export function DetailsView({
   }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: palette.shellBackground }} contentContainerStyle={{ padding: 16, gap: 16 }}>
+    <ScrollView
+      style={{ flex: 1, minHeight: 0, backgroundColor: palette.shellBackground }}
+      contentContainerStyle={{ flexGrow: 1, padding: 16, paddingBottom: 96, gap: 16 }}
+      contentInsetAdjustmentBehavior="automatic"
+    >
       <Image
         source={imageSrc ? { uri: imageSrc } : fallbackImage}
         placeholder={fallbackImage}
