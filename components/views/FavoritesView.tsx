@@ -8,6 +8,7 @@ import type { MediaType } from "@/constants/query";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 type FilterOption = MediaType | undefined;
+export type FavoriteSortDirection = "newest" | "oldest";
 
 const FILTER_OPTIONS: { label: string; value: FilterOption }[] = [
   { label: "All", value: undefined },
@@ -15,9 +16,16 @@ const FILTER_OPTIONS: { label: string; value: FilterOption }[] = [
   { label: "Series", value: "series" },
 ];
 
+const SORT_OPTIONS: { label: string; value: FavoriteSortDirection }[] = [
+  { label: "Newest", value: "newest" },
+  { label: "Oldest", value: "oldest" },
+];
+
 interface FavoritesViewProps {
   filter: FilterOption;
   onFilterChange: (value: FilterOption) => void;
+  sortDirection: FavoriteSortDirection;
+  onSortDirectionChange: (value: FavoriteSortDirection) => void;
   onGoHome: () => void;
   isLoading: boolean;
   errorMessage?: string;
@@ -31,6 +39,8 @@ interface FavoritesViewProps {
 export function FavoritesView({
   filter,
   onFilterChange,
+  sortDirection,
+  onSortDirectionChange,
   onGoHome,
   isLoading,
   errorMessage,
@@ -67,7 +77,7 @@ export function FavoritesView({
         >
           <Text style={{ color: palette.text, fontWeight: "600" }}>Go to Home</Text>
         </TouchableOpacity>
-        <View style={{ flexDirection: "row", gap: 10 }}>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
           {FILTER_OPTIONS.map((option) => (
             <TouchableOpacity
               key={option.label}
@@ -92,6 +102,43 @@ export function FavoritesView({
             </TouchableOpacity>
           ))}
         </View>
+        <View style={{ gap: 8 }}>
+          <Text style={{ color: palette.shellMutedText, fontSize: 13, fontWeight: "700" }}>
+            Sort by date added
+          </Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+            {SORT_OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                onPress={() => onSortDirectionChange(option.value)}
+                accessibilityRole="button"
+                accessibilityLabel={`Sort favorites by date added: ${option.label.toLowerCase()} first`}
+                style={{
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  borderRadius: 20,
+                  backgroundColor:
+                    sortDirection === option.value ? palette.shellChipActive : palette.shellSurface,
+                  borderWidth: 1,
+                  borderColor:
+                    sortDirection === option.value ? palette.shellChipActive : palette.shellBorder,
+                }}
+              >
+                <Text
+                  style={{
+                    color:
+                      sortDirection === option.value
+                        ? palette.shellChipTextActive
+                        : palette.shellChipTextIdle,
+                    fontWeight: sortDirection === option.value ? "bold" : "normal",
+                  }}
+                >
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
       </View>
 
       <View style={{ flex: 1 }}>
@@ -100,6 +147,7 @@ export function FavoritesView({
           isFavorites
           isFavoritesLoading={isLoading}
           showLayoutToggle={false}
+          forceListOnMobile
           topInset={0}
           favoriteIds={favoriteIds}
           onAddFavorite={onAddFavorite}
