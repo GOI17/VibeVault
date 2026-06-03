@@ -22,5 +22,10 @@ export type RootStackParamList = {
     seasons?: Season[];
     source?: FavoriteSource;
   };
+  EpisodeList: {
+    id: string;
+    title?: string;
+    seasons?: Season[];
+  };
   NotFound: undefined;
 };

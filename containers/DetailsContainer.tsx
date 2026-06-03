@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { useMemo, type ReactElement } from "react";
 import { z } from "zod";
 
@@ -6,17 +7,11 @@ import { DetailsView } from "@/components/views/DetailsView";
 import type { RootStackParamList } from "@/app/navigation/types";
 import { useRepositories } from "@/providers/RepositoryProvider";
 import { inferMovieMediaType, SeasonSchema } from "@/domain/entities/Movie";
-import { createEpisodeWatchedKey, type WatchedEpisodeInput } from "@/domain/entities/WatchedProgress";
+import { createEpisodeWatchedKey } from "@/domain/entities/WatchedProgress";
 import { queryOptions } from "@/constants/query";
 
 interface DetailsContainerProps {
   params: RootStackParamList["Details"];
-}
-
-interface EpisodeToggleInput {
-  seasonNumber: number;
-  episodeNumber: number;
-  watched: boolean;
 }
 
 function normalizeStringList(value: unknown): string[] | undefined {
@@ -62,6 +57,7 @@ function normalizeSeasons(
 }
 
 export function DetailsContainer({ params }: DetailsContainerProps): ReactElement {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { movieRepository, favoriteRepository, watchedProgressRepository } = useRepositories();
   const queryClient = useQueryClient();
   const isManualFavorite = params.source === "manual" || params.id.startsWith("custom-");
@@ -94,21 +90,6 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
     mutationFn: (watched: boolean) => watchedProgressRepository.setMovieWatched(params.id, watched),
     onSuccess: () => {
       void queryClient.invalidateQueries(queryOptions.watchedProgress.movie(params.id));
-      void queryClient.invalidateQueries({ queryKey: ["watched-progress", "summary"] });
-    },
-  });
-
-  const toggleEpisodeWatchedMutation = useMutation({
-    mutationFn: (input: EpisodeToggleInput) => {
-      const watchedInput: WatchedEpisodeInput = {
-        mediaId: params.id,
-        ...input,
-      };
-
-      return watchedProgressRepository.setEpisodeWatched(watchedInput);
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries(queryOptions.watchedProgress.episodes(params.id));
       void queryClient.invalidateQueries({ queryKey: ["watched-progress", "summary"] });
     },
   });
@@ -240,15 +221,15 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
       isMovieWatched={Boolean(watchedMovieStatus?.watched)}
       isUpdatingMovieWatched={toggleMovieWatchedMutation.isPending}
       onToggleMovieWatched={() => toggleMovieWatchedMutation.mutate(!watchedMovieStatus?.watched)}
-      isEpisodeWatched={(seasonNumber, episodeNumber) =>
-        watchedEpisodeKeys.has(createEpisodeWatchedKey(seasonNumber, episodeNumber))
-      }
       lastWatchedEpisodeLabel={lastWatchedEpisodeLabel}
-      isUpdatingEpisodeWatched={toggleEpisodeWatchedMutation.isPending}
-      onToggleEpisodeWatched={(seasonNumber, episodeNumber, watched) =>
-        toggleEpisodeWatchedMutation.mutate({ seasonNumber, episodeNumber, watched })
-      }
       seriesProgress={seriesProgress}
+      onOpenEpisodeList={() =>
+        navigation.navigate("EpisodeList", {
+          id: params.id,
+          title,
+          ...(seasons ? { seasons } : {}),
+        })
+      }
     />
   );
 }
