@@ -17,15 +17,35 @@ export function SearchContainer({ query }: SearchContainerProps): ReactElement {
   const { movieRepository, favoriteRepository } = useRepositories();
   const { addFavorite, removeFavorite } = useFavoriteMutations();
   const [activeQuery, setActiveQuery] = useState(query);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     setActiveQuery(query);
+    setRetryCount(0);
   }, [query]);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isFetching, isLoading, error, refetch } = useQuery({
     ...queryOptions.movies.all(activeQuery),
     queryFn: () => movieRepository.search(activeQuery),
+    retry: false,
   });
+
+  const handleRetrySearch = (): void => {
+    if (retryCount >= 3) {
+      return;
+    }
+
+    void (async (): Promise<void> => {
+      const result = await refetch();
+
+      if (result.error) {
+        setRetryCount((currentCount) => Math.min(currentCount + 1, 3));
+        return;
+      }
+
+      setRetryCount(0);
+    })();
+  };
 
   const { data: favorites } = useQuery({
     ...queryOptions.movies.favorites,
@@ -38,7 +58,7 @@ export function SearchContainer({ query }: SearchContainerProps): ReactElement {
         key: item.id,
         imageSrc: item.primaryImage?.url,
         title: item.primaryTitle,
-        mediaType: (item.type?.toLowerCase().includes("tv") ? "series" : "movie") as "movie" | "series",
+        mediaType: ((item.type?.toLowerCase() ?? "").includes("tv") ? "series" : "movie") as "movie" | "series",
         description: item.plot,
         cast: item.cast,
         releaseDate: item.releaseDate || item.startYear?.toString(),
@@ -51,21 +71,26 @@ export function SearchContainer({ query }: SearchContainerProps): ReactElement {
       query={activeQuery}
       isLoading={isLoading}
       errorMessage={error?.message}
+      retryCount={retryCount}
+      maxRetries={3}
+      isRetrying={isFetching && Boolean(error)}
       data={mappedData}
       favoriteIds={favoriteIds}
+      onRetrySearch={handleRetrySearch}
+      onGoHome={() => navigation.navigate("Tabs", { screen: "Home" })}
       onAddFavorite={(item) =>
         addFavorite({
           id: item.key,
           title: item.title,
           mediaType: item.mediaType || "movie",
           url: item.imageSrc,
-          description: item.description || "No disponible",
-          cast: item.cast && item.cast.length > 0 ? item.cast : ["No disponible"],
-          releaseDate: item.releaseDate || "No disponible",
+          description: item.description || "Not available",
+          cast: item.cast && item.cast.length > 0 ? item.cast : ["Not available"],
+          releaseDate: item.releaseDate || "Not available",
           whereToWatch:
             item.whereToWatch && item.whereToWatch.length > 0
               ? item.whereToWatch
-              : ["No disponible"],
+              : ["Not available"],
           seasons: item.seasons,
           source: "catalog",
         })

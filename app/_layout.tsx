@@ -15,7 +15,7 @@ import Toast from "react-native-toast-message";
 import type { ToastConfig } from "react-native-toast-message";
 import "react-native-reanimated";
 
-import Header from "@/components/Header";
+import { HeaderContainer } from "@/containers/HeaderContainer";
 import { LeftHeaderContent } from "@/components/common/LeftHeaderContent";
 import { client } from "@/constants/RQClient";
 import { SeasonSchema } from "@/domain/entities/Movie";
@@ -185,41 +185,37 @@ function RootNavigator(): ReactElement {
             name="Tabs"
             component={TabNavigator}
             options={{
-              header: () => <Header />,
+              header: () => <HeaderContainer />,
               headerStyle: { backgroundColor: palette.shellBackground },
             }}
           />
           <Stack.Screen
             name="Search"
             component={SearchScreen}
-            options={({ navigation }) => ({
-              title: "Search",
+            options={{
+              header: () => <HeaderContainer />,
               headerStyle: { backgroundColor: palette.shellBackground },
-              headerTintColor: palette.text,
-              headerLeft: () => (
-                <LeftHeaderContent
-                  showBackButton
-                  onBackPress={handleBackPress(navigation)}
-                  tintColor={palette.text}
-                  showLogo
-                  backgroundColor={palette.shellBackground}
-                />
-              ),
-            })}
+            }}
           />
           <Stack.Screen
             name="Details"
             component={DetailsScreen}
-            options={({ navigation }) => ({
-              title: "Details",
-              headerStyle: { backgroundColor: palette.shellBackground },
+            options={({ navigation, route }) => ({
+              title: route.params.title ?? "Details",
+              headerStyle: {
+                backgroundColor: palette.shellBackground,
+                borderBottomColor: palette.shellBorder,
+                borderBottomWidth: 1,
+                elevation: 0,
+                shadowOpacity: 0,
+              },
+              headerShadowVisible: false,
               headerTintColor: palette.text,
               headerLeft: () => (
                 <LeftHeaderContent
                   showBackButton
                   onBackPress={handleBackPress(navigation)}
                   tintColor={palette.text}
-                  showLogo
                   backgroundColor={palette.shellBackground}
                 />
               ),

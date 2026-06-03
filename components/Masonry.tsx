@@ -80,7 +80,7 @@ export default function MasonryList({
   });
 
   return (
-    <View style={{ flex: 1, marginTop: offsetTop }}>
+    <View style={{ flex: 1, minHeight: 0, marginTop: offsetTop }}>
       {showLayoutToggle && width < mobileBreakpoint && !isListForcedOnMobile && (
         <Pressable
           onPress={() => setView((prev) => (prev === "grid" ? "list" : "grid"))}
@@ -99,8 +99,9 @@ export default function MasonryList({
       )}
       <FlashList<MasonryItemData>
         numColumns={numColumns}
-        style={{ flex: 1 }}
+        style={{ flex: 1, minHeight: 0 }}
         contentContainerStyle={{
+          flexGrow: 1,
           paddingBottom: 96,
           paddingTop: topInset,
           paddingHorizontal: 16,

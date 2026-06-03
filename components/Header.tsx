@@ -1,130 +1,57 @@
-import React from "react";
-import { useNavigation, useNavigationState, type NavigationProp } from "@react-navigation/native";
-import {
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  useWindowDimensions,
-  Keyboard,
-} from "react-native";
-import Toast from "react-native-toast-message";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import { SearchInputWithSuggestions } from "@/components/navigation/SearchInputWithSuggestions";
+import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import type { ReactElement } from "react";
+
 import { LeftHeaderContent } from "@/components/common/LeftHeaderContent";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { RootStackParamList } from "@/app/navigation/types";
+import { SearchInputWithSuggestions } from "@/components/navigation/SearchInputWithSuggestions";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 import type { MovieSuggestion } from "@/domain/entities/Movie";
-import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
-interface NavigationStateNode {
-  index: number;
-  routes: NavigationRouteNode[];
+type ThemePalette = ReturnType<typeof useThemePreference>["palette"];
+
+interface HeaderProps {
+  searchQuery: string;
+  suggestions: MovieSuggestion[];
+  menuOpen: boolean;
+  isCompact: boolean;
+  topInset: number;
+  palette: ThemePalette;
+  toggleLabel: string;
+  shouldShowBackButton: boolean;
+  primaryNavigationLabel: string;
+  onSearchQueryChange: (value: string) => void;
+  onSubmitSearch: () => void;
+  onPressSuggestion: (suggestion: MovieSuggestion) => void;
+  onFillSuggestion: (suggestion: MovieSuggestion) => void;
+  onOpenMenu: () => void;
+  onCloseMenu: () => void;
+  onPrimaryNavigation: () => void;
+  onOpenSettings: () => void;
+  onToggleTheme: () => void;
+  onBackPress: () => void;
 }
 
-interface NavigationRouteNode {
-  name?: string;
-  state?: unknown;
-}
-
-function isNavigationStateNode(value: unknown): value is NavigationStateNode {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-
-  const candidate = value as { index?: unknown; routes?: unknown };
-  return typeof candidate.index === "number" && Array.isArray(candidate.routes);
-}
-
-function getActiveRouteName(state: unknown): string | null {
-  if (!isNavigationStateNode(state)) {
-    return null;
-  }
-
-  const activeRoute = state.routes[state.index];
-  return typeof activeRoute?.name === "string" ? activeRoute.name : null;
-}
-
-export default function Header(): React.ReactElement {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const { suggestions } = useSearchSuggestions(searchQuery);
-  const { theme: activeTheme, palette, toggleTheme } = useThemePreference();
-  const isCompact = width < 390;
-  const toggleLabel = activeTheme === "light" ? "Toggle dark mode" : "Toggle light mode";
-  const isFavoritesRoute = useNavigationState((state) => {
-    const activeRootRoute = state.routes[state.index];
-    if (activeRootRoute?.name !== "Tabs") {
-      return false;
-    }
-
-    return getActiveRouteName(activeRootRoute.state) === "Favorites";
-  });
-
-  const submitSearch = React.useCallback(() => {
-    const query = searchQuery.trim();
-    if (!query) return;
-    Keyboard.dismiss();
-    navigation.navigate("Search", { query });
-  }, [navigation, searchQuery]);
-
-  const openSuggestionDetails = React.useCallback((suggestion: MovieSuggestion) => {
-    Keyboard.dismiss();
-    navigation.navigate("Details", {
-      id: suggestion.id,
-      title: suggestion.title,
-      mediaType: suggestion.mediaType,
-      source: "catalog",
-    });
-  }, [navigation]);
-
-  const fillSuggestion = React.useCallback((suggestion: MovieSuggestion) => {
-    setSearchQuery(suggestion.title);
-  }, []);
-
-  const openMenu = React.useCallback(() => {
-    setMenuOpen(true);
-  }, []);
-
-  const closeMenu = React.useCallback(() => {
-    setMenuOpen(false);
-  }, []);
-
-  const goToFavorites = React.useCallback(() => {
-    closeMenu();
-    navigation.navigate("Tabs", { screen: "Favorites" });
-  }, [closeMenu, navigation]);
-
-  const openSettingsPlaceholder = React.useCallback(() => {
-    Toast.show({
-      type: "info",
-      text1: "Settings",
-      text2: "Settings panel coming soon",
-      visibilityTime: 1800,
-    });
-    closeMenu();
-  }, [closeMenu]);
-
-  const handleToggleTheme = React.useCallback(() => {
-    toggleTheme();
-    closeMenu();
-  }, [closeMenu, toggleTheme]);
-
-  const handleBackPress = React.useCallback(() => {
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-      return;
-    }
-
-    navigation.navigate("Tabs", { screen: "Home" });
-  }, [navigation]);
-
+export default function Header({
+  searchQuery,
+  suggestions,
+  menuOpen,
+  isCompact,
+  topInset,
+  palette,
+  toggleLabel,
+  shouldShowBackButton,
+  primaryNavigationLabel,
+  onSearchQueryChange,
+  onSubmitSearch,
+  onPressSuggestion,
+  onFillSuggestion,
+  onOpenMenu,
+  onCloseMenu,
+  onPrimaryNavigation,
+  onOpenSettings,
+  onToggleTheme,
+  onBackPress,
+}: HeaderProps): ReactElement {
   return (
     <View
       style={[
@@ -132,7 +59,7 @@ export default function Header(): React.ReactElement {
         {
           backgroundColor: palette.shellBackground,
           borderBottomColor: palette.shellBorder,
-          paddingTop: insets.top + (isCompact ? 6 : 8),
+          paddingTop: topInset + (isCompact ? 6 : 8),
           paddingHorizontal: isCompact ? 12 : 16,
         },
       ]}
@@ -141,20 +68,20 @@ export default function Header(): React.ReactElement {
         <SearchInputWithSuggestions
           value={searchQuery}
           suggestions={suggestions}
-          onChangeText={setSearchQuery}
-          onSubmit={submitSearch}
-          onPressSuggestion={openSuggestionDetails}
-          onFillSuggestion={fillSuggestion}
+          onChangeText={onSearchQueryChange}
+          onSubmit={onSubmitSearch}
+          onPressSuggestion={onPressSuggestion}
+          onFillSuggestion={onFillSuggestion}
           leadingAccessory={
-            isFavoritesRoute ? (
-              <LeftHeaderContent showBackButton onBackPress={handleBackPress} tintColor={palette.shellMutedText} compact />
+            shouldShowBackButton ? (
+              <LeftHeaderContent showBackButton onBackPress={onBackPress} tintColor={palette.shellMutedText} compact />
             ) : undefined
           }
         />
 
         <View style={styles.rightCluster}>
           <TouchableOpacity
-            onPress={openMenu}
+            onPress={onOpenMenu}
             style={[styles.avatarButton, { backgroundColor: palette.shellSurface, borderColor: palette.shellBorder }]}
             accessibilityRole="button"
             accessibilityLabel="Open account menu"
@@ -164,20 +91,15 @@ export default function Header(): React.ReactElement {
         </View>
       </View>
 
-      <Modal
-        visible={menuOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={closeMenu}
-      >
-        <Pressable style={[styles.menuOverlay, { backgroundColor: palette.shellOverlay }]} onPress={closeMenu}>
+      <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={onCloseMenu}>
+        <Pressable style={[styles.menuOverlay, { backgroundColor: palette.shellOverlay }]} onPress={onCloseMenu}>
           <Pressable
             style={[
               styles.menuPanel,
               {
                 backgroundColor: palette.shellSurface,
                 borderColor: palette.shellBorder,
-                top: insets.top + 56,
+                top: topInset + 56,
                 right: isCompact ? 12 : 16,
               },
             ]}
@@ -187,7 +109,7 @@ export default function Header(): React.ReactElement {
           >
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={openSettingsPlaceholder}
+              onPress={onOpenSettings}
               accessibilityRole="button"
               accessibilityLabel="Settings"
             >
@@ -196,16 +118,16 @@ export default function Header(): React.ReactElement {
 
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={goToFavorites}
+              onPress={onPrimaryNavigation}
               accessibilityRole="button"
-              accessibilityLabel="My Favorites"
+              accessibilityLabel={primaryNavigationLabel}
             >
-              <Text style={[styles.menuText, { color: palette.text }]}>My Favorites</Text>
+              <Text style={[styles.menuText, { color: palette.text }]}>{primaryNavigationLabel}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={handleToggleTheme}
+              onPress={onToggleTheme}
               accessibilityRole="button"
               accessibilityLabel={toggleLabel}
             >
