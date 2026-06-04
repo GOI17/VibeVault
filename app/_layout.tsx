@@ -25,6 +25,7 @@ import NotFoundScreen from "./+not-found";
 import TabNavigator from "./tabs/_layout";
 import SearchScreen from "./home/search/query";
 import DetailsScreen from "./home/details/[id]";
+import EpisodeListScreen from "./home/details/episodes";
 import type { RootStackParamList } from "./navigation/types";
 
 interface ToastInfoProps {
@@ -101,7 +102,7 @@ function handleBackPress(navigation: StackNavigationProp<RootStackParamList>): (
 }
 
 const linking: LinkingOptions<RootStackParamList> = {
-  prefixes: ['http://localhost:8081', 'exp://localhost:8081'],
+  prefixes: ['http://localhost:8081', 'exp://localhost:8081', 'https://goi17.github.io/VibeVault'],
   config: {
     screens: {
       Tabs: {
@@ -143,6 +144,29 @@ const linking: LinkingOptions<RootStackParamList> = {
             Array.isArray(value)
               ? value.map((entry) => String(entry ?? '').trim()).filter(Boolean).join(', ')
               : String(value ?? ''),
+          seasons: (value: unknown) => {
+            try {
+              return JSON.stringify(value);
+            } catch {
+              return '';
+            }
+          },
+        },
+      },
+      EpisodeList: {
+        path: 'details/:id/episodes',
+        parse: {
+          seasons: (value: string) => {
+            try {
+              const parsed: unknown = JSON.parse(value);
+              const seasonsResult = SeasonSchema.array().safeParse(parsed);
+              return seasonsResult.success ? seasonsResult.data : undefined;
+            } catch {
+              return undefined;
+            }
+          },
+        },
+        stringify: {
           seasons: (value: unknown) => {
             try {
               return JSON.stringify(value);
@@ -202,6 +226,30 @@ function RootNavigator(): ReactElement {
             component={DetailsScreen}
             options={({ navigation, route }) => ({
               title: route.params.title ?? "Details",
+              headerStyle: {
+                backgroundColor: palette.shellBackground,
+                borderBottomColor: palette.shellBorder,
+                borderBottomWidth: 1,
+                elevation: 0,
+                shadowOpacity: 0,
+              },
+              headerShadowVisible: false,
+              headerTintColor: palette.text,
+              headerLeft: () => (
+                <LeftHeaderContent
+                  showBackButton
+                  onBackPress={handleBackPress(navigation)}
+                  tintColor={palette.text}
+                  backgroundColor={palette.shellBackground}
+                />
+              ),
+            })}
+          />
+          <Stack.Screen
+            name="EpisodeList"
+            component={EpisodeListScreen}
+            options={({ navigation, route }) => ({
+              title: route.params.title ?? "Episodes",
               headerStyle: {
                 backgroundColor: palette.shellBackground,
                 borderBottomColor: palette.shellBorder,
