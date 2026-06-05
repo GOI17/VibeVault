@@ -83,18 +83,19 @@ export function DetailsView({
   return (
     <ScrollView
       style={{ flex: 1, minHeight: 0, backgroundColor: palette.shellBackground }}
-      contentContainerStyle={{ flexGrow: 1, padding: 16, paddingBottom: 96, gap: 16 }}
+      contentContainerStyle={{ flexGrow: 1, alignItems: "center", padding: 8, paddingBottom: 96 }}
       contentInsetAdjustmentBehavior="automatic"
     >
+      <View style={{ width: "100%", maxWidth: 480, gap: 14 }}>
       <View style={{ borderRadius: 24, overflow: "hidden", backgroundColor: palette.shellSurface }}>
         <Image
           source={imageSrc ? { uri: imageSrc } : fallbackImage}
           placeholder={fallbackImage}
-          style={{ width: "100%", height: 260 }}
+          style={{ width: "100%", height: 210 }}
         />
         <View
           style={{
-            marginTop: -54,
+            marginTop: -44,
             marginHorizontal: 14,
             marginBottom: 14,
             borderRadius: 20,
@@ -109,10 +110,10 @@ export function DetailsView({
             <Image
               source={imageSrc ? { uri: imageSrc } : fallbackImage}
               placeholder={fallbackImage}
-              style={{ width: 76, height: 96, borderRadius: 12 }}
+              style={{ width: 72, height: 92, borderRadius: 12 }}
             />
             <View style={{ flex: 1, minWidth: 0, gap: 6 }}>
-              <Text style={{ color: palette.text, fontSize: 26, lineHeight: 30, fontWeight: "800" }} numberOfLines={2}>
+              <Text style={{ color: palette.text, fontSize: 24, lineHeight: 28, fontWeight: "800" }} numberOfLines={2}>
                 {title}
               </Text>
               <Text style={{ color: palette.shellMutedText, fontSize: 14, fontWeight: "600" }}>{metadata}</Text>
@@ -128,7 +129,7 @@ export function DetailsView({
               accessibilityLabel={mediaType === "movie" ? (isMovieWatched ? "Mark movie as unwatched" : "Mark movie as watched") : "Favorite status"}
               style={{
                 flex: 1,
-                minHeight: 44,
+                minHeight: 42,
                 borderRadius: 12,
                 borderWidth: 1,
                 borderColor: palette.shellBorder,
@@ -137,7 +138,7 @@ export function DetailsView({
                 opacity: isUpdatingMovieWatched ? 0.6 : 1,
               }}
             >
-              <Text style={{ color: palette.text, fontWeight: "700" }}>
+              <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>
                 {mediaType === "movie" ? (isMovieWatched ? "Watched" : "Mark watched") : "Favorite"}
               </Text>
             </Pressable>
@@ -147,7 +148,7 @@ export function DetailsView({
               accessibilityLabel={`Share ${title}`}
               style={{
                 flex: 1,
-                minHeight: 44,
+                minHeight: 42,
                 borderRadius: 12,
                 borderWidth: 1,
                 borderColor: palette.shellBorder,
@@ -155,7 +156,7 @@ export function DetailsView({
                 justifyContent: "center",
               }}
             >
-              <Text style={{ color: palette.text, fontWeight: "700" }}>Share</Text>
+              <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>Share</Text>
             </Pressable>
           </View>
         </View>
@@ -215,6 +216,7 @@ export function DetailsView({
         <Text style={{ color: palette.text, fontSize: 16 }}>
           {whereToWatch && whereToWatch.length > 0 ? whereToWatch.join(", ") : "Not available"}
         </Text>
+      </View>
       </View>
     </ScrollView>
   );
