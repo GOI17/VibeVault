@@ -224,26 +224,7 @@ function RootNavigator(): ReactElement {
           <Stack.Screen
             name="Details"
             component={DetailsScreen}
-            options={({ navigation, route }) => ({
-              title: route.params.title ?? "Details",
-              headerStyle: {
-                backgroundColor: palette.shellBackground,
-                borderBottomColor: palette.shellBorder,
-                borderBottomWidth: 1,
-                elevation: 0,
-                shadowOpacity: 0,
-              },
-              headerShadowVisible: false,
-              headerTintColor: palette.text,
-              headerLeft: () => (
-                <LeftHeaderContent
-                  showBackButton
-                  onBackPress={handleBackPress(navigation)}
-                  tintColor={palette.text}
-                  backgroundColor={palette.shellBackground}
-                />
-              ),
-            })}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="EpisodeList"

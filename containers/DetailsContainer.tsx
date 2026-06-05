@@ -223,6 +223,14 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
       onToggleMovieWatched={() => toggleMovieWatchedMutation.mutate(!watchedMovieStatus?.watched)}
       lastWatchedEpisodeLabel={lastWatchedEpisodeLabel}
       seriesProgress={seriesProgress}
+      onGoBack={() => {
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+          return;
+        }
+
+        navigation.navigate("Tabs", { screen: "Home" });
+      }}
       onOpenEpisodeList={() =>
         navigation.navigate("EpisodeList", {
           id: params.id,
