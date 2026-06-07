@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Share, Text, View } from "react-native";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import type { Season } from "@/domain/entities/Movie";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
+import Toast from "react-native-toast-message";
 
 interface DetailsViewProps {
   isLoading: boolean;
@@ -17,9 +18,9 @@ interface DetailsViewProps {
   seasons?: Season[];
   imageSrc?: string;
   mediaType: "movie" | "series";
-  isMovieWatched: boolean;
-  isUpdatingMovieWatched: boolean;
-  onToggleMovieWatched: () => void;
+  isFavorite: boolean;
+  isUpdatingFavorite: boolean;
+  onToggleFavorite: () => void;
   lastWatchedEpisodeLabel?: string;
   seriesProgress: { watched: number; total: number };
   onOpenEpisodeList: () => void;
@@ -72,9 +73,9 @@ export function DetailsView({
   seasons,
   imageSrc,
   mediaType,
-  isMovieWatched,
-  isUpdatingMovieWatched,
-  onToggleMovieWatched,
+  isFavorite,
+  isUpdatingFavorite,
+  onToggleFavorite,
   lastWatchedEpisodeLabel,
   seriesProgress,
   onOpenEpisodeList,
@@ -85,7 +86,16 @@ export function DetailsView({
   const episodeProgressPercent = seriesProgress.total > 0 ? Math.round((seriesProgress.watched / seriesProgress.total) * 100) : 0;
 
   const handleShare = (): void => {
-    void Share.share({ title, message: title });
+    const sharePromise = Share.share({ title, message: title });
+    void sharePromise.catch(() => {
+      Toast.show({
+        type: "info",
+        text1: "Share unavailable",
+        text2: "Use your browser controls to copy this page link.",
+        visibilityTime: 2000,
+        position: "top",
+      });
+    });
   };
 
   if (isLoading) {
@@ -147,11 +157,11 @@ export function DetailsView({
 
           <View style={{ flexDirection: "row", gap: 10 }}>
             <Pressable
-              onPress={mediaType === "movie" ? onToggleMovieWatched : undefined}
-              disabled={mediaType !== "movie" || isUpdatingMovieWatched}
+              onPress={onToggleFavorite}
+              disabled={isUpdatingFavorite}
               accessibilityRole="button"
-              accessibilityState={{ selected: mediaType === "movie" ? isMovieWatched : false, disabled: mediaType !== "movie" || isUpdatingMovieWatched }}
-              accessibilityLabel={mediaType === "movie" ? (isMovieWatched ? "Mark movie as unwatched" : "Mark movie as watched") : "Favorite status"}
+              accessibilityState={{ selected: isFavorite, disabled: isUpdatingFavorite }}
+              accessibilityLabel={isFavorite ? `Remove ${title} from favorites` : `Add ${title} to favorites`}
               style={{
                 flex: 1,
                 minHeight: 42,
@@ -162,12 +172,12 @@ export function DetailsView({
                 gap: 8,
                 alignItems: "center",
                 justifyContent: "center",
-                opacity: isUpdatingMovieWatched ? 0.6 : 1,
+                opacity: isUpdatingFavorite ? 0.6 : 1,
               }}
             >
-              <IconSymbol name="heart.fill" color="#FF2D55" size={18} />
+              <IconSymbol name={isFavorite ? "heart.fill" : "heart"} color="#FF2D55" size={18} />
               <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>
-                {mediaType === "movie" ? (isMovieWatched ? "Watched" : "Mark watched") : "Favorite"}
+                {isFavorite ? "Favorited" : "Favorite"}
               </Text>
             </Pressable>
             {mediaType === "series" ? (
@@ -188,7 +198,7 @@ export function DetailsView({
                 }}
               >
                 <Text style={{ color: "#3B82F6", fontSize: 16, fontWeight: "900" }}>▶</Text>
-                <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>Watching</Text>
+                <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>Episodes</Text>
               </Pressable>
             ) : null}
             <Pressable

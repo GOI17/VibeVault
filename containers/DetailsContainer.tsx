@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { useMemo, type ReactElement } from "react";
 import { z } from "zod";
@@ -9,6 +9,7 @@ import { useRepositories } from "@/providers/RepositoryProvider";
 import { inferMovieMediaType, SeasonSchema } from "@/domain/entities/Movie";
 import { createEpisodeWatchedKey } from "@/domain/entities/WatchedProgress";
 import { queryOptions } from "@/constants/query";
+import { useFavoriteMutations } from "@/hooks/useFavoriteMutations";
 
 interface DetailsContainerProps {
   params: RootStackParamList["Details"];
@@ -52,14 +53,13 @@ function normalizeSeasons(
   const parsedSeasons = z.array(SeasonSchema).safeParse(parsedValue);
 
   return parsedSeasons.success && parsedSeasons.data.length > 0
-    ? (parsedSeasons.data as RootStackParamList["Details"]["seasons"])
+    ? parsedSeasons.data
     : undefined;
 }
 
 export function DetailsContainer({ params }: DetailsContainerProps): ReactElement {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { movieRepository, favoriteRepository, watchedProgressRepository } = useRepositories();
-  const queryClient = useQueryClient();
   const isManualFavorite = params.source === "manual" || params.id.startsWith("custom-");
 
   const { data, isLoading, error } = useQuery({
@@ -74,25 +74,23 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
     enabled: isManualFavorite,
   });
 
-  const { data: watchedMovieStatus } = useQuery({
-    ...queryOptions.watchedProgress.movie(params.id),
-    queryFn: () => watchedProgressRepository.getMovieStatus(params.id),
-    enabled: Boolean(params.id),
-  });
-
   const { data: watchedEpisodeStatuses = [] } = useQuery({
     ...queryOptions.watchedProgress.episodes(params.id),
     queryFn: () => watchedProgressRepository.getEpisodeStatuses(params.id),
     enabled: Boolean(params.id),
   });
 
-  const toggleMovieWatchedMutation = useMutation({
-    mutationFn: (watched: boolean) => watchedProgressRepository.setMovieWatched(params.id, watched),
-    onSuccess: () => {
-      void queryClient.invalidateQueries(queryOptions.watchedProgress.movie(params.id));
-      void queryClient.invalidateQueries({ queryKey: ["watched-progress", "summary"] });
-    },
+  const { data: favorites } = useQuery({
+    ...queryOptions.movies.favorites,
+    queryFn: () => favoriteRepository.getAll(),
   });
+
+  const { addFavorite, removeFavorite, isAdding, isRemoving } = useFavoriteMutations();
+
+  const isFavorite = useMemo(
+    () => Boolean(favorites?.some((item) => item.id === params.id)),
+    [favorites, params.id],
+  );
 
   const missingDetails = !isManualFavorite && !isLoading && !error && data === null;
 
@@ -109,9 +107,7 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
   const whereToWatch = normalizeStringList(
     data?.whereToWatch ?? manualDetails?.whereToWatch ?? params.whereToWatch
   );
-  const seasons = normalizeSeasons(
-    data?.seasons ?? manualDetails?.seasons ?? (params as { seasons?: unknown }).seasons
-  );
+  const seasons = normalizeSeasons(data?.seasons ?? manualDetails?.seasons ?? params.seasons);
   const imageSrc = data?.primaryImage?.url || manualDetails?.url || params.imageSrc;
 
   const watchedEpisodeKeys = useMemo(() => {
@@ -206,6 +202,25 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
 
   const showBlockingLoading = (isLoading || isManualLoading) && !hasRequiredDetails;
 
+  const handleToggleFavorite = (): void => {
+    if (isFavorite) {
+      removeFavorite(params.id);
+    } else {
+      addFavorite({
+        id: params.id,
+        title,
+        mediaType,
+        url: imageSrc,
+        description: description || "Not available",
+        cast: cast && cast.length > 0 ? cast : ["Not available"],
+        releaseDate: releaseDate || "Not available",
+        whereToWatch: whereToWatch && whereToWatch.length > 0 ? whereToWatch : ["Not available"],
+        seasons: seasons,
+        source: "catalog",
+      });
+    }
+  };
+
   return (
     <DetailsView
       isLoading={showBlockingLoading}
@@ -218,9 +233,9 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
       seasons={seasons}
       imageSrc={imageSrc}
       mediaType={mediaType}
-      isMovieWatched={Boolean(watchedMovieStatus?.watched)}
-      isUpdatingMovieWatched={toggleMovieWatchedMutation.isPending}
-      onToggleMovieWatched={() => toggleMovieWatchedMutation.mutate(!watchedMovieStatus?.watched)}
+      isFavorite={isFavorite}
+      isUpdatingFavorite={isAdding || isRemoving}
+      onToggleFavorite={handleToggleFavorite}
       lastWatchedEpisodeLabel={lastWatchedEpisodeLabel}
       seriesProgress={seriesProgress}
       onOpenEpisodeList={() =>
