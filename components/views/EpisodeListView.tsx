@@ -24,6 +24,7 @@ export interface EpisodeListSeasonViewModel {
 interface EpisodeListViewProps {
   title: string;
   seasons: EpisodeListSeasonViewModel[];
+  initialSeasonNumber: number;
   isUpdatingEpisodeWatched: boolean;
   onToggleEpisodeWatched: (seasonNumber: number, episodeNumber: number, watched: boolean) => void;
 }
@@ -31,11 +32,12 @@ interface EpisodeListViewProps {
 export function EpisodeListView({
   title,
   seasons,
+  initialSeasonNumber,
   isUpdatingEpisodeWatched,
   onToggleEpisodeWatched,
 }: EpisodeListViewProps): ReactElement {
   const { palette } = useThemePreference();
-  const [selectedSeasonNumber, setSelectedSeasonNumber] = useState(seasons[0]?.seasonNumber ?? 0);
+  const [selectedSeasonNumber, setSelectedSeasonNumber] = useState(initialSeasonNumber);
   const [isSeasonSelectorOpen, setIsSeasonSelectorOpen] = useState(false);
   const selectedSeason = seasons.find((season) => season.seasonNumber === selectedSeasonNumber) ?? seasons[0];
   const seasonEpisodes = useMemo(() => selectedSeason?.episodes ?? [], [selectedSeason]);
@@ -58,9 +60,9 @@ export function EpisodeListView({
         contentContainerStyle={{ flexGrow: 1, padding: 16, paddingBottom: 96, gap: 14 }}
         contentInsetAdjustmentBehavior="automatic"
       >
-        <View style={{ gap: 10 }}>
+        <View style={{ gap: 10, zIndex: 2, elevation: 2 }}>
           <Text style={{ color: palette.text, fontSize: 22, lineHeight: 26, fontWeight: "800" }}>{title}</Text>
-          <View style={{ alignSelf: "flex-start", minWidth: 184 }}>
+          <View style={{ alignSelf: "flex-start", minWidth: 184, zIndex: 1000, elevation: 1000 }}>
             <TouchableOpacity
               onPress={() => setIsSeasonSelectorOpen((isOpen) => !isOpen)}
               accessibilityRole="button"
@@ -87,12 +89,22 @@ export function EpisodeListView({
             {isSeasonSelectorOpen ? (
               <View
                 style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  right: 0,
                   marginTop: 8,
                   borderRadius: 18,
                   borderWidth: 1,
                   borderColor: palette.shellBorder,
                   backgroundColor: palette.shellSurface,
                   overflow: "hidden",
+                  zIndex: 999,
+                  elevation: 8,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 12,
                 }}
               >
                 {seasons.map((season) => {
@@ -136,7 +148,7 @@ export function EpisodeListView({
           </View>
         </View>
 
-        <View style={{ gap: 10 }}>
+        <View style={{ gap: 10, zIndex: 1 }}>
           {seasonEpisodes.map((episode) => {
             return (
               <TouchableOpacity
@@ -166,7 +178,7 @@ export function EpisodeListView({
                 />
                 <View style={{ flex: 1, minWidth: 0, gap: 3 }}>
                   <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }} numberOfLines={1}>
-                    {episode.episodeNumber}. {episode.title}
+                    {`Episode ${episode.episodeNumber}: ${episode.title}`}
                   </Text>
                   <Text style={{ color: palette.shellMutedText, fontSize: 13 }} numberOfLines={1}>
                     {episode.releaseDate || "Release date unavailable"}

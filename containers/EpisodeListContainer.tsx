@@ -119,10 +119,24 @@ export function EpisodeListContainer({ params }: EpisodeListContainerProps): Rea
     [seasons, watchedEpisodeKeys]
   );
 
+  const initialSeasonNumber = useMemo<number>(() => {
+    if (seasons.length === 0) {
+      return 0;
+    }
+    const currentOrNextSeason = seasons.find((season) => {
+      const firstUnwatchedEpisode = season.episodes.find(
+        (episode) => !watchedEpisodeKeys.has(createEpisodeWatchedKey(season.seasonNumber, episode.episodeNumber))
+      );
+      return firstUnwatchedEpisode !== undefined;
+    });
+    return currentOrNextSeason?.seasonNumber ?? seasons[seasons.length - 1].seasonNumber;
+  }, [seasons, watchedEpisodeKeys]);
+
   return (
     <EpisodeListView
       title={title}
       seasons={seasonViewModels}
+      initialSeasonNumber={initialSeasonNumber}
       isUpdatingEpisodeWatched={toggleEpisodeWatchedMutation.isPending}
       onToggleEpisodeWatched={(seasonNumber, episodeNumber, watched) =>
         toggleEpisodeWatchedMutation.mutate({ seasonNumber, episodeNumber, watched })
