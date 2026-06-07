@@ -10,9 +10,9 @@ import { createStackNavigator } from "@react-navigation/stack";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import Toast from "react-native-toast-message";
-import type { ToastConfig } from "react-native-toast-message";
+import type { ToastConfig, ToastConfigParams } from "react-native-toast-message";
 import "react-native-reanimated";
 
 import { HeaderContainer } from "@/containers/HeaderContainer";
@@ -31,6 +31,10 @@ import type { RootStackParamList } from "./navigation/types";
 interface ToastInfoProps {
   text1?: string;
   text2?: string;
+}
+
+interface UndoToastPayload {
+  onUndo?: () => void;
 }
 
 function ThemedToast(): ReactElement {
@@ -81,6 +85,76 @@ function ThemedToast(): ReactElement {
           </Text>
         </View>
       ),
+      success: ({ text1, text2, props }: ToastConfigParams<UndoToastPayload>) => {
+        const onUndo = props?.onUndo;
+        return (
+          <View
+            style={{
+              backgroundColor: palette.shellSurface,
+              borderLeftColor: "#4CAF50",
+              borderLeftWidth: 5,
+              borderWidth: 1,
+              borderColor: palette.shellBorder,
+              padding: 15,
+              marginHorizontal: 20,
+              borderRadius: 8,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.35,
+              shadowRadius: 4,
+              elevation: 5,
+              alignSelf: "center",
+              width: "90%",
+              maxWidth: 400,
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <View style={{ flex: 1, marginRight: 10 }}>
+              <Text
+                style={{
+                  color: palette.text,
+                  fontSize: 16,
+                  fontWeight: "bold",
+                }}
+                numberOfLines={1}
+              >
+                {text1}
+              </Text>
+              {text2 ? (
+                <Text
+                  style={{
+                    color: palette.shellMutedText,
+                    fontSize: 14,
+                    marginTop: 2,
+                  }}
+                  numberOfLines={1}
+                >
+                  {text2}
+                </Text>
+              ) : null}
+            </View>
+            {onUndo ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Undo watched action"
+                onPress={onUndo}
+                style={{ paddingVertical: 6, paddingHorizontal: 12 }}
+              >
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontSize: 15,
+                    fontWeight: "600",
+                  }}
+                >
+                  Undo
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
+        );
+      },
     }),
     [palette]
   );

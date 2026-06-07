@@ -243,6 +243,34 @@ export function HomeContainer(): ReactElement {
     },
   });
 
+  const undoMovieWatchedMutation = useMutation({
+    mutationFn: (mediaId: string) => watchedProgressRepository.setMovieWatched(mediaId, false),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["watched-progress"] });
+    },
+    onError: (err) => {
+      console.error("[HomeContainer] undoMovieWatched failed:", err);
+      Toast.show({ type: "error", text1: "Failed to undo. Please try again." });
+    },
+  });
+
+  const undoEpisodeWatchedMutation = useMutation({
+    mutationFn: (input: { mediaId: string; seasonNumber: number; episodeNumber: number }) =>
+      watchedProgressRepository.setEpisodeWatched({
+        mediaId: input.mediaId,
+        seasonNumber: input.seasonNumber,
+        episodeNumber: input.episodeNumber,
+        watched: false,
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["watched-progress"] });
+    },
+    onError: (err) => {
+      console.error("[HomeContainer] undoEpisodeWatched failed:", err);
+      Toast.show({ type: "error", text1: "Failed to undo. Please try again." });
+    },
+  });
+
   const handleOpenDetails = useCallback(
     (item: PosterQueueItem): void => {
       navigation.navigate("Details", {
@@ -301,13 +329,37 @@ export function HomeContainer(): ReactElement {
             text2: enriched.nextEpisodeLabel ? `Next: ${enriched.nextEpisodeLabel}` : "All episodes watched",
             visibilityTime: 2500,
             position: "bottom",
+            props: {
+              onUndo: () => {
+                if (enriched.currentEpisode) {
+                  undoEpisodeWatchedMutation.mutate({
+                    mediaId: enriched.key,
+                    seasonNumber: enriched.currentEpisode.seasonNumber,
+                    episodeNumber: enriched.currentEpisode.episodeNumber,
+                  });
+                }
+              },
+            },
+          });
+        } else if (enriched.mediaType === "movie") {
+          Toast.show({
+            type: "success",
+            text1: `Marked: ${watchedLabel}`,
+            text2: undefined,
+            visibilityTime: 2500,
+            position: "bottom",
+            props: {
+              onUndo: () => {
+                undoMovieWatchedMutation.mutate(enriched.key);
+              },
+            },
           });
         }
       } catch {
         // mutation error already handled in onError — do not advance
       }
     },
-    [handleMarkWatchedAsync],
+    [handleMarkWatchedAsync, undoEpisodeWatchedMutation, undoMovieWatchedMutation],
   );
 
   const isLoading = isLoadingFavorites;
