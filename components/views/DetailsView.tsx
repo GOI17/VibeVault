@@ -52,11 +52,10 @@ function DetailRow({ label, value }: { label: string; value: string }): ReactEle
       }}
     >
       <Text style={{ color: palette.shellMutedText, flex: 0.36, fontSize: 14 }}>{label}</Text>
-      <View style={{ flex: 0.64, flexDirection: "row", gap: 8, alignItems: "center" }}>
-        <Text style={{ color: palette.text, flex: 1, fontSize: 14, lineHeight: 19 }} numberOfLines={2}>
+      <View style={{ flex: 0.64 }}>
+        <Text style={{ color: palette.text, fontSize: 14, lineHeight: 19 }}>
           {value}
         </Text>
-        <Text style={{ color: palette.shellMutedText, fontSize: 24, lineHeight: 24 }}>›</Text>
       </View>
     </View>
   );
@@ -254,7 +253,7 @@ export function DetailsView({
             </Pressable>
           ) : null}
 
-          <Text style={{ color: palette.text, fontSize: 15, lineHeight: 22 }} numberOfLines={4}>
+          <Text style={{ color: palette.text, fontSize: 15, lineHeight: 22 }}>
             {description || "Not available"}
           </Text>
 
