@@ -21,6 +21,9 @@ interface DetailsViewProps {
   isFavorite: boolean;
   isUpdatingFavorite: boolean;
   onToggleFavorite: () => void;
+  isWatched?: boolean;
+  isUpdatingWatched?: boolean;
+  onToggleWatched?: () => void;
   lastWatchedEpisodeLabel?: string;
   seriesProgress: { watched: number; total: number };
   onOpenEpisodeList: () => void;
@@ -75,6 +78,9 @@ export function DetailsView({
   isFavorite,
   isUpdatingFavorite,
   onToggleFavorite,
+  isWatched,
+  isUpdatingWatched,
+  onToggleWatched,
   lastWatchedEpisodeLabel,
   seriesProgress,
   onOpenEpisodeList,
@@ -127,6 +133,7 @@ export function DetailsView({
           borderColor: palette.shellBorder,
           borderRadius: 24,
           borderWidth: 1,
+          borderTopWidth: 0,
           backgroundColor: palette.shellSurface,
           overflow: "hidden",
         }}
@@ -179,7 +186,32 @@ export function DetailsView({
                 {isFavorite ? "Favorited" : "Favorite"}
               </Text>
             </Pressable>
-            {mediaType === "series" ? (
+            {mediaType === "movie" && onToggleWatched ? (
+              <Pressable
+                onPress={onToggleWatched}
+                disabled={isUpdatingWatched}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isWatched, disabled: isUpdatingWatched }}
+                accessibilityLabel={isWatched ? `Mark ${title} as not watched` : `Mark ${title} as watched`}
+                style={{
+                  flex: 1,
+                  minHeight: 42,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: palette.shellBorder,
+                  flexDirection: "row",
+                  gap: 8,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: isUpdatingWatched ? 0.6 : 1,
+                }}
+              >
+                <IconSymbol name={isWatched ? "eye.fill" : "eye"} color="#34C759" size={18} />
+                <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>
+                  {isWatched ? "Watched" : "Watch"}
+                </Text>
+              </Pressable>
+            ) : mediaType === "series" ? (
               <Pressable
                 onPress={onOpenEpisodeList}
                 accessibilityRole="button"
@@ -199,26 +231,27 @@ export function DetailsView({
                 <Text style={{ color: "#3B82F6", fontSize: 16, fontWeight: "900" }}>▶</Text>
                 <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>Episodes</Text>
               </Pressable>
-            ) : null}
-            <Pressable
-              onPress={handleShare}
-              accessibilityRole="button"
-              accessibilityLabel={`Share ${title}`}
-              style={{
-                flex: 1,
-                minHeight: 42,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: palette.shellBorder,
-                flexDirection: "row",
-                gap: 8,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <IconSymbol name="square.and.arrow.up" color={palette.text} size={18} />
-              <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>Share</Text>
-            </Pressable>
+            ) : (
+              <Pressable
+                onPress={handleShare}
+                accessibilityRole="button"
+                accessibilityLabel={`Share ${title}`}
+                style={{
+                  flex: 1,
+                  minHeight: 42,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: palette.shellBorder,
+                  flexDirection: "row",
+                  gap: 8,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <IconSymbol name="square.and.arrow.up" color={palette.text} size={18} />
+                <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>Share</Text>
+              </Pressable>
+            )}
           </View>
 
           {mediaType === "series" ? (
@@ -248,7 +281,15 @@ export function DetailsView({
                 <Text style={{ color: palette.text, fontSize: 13, fontWeight: "700" }}>{episodeProgressPercent}%</Text>
               </View>
               <Text style={{ color: palette.shellMutedText, fontSize: 13, lineHeight: 18 }}>
-                {lastWatchedEpisodeLabel ? `Last watched:\n${lastWatchedEpisodeLabel}` : "No watched episodes yet"}
+                {lastWatchedEpisodeLabel ? (
+                  <>
+                    <Text>Last watched:</Text>
+                    {"\n"}
+                    <Text>{lastWatchedEpisodeLabel}</Text>
+                  </>
+                ) : (
+                  <Text>No watched episodes yet</Text>
+                )}
               </Text>
             </Pressable>
           ) : null}

@@ -40,6 +40,8 @@ const MAPPING = {
   'checkmark': 'check',
   'circle': 'radio-button-unchecked',
   'tv': 'live-tv',
+  'eye.fill': 'visibility',
+  'eye': 'visibility-off',
 } as const satisfies Record<string, MaterialIconName>;
 
 type IconSymbolName = keyof typeof MAPPING;

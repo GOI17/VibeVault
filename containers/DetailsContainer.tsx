@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { useMemo, type ReactElement } from "react";
 import { z } from "zod";
@@ -109,6 +109,22 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
   );
   const seasons = normalizeSeasons(data?.seasons ?? manualDetails?.seasons ?? params.seasons);
   const imageSrc = data?.primaryImage?.url || manualDetails?.url || params.imageSrc;
+
+  const { data: watchedMovieStatus } = useQuery({
+    ...queryOptions.watchedProgress.movie(params.id),
+    queryFn: () => watchedProgressRepository.getMovieStatus(params.id),
+    enabled: Boolean(params.id) && mediaType === "movie",
+  });
+
+  const queryClient = useQueryClient();
+
+  const toggleWatchedMutation = useMutation({
+    mutationFn: (watched: boolean) => watchedProgressRepository.setMovieWatched(params.id, watched),
+    onSuccess: () => {
+      void queryClient.invalidateQueries(queryOptions.watchedProgress.movie(params.id));
+      void queryClient.invalidateQueries({ queryKey: ["watched-progress", "summary"] });
+    },
+  });
 
   const watchedEpisodeKeys = useMemo(() => {
     return new Set(
@@ -221,6 +237,14 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
     }
   };
 
+  const handleToggleWatched = (): void => {
+    if (watchedMovieStatus?.watched) {
+      void toggleWatchedMutation.mutateAsync(false);
+    } else {
+      void toggleWatchedMutation.mutateAsync(true);
+    }
+  };
+
   return (
     <DetailsView
       isLoading={showBlockingLoading}
@@ -236,6 +260,9 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
       isFavorite={isFavorite}
       isUpdatingFavorite={isAdding || isRemoving}
       onToggleFavorite={handleToggleFavorite}
+      isWatched={watchedMovieStatus?.watched}
+      isUpdatingWatched={toggleWatchedMutation.isPending}
+      onToggleWatched={handleToggleWatched}
       lastWatchedEpisodeLabel={lastWatchedEpisodeLabel}
       seriesProgress={seriesProgress}
       onOpenEpisodeList={() =>
