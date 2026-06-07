@@ -36,6 +36,7 @@ export function EpisodeListView({
 }: EpisodeListViewProps): ReactElement {
   const { palette } = useThemePreference();
   const [selectedSeasonNumber, setSelectedSeasonNumber] = useState(seasons[0]?.seasonNumber ?? 0);
+  const [isSeasonSelectorOpen, setIsSeasonSelectorOpen] = useState(false);
   const selectedSeason = seasons.find((season) => season.seasonNumber === selectedSeasonNumber) ?? seasons[0];
   const seasonEpisodes = useMemo(() => selectedSeason?.episodes ?? [], [selectedSeason]);
 
@@ -59,32 +60,68 @@ export function EpisodeListView({
       >
         <View style={{ gap: 10 }}>
           <Text style={{ color: palette.text, fontSize: 22, lineHeight: 26, fontWeight: "800" }}>{title}</Text>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-            {seasons.map((season) => {
-              const isSelected = season.seasonNumber === selectedSeason?.seasonNumber;
+          <View style={{ alignSelf: "flex-start", minWidth: 184 }}>
+            <TouchableOpacity
+              onPress={() => setIsSeasonSelectorOpen((isOpen) => !isOpen)}
+              accessibilityRole="button"
+              accessibilityState={{ expanded: isSeasonSelectorOpen }}
+              accessibilityLabel="Choose season"
+              style={{
+                minHeight: 56,
+                borderRadius: 18,
+                borderWidth: 1,
+                borderColor: palette.shellBorder,
+                backgroundColor: palette.shellSurface,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 28,
+                paddingHorizontal: 18,
+                paddingVertical: 12,
+              }}
+            >
+              <Text style={{ color: palette.text, fontSize: 20, fontWeight: "800" }}>{selectedSeason.label}</Text>
+              <Text style={{ color: palette.text, fontSize: 28, lineHeight: 28 }}>{isSeasonSelectorOpen ? "⌃" : "⌄"}</Text>
+            </TouchableOpacity>
 
-              return (
-                <TouchableOpacity
-                  key={season.seasonNumber}
-                  onPress={() => setSelectedSeasonNumber(season.seasonNumber)}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: isSelected }}
-                  accessibilityLabel={`Show ${season.label}`}
-                  style={{
-                    borderRadius: 14,
-                    borderWidth: 1,
-                    borderColor: isSelected ? palette.shellChipActive : palette.shellBorder,
-                    backgroundColor: isSelected ? palette.shellChipActive : palette.shellSurface,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                  }}
-                >
-                  <Text style={{ color: isSelected ? palette.shellChipTextActive : palette.text, fontWeight: "700" }}>
-                    {season.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+            {isSeasonSelectorOpen ? (
+              <View
+                style={{
+                  marginTop: 8,
+                  borderRadius: 18,
+                  borderWidth: 1,
+                  borderColor: palette.shellBorder,
+                  backgroundColor: palette.shellSurface,
+                  overflow: "hidden",
+                }}
+              >
+                {seasons.map((season) => {
+                  const isSelected = season.seasonNumber === selectedSeason.seasonNumber;
+
+                  return (
+                    <TouchableOpacity
+                      key={season.seasonNumber}
+                      onPress={() => {
+                        setSelectedSeasonNumber(season.seasonNumber);
+                        setIsSeasonSelectorOpen(false);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: isSelected }}
+                      accessibilityLabel={`Show ${season.label}`}
+                      style={{
+                        paddingHorizontal: 18,
+                        paddingVertical: 14,
+                        backgroundColor: isSelected ? palette.shellChipActive : palette.shellSurface,
+                      }}
+                    >
+                      <Text style={{ color: isSelected ? palette.shellChipTextActive : palette.text, fontSize: 16, fontWeight: "700" }}>
+                        {season.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            ) : null}
           </View>
           <View style={{ gap: 6 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
