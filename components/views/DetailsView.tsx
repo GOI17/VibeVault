@@ -2,8 +2,10 @@ import { Image } from "expo-image";
 import type { ReactElement } from "react";
 import { Pressable, ScrollView, Share, Text, View } from "react-native";
 
+import { IconSymbol } from "@/components/ui/IconSymbol";
 import type { Season } from "@/domain/entities/Movie";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
+import Toast from "react-native-toast-message";
 
 interface DetailsViewProps {
   isLoading: boolean;
@@ -16,9 +18,9 @@ interface DetailsViewProps {
   seasons?: Season[];
   imageSrc?: string;
   mediaType: "movie" | "series";
-  isMovieWatched: boolean;
-  isUpdatingMovieWatched: boolean;
-  onToggleMovieWatched: () => void;
+  isFavorite: boolean;
+  isUpdatingFavorite: boolean;
+  onToggleFavorite: () => void;
   lastWatchedEpisodeLabel?: string;
   seriesProgress: { watched: number; total: number };
   onOpenEpisodeList: () => void;
@@ -36,6 +38,29 @@ function formatMetadata({
   return [year, seasonLabel].filter(Boolean).join(" · ") || (mediaType === "series" ? "Series" : "Movie");
 }
 
+function DetailRow({ label, value }: { label: string; value: string }): ReactElement {
+  const { palette } = useThemePreference();
+
+  return (
+    <View
+      style={{
+        borderTopColor: palette.shellBorder,
+        borderTopWidth: 1,
+        flexDirection: "row",
+        gap: 14,
+        paddingVertical: 10,
+      }}
+    >
+      <Text style={{ color: palette.shellMutedText, flex: 0.36, fontSize: 14 }}>{label}</Text>
+      <View style={{ flex: 0.64 }}>
+        <Text style={{ color: palette.text, fontSize: 14, lineHeight: 19 }}>
+          {value}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
 export function DetailsView({
   isLoading,
   errorMessage,
@@ -47,9 +72,9 @@ export function DetailsView({
   seasons,
   imageSrc,
   mediaType,
-  isMovieWatched,
-  isUpdatingMovieWatched,
-  onToggleMovieWatched,
+  isFavorite,
+  isUpdatingFavorite,
+  onToggleFavorite,
   lastWatchedEpisodeLabel,
   seriesProgress,
   onOpenEpisodeList,
@@ -60,7 +85,16 @@ export function DetailsView({
   const episodeProgressPercent = seriesProgress.total > 0 ? Math.round((seriesProgress.watched / seriesProgress.total) * 100) : 0;
 
   const handleShare = (): void => {
-    void Share.share({ title, message: title });
+    const sharePromise = Share.share({ title, message: title });
+    void sharePromise.catch(() => {
+      Toast.show({
+        type: "info",
+        text1: "Share unavailable",
+        text2: "Use your browser controls to copy this page link.",
+        visibilityTime: 2000,
+        position: "top",
+      });
+    });
   };
 
   if (isLoading) {
@@ -83,138 +117,163 @@ export function DetailsView({
   return (
     <ScrollView
       style={{ flex: 1, minHeight: 0, backgroundColor: palette.shellBackground }}
-      contentContainerStyle={{ flexGrow: 1, padding: 16, paddingBottom: 96, gap: 16 }}
+      contentContainerStyle={{ flexGrow: 1, alignItems: "center", padding: 8, paddingBottom: 96 }}
       contentInsetAdjustmentBehavior="automatic"
     >
-      <View style={{ borderRadius: 24, overflow: "hidden", backgroundColor: palette.shellSurface }}>
-        <Image
-          source={imageSrc ? { uri: imageSrc } : fallbackImage}
-          placeholder={fallbackImage}
-          style={{ width: "100%", height: 260 }}
-        />
-        <View
-          style={{
-            marginTop: -54,
-            marginHorizontal: 14,
-            marginBottom: 14,
-            borderRadius: 20,
-            borderWidth: 1,
-            borderColor: palette.shellBorder,
-            backgroundColor: palette.shellSurface,
-            padding: 14,
-            gap: 12,
-          }}
-        >
-          <View style={{ flexDirection: "row", gap: 12, alignItems: "flex-end" }}>
+      <View
+        style={{
+          width: "100%",
+          maxWidth: 480,
+          borderColor: palette.shellBorder,
+          borderRadius: 24,
+          borderWidth: 1,
+          backgroundColor: palette.shellSurface,
+          overflow: "hidden",
+        }}
+      >
+        <View style={{ minHeight: 168 }}>
+          <Image
+            source={imageSrc ? { uri: imageSrc } : fallbackImage}
+            placeholder={fallbackImage}
+            style={{ width: "100%", height: 178 }}
+          />
+        </View>
+
+        <View style={{ marginTop: -42, paddingHorizontal: 20, paddingBottom: 18, gap: 12 }}>
+          <View style={{ flexDirection: "row", gap: 14, alignItems: "flex-end" }}>
             <Image
               source={imageSrc ? { uri: imageSrc } : fallbackImage}
               placeholder={fallbackImage}
-              style={{ width: 76, height: 96, borderRadius: 12 }}
+              style={{ width: 82, height: 82, borderRadius: 12 }}
             />
-            <View style={{ flex: 1, minWidth: 0, gap: 6 }}>
-              <Text style={{ color: palette.text, fontSize: 26, lineHeight: 30, fontWeight: "800" }} numberOfLines={2}>
+            <View style={{ flex: 1, minWidth: 0, gap: 5, paddingBottom: 4 }}>
+              <Text style={{ color: palette.text, fontSize: 24, lineHeight: 28, fontWeight: "800" }} numberOfLines={1}>
                 {title}
               </Text>
               <Text style={{ color: palette.shellMutedText, fontSize: 14, fontWeight: "600" }}>{metadata}</Text>
             </View>
           </View>
 
-          <View style={{ flexDirection: "row", gap: 8 }}>
+          <View style={{ flexDirection: "row", gap: 10 }}>
             <Pressable
-              onPress={mediaType === "movie" ? onToggleMovieWatched : undefined}
-              disabled={mediaType !== "movie" || isUpdatingMovieWatched}
+              onPress={onToggleFavorite}
+              disabled={isUpdatingFavorite}
               accessibilityRole="button"
-              accessibilityState={{ selected: mediaType === "movie" ? isMovieWatched : false, disabled: mediaType !== "movie" || isUpdatingMovieWatched }}
-              accessibilityLabel={mediaType === "movie" ? (isMovieWatched ? "Mark movie as unwatched" : "Mark movie as watched") : "Favorite status"}
+              accessibilityState={{ selected: isFavorite, disabled: isUpdatingFavorite }}
+              accessibilityLabel={isFavorite ? `Remove ${title} from favorites` : `Add ${title} to favorites`}
               style={{
                 flex: 1,
-                minHeight: 44,
-                borderRadius: 12,
+                minHeight: 42,
+                borderRadius: 8,
                 borderWidth: 1,
                 borderColor: palette.shellBorder,
+                flexDirection: "row",
+                gap: 8,
                 alignItems: "center",
                 justifyContent: "center",
-                opacity: isUpdatingMovieWatched ? 0.6 : 1,
+                opacity: isUpdatingFavorite ? 0.6 : 1,
               }}
             >
-              <Text style={{ color: palette.text, fontWeight: "700" }}>
-                {mediaType === "movie" ? (isMovieWatched ? "Watched" : "Mark watched") : "Favorite"}
+              <IconSymbol name={isFavorite ? "heart.fill" : "heart"} color="#FF2D55" size={18} />
+              <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>
+                {isFavorite ? "Favorited" : "Favorite"}
               </Text>
             </Pressable>
+            {mediaType === "series" ? (
+              <Pressable
+                onPress={onOpenEpisodeList}
+                accessibilityRole="button"
+                accessibilityLabel="Open episode list"
+                style={{
+                  flex: 1,
+                  minHeight: 42,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: palette.shellBorder,
+                  flexDirection: "row",
+                  gap: 8,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text style={{ color: "#3B82F6", fontSize: 16, fontWeight: "900" }}>▶</Text>
+                <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>Episodes</Text>
+              </Pressable>
+            ) : null}
             <Pressable
               onPress={handleShare}
               accessibilityRole="button"
               accessibilityLabel={`Share ${title}`}
               style={{
                 flex: 1,
-                minHeight: 44,
-                borderRadius: 12,
+                minHeight: 42,
+                borderRadius: 8,
                 borderWidth: 1,
                 borderColor: palette.shellBorder,
+                flexDirection: "row",
+                gap: 8,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Text style={{ color: palette.text, fontWeight: "700" }}>Share</Text>
+              <IconSymbol name="square.and.arrow.up" color={palette.text} size={18} />
+              <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>Share</Text>
             </Pressable>
           </View>
-        </View>
-      </View>
 
-      {mediaType === "series" ? (
-        <Pressable
-          onPress={onOpenEpisodeList}
-          accessibilityRole="button"
-          accessibilityLabel="Open episode list"
-          style={{
-            borderColor: palette.shellBorder,
-            borderRadius: 18,
-            backgroundColor: palette.shellSurface,
-            padding: 14,
-            gap: 10,
-          }}
-        >
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-            <Text style={{ color: palette.text, fontSize: 18, fontWeight: "800" }}>Episodes</Text>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <Text style={{ color: palette.shellMutedText, fontWeight: "700" }}>{episodeProgressPercent}%</Text>
-              <Text style={{ color: palette.shellMutedText, fontWeight: "800" }}>›</Text>
+          {mediaType === "series" ? (
+            <Pressable
+              onPress={onOpenEpisodeList}
+              accessibilityRole="button"
+              accessibilityLabel="Open episode list"
+              style={{
+                borderColor: palette.shellBorder,
+                borderRadius: 10,
+                borderWidth: 1,
+                padding: 14,
+                gap: 9,
+              }}
+            >
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                <Text style={{ color: palette.text, fontSize: 18, fontWeight: "800" }}>Episodes</Text>
+                <Text style={{ color: palette.text, fontSize: 26, lineHeight: 26 }}>›</Text>
+              </View>
+              <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>
+                {seriesProgress.watched} / {seriesProgress.total} Episodes
+              </Text>
+              <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+                <View style={{ flex: 1, height: 6, borderRadius: 999, overflow: "hidden", backgroundColor: palette.shellBorder }}>
+                  <View style={{ height: "100%", width: `${episodeProgressPercent}%`, backgroundColor: "#3B82F6" }} />
+                </View>
+                <Text style={{ color: palette.text, fontSize: 13, fontWeight: "700" }}>{episodeProgressPercent}%</Text>
+              </View>
+              <Text style={{ color: palette.shellMutedText, fontSize: 13, lineHeight: 18 }}>
+                {lastWatchedEpisodeLabel ? `Last watched:\n${lastWatchedEpisodeLabel}` : "No watched episodes yet"}
+              </Text>
+            </Pressable>
+          ) : null}
+
+          <Text style={{ color: palette.text, fontSize: 15, lineHeight: 22 }}>
+            {description || "Not available"}
+          </Text>
+
+          <View>
+            <DetailRow label="Cast" value={cast && cast.length > 0 ? cast.join(", ") : "Not available"} />
+            <DetailRow label="Where to Watch" value={whereToWatch && whereToWatch.length > 0 ? whereToWatch.join(", ") : "Not available"} />
+            <View
+              style={{
+                borderTopColor: palette.shellBorder,
+                borderTopWidth: 1,
+                flexDirection: "row",
+                gap: 14,
+                paddingTop: 10,
+              }}
+            >
+              <Text style={{ color: palette.shellMutedText, flex: 0.36, fontSize: 14 }}>Release Date</Text>
+              <Text style={{ color: palette.text, flex: 0.64, fontSize: 14 }}>{releaseDate || "Not available"}</Text>
             </View>
           </View>
-          <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>
-            {seriesProgress.watched} / {seriesProgress.total} Episodes
-          </Text>
-          <View style={{ height: 6, borderRadius: 999, overflow: "hidden", backgroundColor: palette.shellBorder }}>
-            <View style={{ height: "100%", width: `${episodeProgressPercent}%`, backgroundColor: "#3B82F6" }} />
-          </View>
-          <Text style={{ color: palette.shellMutedText, fontSize: 13 }}>
-            {lastWatchedEpisodeLabel ? `Last watched: ${lastWatchedEpisodeLabel}` : "No watched episodes yet"}
-          </Text>
-        </Pressable>
-      ) : null}
-
-      <View style={{ gap: 8 }}>
-        <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>Description / Synopsis</Text>
-        <Text style={{ color: palette.text, fontSize: 16, lineHeight: 24 }}>{description || "Not available"}</Text>
-      </View>
-
-      <View style={{ gap: 8 }}>
-        <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>Cast</Text>
-        <Text style={{ color: palette.text, fontSize: 16, lineHeight: 24 }}>
-          {cast && cast.length > 0 ? cast.join(", ") : "Not available"}
-        </Text>
-      </View>
-
-      <View style={{ gap: 8 }}>
-        <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>Release date</Text>
-        <Text style={{ color: palette.text, fontSize: 16 }}>{releaseDate || "Not available"}</Text>
-      </View>
-
-      <View style={{ gap: 8 }}>
-        <Text style={{ color: palette.shellMutedText, fontSize: 12, fontWeight: "700", textTransform: "uppercase" }}>Where to watch</Text>
-        <Text style={{ color: palette.text, fontSize: 16 }}>
-          {whereToWatch && whereToWatch.length > 0 ? whereToWatch.join(", ") : "Not available"}
-        </Text>
+        </View>
       </View>
     </ScrollView>
   );

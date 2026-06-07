@@ -37,7 +37,7 @@ Populate `EXPO_PUBLIC_API_URL` in `.env` before running the app.
 
 ## Browser policy verification
 
-Legacy Playwright artifacts are read-only. For browser checks, use the cmux workflow in [`docs/browser-workflow.md`](docs/browser-workflow.md).
+For browser checks and visual evidence, use the Playwright workflow in [`docs/browser-workflow.md`](docs/browser-workflow.md).
 
 ```bash
 npm run verify:browser-policy

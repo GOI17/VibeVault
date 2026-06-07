@@ -15,4 +15,4 @@ This is best-effort. Browser accessibility zoom controls may still override rest
 - Do not remove the web policy while changing bootstrap or layout code.
 - Treat browser behavior as platform-specific.
 - Run `pnpm verify:browser-policy` when touching browser policy code.
-- Use `docs/browser-workflow.md` for cmux browser evidence.
+- Use `docs/browser-workflow.md` for Playwright browser evidence.
