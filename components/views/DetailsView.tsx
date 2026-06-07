@@ -22,7 +22,6 @@ interface DetailsViewProps {
   onToggleMovieWatched: () => void;
   lastWatchedEpisodeLabel?: string;
   seriesProgress: { watched: number; total: number };
-  onGoBack: () => void;
   onOpenEpisodeList: () => void;
 }
 
@@ -78,7 +77,6 @@ export function DetailsView({
   onToggleMovieWatched,
   lastWatchedEpisodeLabel,
   seriesProgress,
-  onGoBack,
   onOpenEpisodeList,
 }: DetailsViewProps): ReactElement {
   const { palette } = useThemePreference();
@@ -130,27 +128,6 @@ export function DetailsView({
             placeholder={fallbackImage}
             style={{ width: "100%", height: 178 }}
           />
-          <View
-            style={{
-              position: "absolute",
-              top: 12,
-              left: 12,
-              right: 12,
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Pressable
-              onPress={onGoBack}
-              accessibilityRole="button"
-              accessibilityLabel="Go back"
-              style={{ width: 36, height: 36, alignItems: "center", justifyContent: "center" }}
-            >
-              <Text style={{ color: palette.text, fontSize: 34, lineHeight: 34 }}>‹</Text>
-            </Pressable>
-            <Text style={{ color: palette.text, fontSize: 26, lineHeight: 26 }}>…</Text>
-          </View>
         </View>
 
         <View style={{ marginTop: -42, paddingHorizontal: 20, paddingBottom: 18, gap: 12 }}>
