@@ -89,6 +89,16 @@ export class AsyncStorageWatchedProgressRepository implements IWatchedProgressRe
     await this.writeStore(nextStore);
   }
 
+  async getAllWatchedShows(): Promise<string[]> {
+    const store = await this.readStore();
+    const showIds = new Set(
+      store.episodes
+        .filter((episode) => episode.watched)
+        .map((episode) => episode.mediaId)
+    );
+    return Array.from(showIds);
+  }
+
   private async readStore(): Promise<WatchedProgressStore> {
     const storage = await AsyncStorage.getItem(STORAGE_KEY);
 

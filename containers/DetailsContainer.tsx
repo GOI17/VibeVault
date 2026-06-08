@@ -241,7 +241,22 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
     if (watchedMovieStatus?.watched) {
       void toggleWatchedMutation.mutateAsync(false);
     } else {
-      void toggleWatchedMutation.mutateAsync(true);
+      void toggleWatchedMutation.mutateAsync(true).then(() => {
+        if (mediaType === "movie" && !isFavorite) {
+          addFavorite({
+            id: params.id,
+            title,
+            mediaType,
+            url: imageSrc,
+            description: description || "Not available",
+            cast: cast && cast.length > 0 ? cast : ["Not available"],
+            releaseDate: releaseDate || "Not available",
+            whereToWatch: whereToWatch && whereToWatch.length > 0 ? whereToWatch : ["Not available"],
+            seasons: seasons,
+            source: "catalog",
+          });
+        }
+      });
     }
   };
 

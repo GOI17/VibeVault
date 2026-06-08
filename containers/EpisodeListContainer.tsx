@@ -8,6 +8,7 @@ import { queryOptions } from "@/constants/query";
 import { SeasonSchema } from "@/domain/entities/Movie";
 import { createEpisodeWatchedKey, type WatchedEpisodeInput } from "@/domain/entities/WatchedProgress";
 import { useRepositories } from "@/providers/RepositoryProvider";
+import { useFavoriteMutations } from "@/hooks/useFavoriteMutations";
 
 interface EpisodeListContainerProps {
   params: RootStackParamList["EpisodeList"];
@@ -40,8 +41,9 @@ function getSeasonLabel(season: NonNullable<RootStackParamList["EpisodeList"]["s
 }
 
 export function EpisodeListContainer({ params }: EpisodeListContainerProps): ReactElement {
-  const { movieRepository, watchedProgressRepository } = useRepositories();
+  const { movieRepository, watchedProgressRepository, favoriteRepository } = useRepositories();
   const queryClient = useQueryClient();
+  const { addFavorite } = useFavoriteMutations();
   const needsDetailsFallback = !params.title || !params.seasons || params.seasons.length === 0;
   const { data: details } = useQuery({
     queryKey: ["movies", "details", params.id],
@@ -59,7 +61,7 @@ export function EpisodeListContainer({ params }: EpisodeListContainerProps): Rea
   });
 
   const toggleEpisodeWatchedMutation = useMutation({
-    mutationFn: (input: EpisodeToggleInput) => {
+    mutationFn: async (input: EpisodeToggleInput) => {
       const watchedInput: WatchedEpisodeInput = {
         mediaId: params.id,
         ...input,
@@ -67,9 +69,27 @@ export function EpisodeListContainer({ params }: EpisodeListContainerProps): Rea
 
       return watchedProgressRepository.setEpisodeWatched(watchedInput);
     },
-    onSuccess: () => {
+    onSuccess: (_data, input) => {
       void queryClient.invalidateQueries(queryOptions.watchedProgress.episodes(params.id));
       void queryClient.invalidateQueries({ queryKey: ["watched-progress", "summary"] });
+      if (input.watched) {
+        void favoriteRepository.exists(params.id).then((exists) => {
+          if (!exists) {
+            addFavorite({
+              id: params.id,
+              title: title,
+              mediaType: "series",
+              url: details?.primaryImage?.url,
+              description: details?.plot || "Not available",
+              cast: details?.cast ?? ["Not available"],
+              releaseDate: details?.releaseDate || details?.startYear?.toString() || "Not available",
+              whereToWatch: details?.whereToWatch ?? ["Not available"],
+              seasons: seasons,
+              source: "catalog",
+            });
+          }
+        });
+      }
     },
   });
 

@@ -14,4 +14,6 @@ export interface IWatchedProgressRepository {
   setEpisodeWatched(input: WatchedEpisodeInput): Promise<WatchedEpisode>;
 
   clearMediaProgress(mediaId: string): Promise<void>;
+
+  getAllWatchedShows(): Promise<string[]>;
 }
