@@ -123,6 +123,42 @@ export function HomeContainer(): ReactElement {
     enabled: favoriteIds.length > 0,
   });
 
+  const watchedShowIdsQuery = useQuery({
+    queryKey: ["watched-progress", "shows", "home-queue"],
+    queryFn: () => watchedProgressRepository.getAllWatchedShows(),
+  });
+
+  const nonFavoriteWatchedShowIds = useMemo(() => {
+    const watchedShows = watchedShowIdsQuery.data ?? [];
+    return watchedShows.filter((id) => !favoriteIds.includes(id));
+  }, [watchedShowIdsQuery.data, favoriteIds]);
+
+  const nonFavoriteWatchedShowsQuery = useQuery({
+    queryKey: ["home-watched-shows", [...nonFavoriteWatchedShowIds].sort()],
+    queryFn: async (): Promise<Record<string, { id: string; title: string; url?: string; seasons?: Season[] }>> => {
+      const results: Record<string, { id: string; title: string; url?: string; seasons?: Season[] }> = {};
+      await Promise.all(
+        nonFavoriteWatchedShowIds.map(async (id) => {
+          try {
+            const details = await movieRepository.getById(id);
+            if (details) {
+              results[id] = {
+                id: details.id,
+                title: details.primaryTitle,
+                url: details.primaryImage?.url,
+                seasons: details.seasons,
+              };
+            }
+          } catch {
+            // Non-blocking: skip shows that can't be fetched
+          }
+        }),
+      );
+      return results;
+    },
+    enabled: nonFavoriteWatchedShowIds.length > 0,
+  });
+
   const enrichedFavoriteItems = useMemo((): EnrichedFavoriteItem[] => {
     return favoriteItems
       .filter((item): boolean => {
@@ -208,12 +244,105 @@ export function HomeContainer(): ReactElement {
       });
   }, [favoriteItems, movieWatchStatusQuery.data, episodeStatusQueries.data, seriesDetailsHydration.data]);
 
+  const watchedShowEpisodeStatusesQuery = useQuery({
+    queryKey: ["watched-progress", "episodes", "home-watched-shows", [...nonFavoriteWatchedShowIds].sort()],
+    queryFn: async () => {
+      const results: Record<string, { seasonNumber: number; episodeNumber: number; watched: boolean; title?: string }[]> = {};
+      await Promise.all(
+        nonFavoriteWatchedShowIds.map(async (id) => {
+          const episodes = await watchedProgressRepository.getEpisodeStatuses(id);
+          results[id] = episodes;
+        }),
+      );
+      return results;
+    },
+    enabled: nonFavoriteWatchedShowIds.length > 0,
+  });
+
+  const watchedShowItems = useMemo((): EnrichedFavoriteItem[] => {
+    if (!nonFavoriteWatchedShowsQuery.data || !watchedShowEpisodeStatusesQuery.data) {
+      return [];
+    }
+
+    return Object.entries(nonFavoriteWatchedShowsQuery.data).map(([id, show]) => {
+      const seasons = show.seasons ?? [];
+      const episodes = watchedShowEpisodeStatusesQuery.data[id] ?? [];
+      const watchedKeys = new Set(
+        episodes.filter((e) => e.watched).map((e) => createEpisodeWatchedKey(e.seasonNumber, e.episodeNumber))
+      );
+
+      let totalEpisodes = 0;
+      let watchedEpisodes = 0;
+      let firstUnwatched: { seasonNumber: number; episodeNumber: number; title?: string } | undefined;
+      let nextUnwatched: { seasonNumber: number; episodeNumber: number; title?: string } | undefined;
+      let foundFirst = false;
+
+      for (const season of seasons) {
+        for (const episode of season.episodes) {
+          totalEpisodes++;
+          const key = createEpisodeWatchedKey(season.seasonNumber, episode.episodeNumber);
+          if (watchedKeys.has(key)) {
+            watchedEpisodes++;
+          } else {
+            if (!foundFirst) {
+              firstUnwatched = { seasonNumber: season.seasonNumber, episodeNumber: episode.episodeNumber, title: episode.title };
+              foundFirst = true;
+            } else if (!nextUnwatched) {
+              nextUnwatched = { seasonNumber: season.seasonNumber, episodeNumber: episode.episodeNumber, title: episode.title };
+            }
+          }
+        }
+      }
+
+      const currentEpisode: CurrentEpisodeInfo | undefined = firstUnwatched
+        ? {
+            seasonNumber: firstUnwatched.seasonNumber,
+            episodeNumber: firstUnwatched.episodeNumber,
+            title: firstUnwatched.title,
+            label: `S${firstUnwatched.seasonNumber}E${firstUnwatched.episodeNumber}${firstUnwatched.title ? ` \u2022 ${firstUnwatched.title}` : ""}`,
+          }
+        : undefined;
+
+      return {
+        key: id,
+        imageSrc: show.url,
+        title: show.title,
+        mediaType: "series" as const,
+        description: undefined,
+        cast: undefined,
+        releaseDate: undefined,
+        whereToWatch: undefined,
+        seasons: show.seasons,
+        source: "catalog" as const,
+        watchStatus: "watched" as const,
+        currentEpisode,
+        watchedCount: watchedEpisodes,
+        totalCount: totalEpisodes,
+        progressLabel: `${watchedEpisodes} / ${totalEpisodes} Episodes`,
+        progressPercent: totalEpisodes > 0 ? Math.round((watchedEpisodes / totalEpisodes) * 100) : 0,
+        nextEpisodeLabel: nextUnwatched
+          ? `S${nextUnwatched.seasonNumber}E${nextUnwatched.episodeNumber}${nextUnwatched.title ? ` \u2022 ${nextUnwatched.title}` : ""}`
+          : undefined,
+      };
+    }).filter((item) => {
+      if (item.totalCount > 0 && item.watchedCount === item.totalCount) {
+        return false;
+      }
+      return true;
+    });
+  }, [nonFavoriteWatchedShowsQuery.data, watchedShowEpisodeStatusesQuery.data]);
+
+  const allHomeItems = useMemo(
+    () => [...enrichedFavoriteItems, ...watchedShowItems],
+    [enrichedFavoriteItems, watchedShowItems],
+  );
+
   const [activeFavoriteIndex, setActiveFavoriteIndex] = useState(0);
 
   const clampedActiveIndex = useMemo(() => {
-    if (enrichedFavoriteItems.length === 0) return 0;
-    return Math.min(Math.max(0, activeFavoriteIndex), enrichedFavoriteItems.length - 1);
-  }, [activeFavoriteIndex, enrichedFavoriteItems.length]);
+    if (allHomeItems.length === 0) return 0;
+    return Math.min(Math.max(0, activeFavoriteIndex), allHomeItems.length - 1);
+  }, [activeFavoriteIndex, allHomeItems.length]);
 
   const markMovieWatchedMutation = useMutation({
     mutationFn: (mediaId: string) => watchedProgressRepository.setMovieWatched(mediaId, true),
@@ -223,6 +352,27 @@ export function HomeContainer(): ReactElement {
     onError: (err) => {
       console.error("[HomeContainer] markMovieWatched failed:", err);
       Toast.show({ type: "error", text1: "Failed to mark as watched. Please try again." });
+    },
+  });
+
+  const autoFavoriteMutation = useMutation({
+    mutationFn: async (input: { id: string; title: string; mediaType: "movie" | "series"; url?: string }) => {
+      const exists = await favoriteRepository.exists(input.id);
+      if (!exists) {
+        await favoriteRepository.add({
+          id: input.id,
+          title: input.title,
+          mediaType: input.mediaType,
+          url: input.url,
+          source: "catalog",
+        });
+      }
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryOptions.movies.favorites.queryKey });
+    },
+    onError: (err) => {
+      console.error("[HomeContainer] autoFavorite failed:", err);
     },
   });
 
@@ -298,23 +448,35 @@ export function HomeContainer(): ReactElement {
           seasonNumber,
           episodeNumber,
         });
+        await autoFavoriteMutation.mutateAsync({
+          id: item.key,
+          title: item.title,
+          mediaType: "series",
+          url: item.imageSrc,
+        });
       } else if (item.mediaType === "movie") {
         await markMovieWatchedMutation.mutateAsync(item.key);
+        await autoFavoriteMutation.mutateAsync({
+          id: item.key,
+          title: item.title,
+          mediaType: "movie",
+          url: item.imageSrc,
+        });
       }
       return true;
     },
-    [markEpisodeWatchedMutation, markMovieWatchedMutation],
+    [markEpisodeWatchedMutation, markMovieWatchedMutation, autoFavoriteMutation],
   );
 
   const handleNavigateNext = useCallback((): void => {
-    if (enrichedFavoriteItems.length === 0) return;
-    setActiveFavoriteIndex((prev) => (prev + 1) % enrichedFavoriteItems.length);
-  }, [enrichedFavoriteItems.length]);
+    if (allHomeItems.length === 0) return;
+    setActiveFavoriteIndex((prev) => (prev + 1) % allHomeItems.length);
+  }, [allHomeItems.length]);
 
   const handleNavigatePrev = useCallback((): void => {
-    if (enrichedFavoriteItems.length === 0) return;
-    setActiveFavoriteIndex((prev) => (prev - 1 + enrichedFavoriteItems.length) % enrichedFavoriteItems.length);
-  }, [enrichedFavoriteItems.length]);
+    if (allHomeItems.length === 0) return;
+    setActiveFavoriteIndex((prev) => (prev - 1 + allHomeItems.length) % allHomeItems.length);
+  }, [allHomeItems.length]);
 
   const handleMarkWatchedAndAdvance = useCallback(
     async (item: PosterQueueItem): Promise<void> => {
@@ -369,7 +531,7 @@ export function HomeContainer(): ReactElement {
     <PosterQueueView
       isLoading={isLoading}
       errorMessage={error?.message}
-      items={enrichedFavoriteItems}
+      items={allHomeItems}
       currentIndex={clampedActiveIndex}
       onOpenDetails={handleOpenDetails}
       onMarkWatched={handleMarkWatchedAndAdvance}
