@@ -5,6 +5,7 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import type { MasonryItemData } from "./Masonry";
 import type { ReactElement } from "react";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
+import { createMediaShareUrl } from "@/domain/utils/shareMedia";
 
 interface MasonryItemProps {
   item: MasonryItemData;
@@ -145,9 +146,27 @@ export function MasonryItem({
   };
 
   const handleSharePress = (): void => {
+    if (!item.key || !item.mediaType) {
+      void Share.share({
+        title: item.title,
+        message: item.title,
+      });
+      return;
+    }
+    const url = createMediaShareUrl({
+      id: item.key,
+      mediaType: item.mediaType,
+      title: item.title,
+      imageSrc: item.imageSrc,
+      description: item.description,
+      cast: item.cast,
+      releaseDate: item.releaseDate,
+      whereToWatch: item.whereToWatch,
+      seasons: item.seasons,
+    });
     void Share.share({
       title: item.title,
-      message: item.title,
+      message: url,
     });
   };
 

@@ -6,8 +6,10 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import type { Season } from "@/domain/entities/Movie";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 import Toast from "react-native-toast-message";
+import { createMediaShareUrl } from "@/domain/utils/shareMedia";
 
 interface DetailsViewProps {
+  id: string;
   isLoading: boolean;
   errorMessage?: string;
   title: string;
@@ -65,6 +67,7 @@ function DetailRow({ label, value }: { label: string; value: string }): ReactEle
 }
 
 export function DetailsView({
+  id,
   isLoading,
   errorMessage,
   title,
@@ -91,7 +94,8 @@ export function DetailsView({
   const episodeProgressPercent = seriesProgress.total > 0 ? Math.round((seriesProgress.watched / seriesProgress.total) * 100) : 0;
 
   const handleShare = (): void => {
-    const sharePromise = Share.share({ title, message: title });
+    const url = createMediaShareUrl({ id, mediaType, title, imageSrc, description, cast, releaseDate, whereToWatch, seasons });
+    const sharePromise = Share.share({ title, message: url });
     void sharePromise.catch(() => {
       Toast.show({
         type: "info",
