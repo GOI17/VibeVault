@@ -262,6 +262,7 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
 
   return (
     <DetailsView
+      id={params.id}
       isLoading={showBlockingLoading}
       errorMessage={blockingErrorMessage}
       title={title}

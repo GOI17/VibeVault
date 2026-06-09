@@ -21,6 +21,7 @@ import { client } from "@/constants/RQClient";
 import { SeasonSchema } from "@/domain/entities/Movie";
 import { RepositoryProvider } from "@/providers/RepositoryProvider";
 import { ThemePreferenceProvider, useThemePreference } from "@/providers/ThemePreferenceProvider";
+import { safeParseSharedMediaPayload } from "@/domain/utils/mediaShare";
 import NotFoundScreen from "./+not-found";
 import TabNavigator from "./tabs/_layout";
 import SearchScreen from "./home/search/query";
@@ -189,6 +190,7 @@ const linking: LinkingOptions<RootStackParamList> = {
       Details: {
         path: 'details/:id',
         parse: {
+          id: String,
           cast: (value: string) =>
             value
               .split(',')
@@ -204,6 +206,19 @@ const linking: LinkingOptions<RootStackParamList> = {
               const parsed: unknown = JSON.parse(value);
               const seasonsResult = SeasonSchema.array().safeParse(parsed);
               return seasonsResult.success ? seasonsResult.data : undefined;
+            } catch {
+              return undefined;
+            }
+          },
+          shared: (value: string) => {
+            if (!value || typeof value !== "string") {
+              return undefined;
+            }
+            try {
+              const decoded = decodeURIComponent(value);
+              const parsed = JSON.parse(decoded);
+              const payload = safeParseSharedMediaPayload(parsed);
+              return payload ?? undefined;
             } catch {
               return undefined;
             }
