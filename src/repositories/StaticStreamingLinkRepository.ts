@@ -1,5 +1,6 @@
 import type { IStreamingLinkRepository } from "@/domain/repositories/IStreamingLinkRepository";
 import {
+  buildStreamingHomeLink,
   buildStreamingLink,
   normalizeProviderName,
   type StreamingLink,
@@ -35,7 +36,8 @@ export class StaticStreamingLinkRepository implements IStreamingLinkRepository {
 
     const platformId = resolver(platform);
     if (!platformId) {
-      return null;
+      // Temporary fallback: link to the platform home page until structured IDs arrive.
+      return buildStreamingHomeLink(platform);
     }
 
     return this.resolve({ platform, platformId });

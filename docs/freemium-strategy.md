@@ -200,3 +200,30 @@ For premium features, introduce:
 - `IHistorySyncRepository` for cloud history sync.
 
 Keep all provider-specific logic inside the corresponding repository so the UI only sees normalized domain types.
+
+## ChatGPT Memory Context
+
+El usuario compartió una conversación previa con ChatGPT (Business advisor) sobre el roadmap de VibeVault. El extracto completo está en `docs/chatgpt-memory-extract.md`.
+
+Puntos clave que afectan la estrategia freemium:
+
+- **Horizonte temporal:** los próximos 12 meses se enfocan en retención (WAU), no en ingresos.
+- **Monetización es P3**, solo después de 100+ WAU y una base de shareability funcional.
+- **Shareability sin backend** es el puente: deep links, imágenes, cards, static exports.
+- **Public profiles / public lists / rewind** se mantienen en la visión, pero requieren un backend de *publicación* (no social graph) más adelante.
+- **Social graph** (followers, feeds, comments, reactions) se diferirá por completo.
+- **Rewind** se genera localmente como imagen/PDF/deep link; no tiene URL pública en fase A.
+
+Esto confirma que el freemium debe construirse sobre:
+
+1. Local-first tracking sólido.
+2. Shareability (deep links) lista y funcional.
+3. Monetización ad-free que desbloquee comodidades, no funcionalidades básicas:
+   - notificaciones de nuevo contenido,
+   - deep links directos a plataformas ("dónde verlo"),
+   - export/historial sin límites artificiales.
+
+Por lo tanto, en la implementación inmediata priorizamos:
+- mejorar la superficie de share existente,
+- agregar deep links de plataformas como funcionalidad premium,
+- dejar perfiles/listas públicas como roadmap futuro (P4) con backend de publicación.

@@ -10,6 +10,8 @@ import { inferMovieMediaType, SeasonSchema } from "@/domain/entities/Movie";
 import { createEpisodeWatchedKey } from "@/domain/entities/WatchedProgress";
 import { queryOptions } from "@/constants/query";
 import { useFavoriteMutations } from "@/hooks/useFavoriteMutations";
+import { useSubscription } from "@/providers/SubscriptionProvider";
+import type { StreamingLink } from "@/domain/entities/StreamingPlatform";
 
 interface DetailsContainerProps {
   params: RootStackParamList["Details"];
@@ -59,7 +61,8 @@ function normalizeSeasons(
 
 export function DetailsContainer({ params }: DetailsContainerProps): ReactElement {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { movieRepository, favoriteRepository, watchedProgressRepository } = useRepositories();
+  const { movieRepository, favoriteRepository, watchedProgressRepository, streamingLinkRepository } = useRepositories();
+  const { status: subscriptionStatus } = useSubscription();
   const isManualFavorite = params.source === "manual" || params.id.startsWith("custom-");
 
   const { data, isLoading, error } = useQuery({
@@ -107,6 +110,20 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
   const whereToWatch = normalizeStringList(
     data?.whereToWatch ?? manualDetails?.whereToWatch ?? params.whereToWatch
   );
+
+  const streamingLinks: StreamingLink[] = useMemo(() => {
+    // Premium-only: direct deep links from structured availability.
+    if (subscriptionStatus?.tier !== "premium" || !subscriptionStatus.isActive) {
+      return [];
+    }
+
+    const rawAvailability = data?.whereToWatch ?? manualDetails?.whereToWatch ?? params.whereToWatch;
+    const list = normalizeStringList(rawAvailability) ?? [];
+
+    return list
+      .map((entry) => streamingLinkRepository.resolveFromText(entry, () => undefined))
+      .filter((link): link is StreamingLink => link !== null);
+  }, [subscriptionStatus, data?.whereToWatch, manualDetails?.whereToWatch, params.whereToWatch, streamingLinkRepository]);
   const seasons = normalizeSeasons(data?.seasons ?? manualDetails?.seasons ?? params.seasons);
   const imageSrc = data?.primaryImage?.url || manualDetails?.url || params.imageSrc;
 
@@ -270,6 +287,7 @@ export function DetailsContainer({ params }: DetailsContainerProps): ReactElemen
       cast={cast}
       releaseDate={releaseDate}
       whereToWatch={whereToWatch}
+      streamingLinks={streamingLinks}
       seasons={seasons}
       imageSrc={imageSrc}
       mediaType={mediaType}

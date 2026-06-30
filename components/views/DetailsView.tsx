@@ -7,6 +7,9 @@ import type { Season } from "@/domain/entities/Movie";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 import Toast from "react-native-toast-message";
 import { createMediaShareUrl } from "@/domain/utils/shareMedia";
+import { StreamingLinks } from "@/components/premium/StreamingLinks";
+import { PremiumGate } from "@/components/premium/PremiumGate";
+import type { StreamingLink } from "@/domain/entities/StreamingPlatform";
 
 interface DetailsViewProps {
   id: string;
@@ -17,6 +20,7 @@ interface DetailsViewProps {
   cast?: string[];
   releaseDate?: string;
   whereToWatch?: string[];
+  streamingLinks?: StreamingLink[];
   seasons?: Season[];
   imageSrc?: string;
   mediaType: "movie" | "series";
@@ -75,6 +79,7 @@ export function DetailsView({
   cast,
   releaseDate,
   whereToWatch,
+  streamingLinks,
   seasons,
   imageSrc,
   mediaType,
@@ -305,6 +310,15 @@ export function DetailsView({
           <View>
             <DetailRow label="Cast" value={cast && cast.length > 0 ? cast.join(", ") : "Not available"} />
             <DetailRow label="Where to Watch" value={whereToWatch && whereToWatch.length > 0 ? whereToWatch.join(", ") : "Not available"} />
+            <View style={{ borderTopColor: palette.shellBorder, borderTopWidth: 1, paddingVertical: 10, gap: 10 }}>
+              <Text style={{ color: palette.shellMutedText, fontSize: 14 }}>Watch Now</Text>
+              <PremiumGate
+                title="Premium Streaming Links"
+                description="Upgrade to premium to open Netflix, Prime Video, Disney+ and more directly from this title."
+              >
+                <StreamingLinks links={streamingLinks ?? []} />
+              </PremiumGate>
+            </View>
             <View
               style={{
                 borderTopColor: palette.shellBorder,

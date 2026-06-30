@@ -121,6 +121,30 @@ export function buildStreamingLink(input: StreamingLinkInput): StreamingLink {
   }
 }
 
+
+const HOME_URLS: Record<StreamingPlatform, string> = {
+  Netflix: "https://www.netflix.com",
+  "Prime Video": "https://www.primevideo.com",
+  "Disney+": "https://www.disneyplus.com",
+  "Apple TV+": "https://tv.apple.com",
+  Max: "https://www.max.com",
+  Hulu: "https://www.hulu.com",
+  "Paramount+": "https://www.paramountplus.com",
+  YouTube: "https://www.youtube.com",
+};
+
+/**
+ * Build a link to the platform home page when no title-specific ID is available.
+ * This is a temporary fallback while structured availability data is not yet integrated.
+ */
+export function buildStreamingHomeLink(platform: StreamingPlatform): StreamingLink {
+  return {
+    platform,
+    platformId: "",
+    webUrl: HOME_URLS[platform],
+  };
+}
+
 /**
  * Normalize a free-text provider name to a known StreamingPlatform, if possible.
  * Used when importing availability data from external sources.
