@@ -41,7 +41,7 @@ Anything that does not directly increase activation, retention, or organic distr
 
 ## Phases
 
-### P0 — Analytics Foundation
+### P0 — Analytics Foundation ✅
 
 Goal: know what is happening before we decide what to build.
 
@@ -73,12 +73,12 @@ Milestone: any tracking action takes fewer than 3 taps.
 | Manual favorites | ✅ |
 | Update progress | ✅ |
 
-Remaining polish:
+Remaining polish (non-blocking):
 - Search suggestions latency and error states.
 - Empty states for all flows.
 - Gesture / accessibility pass on poster queue.
 
-### P2 — Shareability
+### P2 — Shareability ✅
 
 Goal: every user can generate shareable content without a backend.
 
@@ -88,8 +88,8 @@ Milestone: a user can share a title or a rewind as a link, image, or card.
 |---|---|
 | Deep-link into details (PR #77) | ✅ |
 | Streaming-platform deep links (premium) | ✅ |
-| Shareable title card / image | ⬜ |
-| Device-generated yearly rewind (image/PDF) | ⬜ |
+| Shareable title card / image | ✅ |
+| Device-generated yearly rewind (image/PDF) | ✅ |
 
 Technical constraint: **no backend**. All artifacts are generated locally from AsyncStorage data.
 
