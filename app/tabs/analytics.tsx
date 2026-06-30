@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, type ReactElement } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { useRepositories } from "@/providers/RepositoryProvider";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 import type { AnalyticsEventKind } from "@/domain/entities/Analytics";
+import {
+  analyticsStoreToCsv,
+  analyticsStoreToJson,
+} from "@/domain/utils/analyticsCsv";
 
 const EVENT_LABELS: Record<AnalyticsEventKind, string> = {
   app_open: "App opens",
@@ -17,7 +21,7 @@ const EVENT_LABELS: Record<AnalyticsEventKind, string> = {
 };
 
 export default function AnalyticsScreen(): ReactElement {
-  const { analyticsRepository } = useRepositories();
+  const { analyticsRepository, exportRepository } = useRepositories();
   const { palette } = useThemePreference();
 
   const { data: store } = useQuery({
@@ -43,6 +47,22 @@ export default function AnalyticsScreen(): ReactElement {
       return acc;
     }, initial);
   }, [store]);
+
+  const handleExportJson = async (): Promise<void> => {
+    const exported = await analyticsRepository.exportEvents();
+    const content = analyticsStoreToJson(exported);
+    await exportRepository.shareText(
+      "vibevault-analytics.json",
+      "application/json",
+      content
+    );
+  };
+
+  const handleExportCsv = async (): Promise<void> => {
+    const exported = await analyticsRepository.exportEvents();
+    const content = analyticsStoreToCsv(exported);
+    await exportRepository.shareText("vibevault-analytics.csv", "text/csv", content);
+  };
 
   return (
     <ScrollView
@@ -76,6 +96,38 @@ export default function AnalyticsScreen(): ReactElement {
           </Text>
         </View>
       ))}
+
+      <View style={{ flexDirection: "row", gap: 10, marginTop: 8 }}>
+        <Pressable
+          onPress={() => void handleExportJson()}
+          accessibilityRole="button"
+          accessibilityLabel="Export analytics as JSON"
+          style={{
+            flex: 1,
+            backgroundColor: palette.shellChipActive,
+            borderRadius: 8,
+            paddingVertical: 12,
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ color: palette.shellChipTextActive, fontWeight: "800" }}>Export JSON</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => void handleExportCsv()}
+          accessibilityRole="button"
+          accessibilityLabel="Export analytics as CSV"
+          style={{
+            flex: 1,
+            backgroundColor: palette.shellChipIdle,
+            borderRadius: 8,
+            paddingVertical: 12,
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ color: palette.shellChipTextIdle, fontWeight: "800" }}>Export CSV</Text>
+        </Pressable>
+      </View>
     </ScrollView>
   );
 }

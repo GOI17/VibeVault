@@ -14,6 +14,8 @@ import { StaticStreamingLinkRepository } from "@/repositories/StaticStreamingLin
 import { LocalSubscriptionRepository } from "@/repositories/LocalSubscriptionRepository";
 import type { IAnalyticsRepository } from "@/domain/repositories/IAnalyticsRepository";
 import { AsyncStorageAnalyticsRepository } from "@/repositories/AsyncStorageAnalyticsRepository";
+import type { IExportRepository } from "@/domain/repositories/IExportRepository";
+import { ExpoExportRepository } from "@/repositories/ExpoExportRepository";
 import { getStoredToken, signInWithGoogle } from "@/repositories/googleAuth";
 
 interface RepositoryContextType {
@@ -24,6 +26,7 @@ interface RepositoryContextType {
   streamingLinkRepository: IStreamingLinkRepository;
   subscriptionRepository: ISubscriptionRepository;
   analyticsRepository: IAnalyticsRepository;
+  exportRepository: IExportRepository;
 }
 
 const RepositoryContext = createContext<RepositoryContextType | undefined>(
@@ -47,6 +50,7 @@ export function RepositoryProvider({ children }: RepositoryProviderProps): React
       streamingLinkRepository: new StaticStreamingLinkRepository(),
       subscriptionRepository: new LocalSubscriptionRepository(),
       analyticsRepository: new AsyncStorageAnalyticsRepository(),
+      exportRepository: new ExpoExportRepository(),
     };
   }, []);
 
