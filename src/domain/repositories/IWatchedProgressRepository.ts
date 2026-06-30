@@ -2,6 +2,7 @@ import type {
   WatchedEpisode,
   WatchedEpisodeInput,
   WatchedMovie,
+  WatchedProgressStore,
 } from "@/domain/entities/WatchedProgress";
 
 export interface IWatchedProgressRepository {
@@ -16,4 +17,10 @@ export interface IWatchedProgressRepository {
   clearMediaProgress(mediaId: string): Promise<void>;
 
   getAllWatchedShows(): Promise<string[]>;
+
+  /**
+   * Export the full local watched-progress store.
+   * Used for device-generated rewind and analytics exports.
+   */
+  exportStore(): Promise<WatchedProgressStore>;
 }

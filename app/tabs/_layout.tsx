@@ -8,6 +8,7 @@ import HomeScreen from "./home";
 import FavoritesScreen from "./favorites";
 import AnalyticsScreen from "./analytics";
 import RoadmapScreen from "./roadmap";
+import RewindScreen from "./rewind";
 
 const Stack = createStackNavigator<TabParamList>();
 
@@ -38,6 +39,11 @@ export default function TabNavigator(): ReactElement {
           name="Roadmap"
           component={RoadmapScreen}
           options={{ title: "Roadmap" }}
+        />
+        <Stack.Screen
+          name="Rewind"
+          component={RewindScreen}
+          options={{ title: "Rewind" }}
         />
       </Stack.Navigator>
     </View>

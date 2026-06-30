@@ -7,6 +7,7 @@ export type TabParamList = {
   Favorites: undefined;
   Analytics: undefined;
   Roadmap: undefined;
+  Rewind: undefined;
 };
 
 export type RootStackParamList = {
