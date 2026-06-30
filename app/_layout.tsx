@@ -19,8 +19,9 @@ import { HeaderContainer } from "@/containers/HeaderContainer";
 import { LeftHeaderContent } from "@/components/common/LeftHeaderContent";
 import { client } from "@/constants/RQClient";
 import { SeasonSchema } from "@/domain/entities/Movie";
-import { RepositoryProvider } from "@/providers/RepositoryProvider";
 import { SubscriptionProvider } from "@/providers/SubscriptionProvider";
+import { AnalyticsProvider } from "@/providers/AnalyticsProvider";
+import { RepositoryProvider, useRepositories } from "@/providers/RepositoryProvider";
 import { ThemePreferenceProvider, useThemePreference } from "@/providers/ThemePreferenceProvider";
 import { safeParseSharedMediaPayload } from "@/domain/utils/mediaShare";
 import NotFoundScreen from "./+not-found";
@@ -366,6 +367,20 @@ function RootNavigator(): ReactElement {
   );
 }
 
+function AppProviders({ children }: { children: React.ReactNode }): ReactElement {
+  const { analyticsRepository } = useRepositories();
+
+  return (
+    <SubscriptionProvider>
+      <AnalyticsProvider repository={analyticsRepository}>
+        <ThemePreferenceProvider>
+          {children}
+        </ThemePreferenceProvider>
+      </AnalyticsProvider>
+    </SubscriptionProvider>
+  );
+}
+
 export default function RootLayout(): ReactElement | null {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
@@ -378,12 +393,10 @@ export default function RootLayout(): ReactElement | null {
   return (
     <QueryClientProvider client={client}>
       <RepositoryProvider>
-        <SubscriptionProvider>
-          <ThemePreferenceProvider>
+        <AppProviders>
           <RootNavigator />
           <ThemedToast />
-          </ThemePreferenceProvider>
-        </SubscriptionProvider>
+        </AppProviders>
       </RepositoryProvider>
     </QueryClientProvider>
   );

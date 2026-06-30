@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { QueryKey } from "@tanstack/react-query";
 import { useRepositories } from "@/providers/RepositoryProvider";
+import { useAnalytics } from "@/providers/AnalyticsProvider";
 import type { Favorite, FavoriteInput, MediaType } from "@/domain/entities/Favorite";
 import { queryOptions } from "@/constants/query";
 
@@ -26,6 +27,7 @@ export function useFavoriteMutations(
 ): UseFavoriteMutationsResult {
   const queryClient = useQueryClient();
   const { favoriteRepository } = useRepositories();
+  const { track } = useAnalytics();
 
   const getFavoriteSnapshots = (): FavoriteQuerySnapshot[] =>
     queryClient.getQueriesData<Favorite[]>({
@@ -86,8 +88,9 @@ export function useFavoriteMutations(
 
       return { snapshots };
     },
-    onSuccess: (_data, variables) => {
+    onSuccess: async (_data, variables) => {
       onAddSuccess?.(variables.id);
+      await track("first_favorite", { id: variables.id, title: variables.title });
       queryClient.invalidateQueries({
         queryKey: queryOptions.movies.favorites.queryKey,
       });

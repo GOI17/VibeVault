@@ -12,6 +12,8 @@ import { GoogleDriveBackupRepository } from "@/repositories/GoogleDriveBackupRep
 import { AsyncStorageWatchedProgressRepository } from "@/repositories/AsyncStorageWatchedProgressRepository";
 import { StaticStreamingLinkRepository } from "@/repositories/StaticStreamingLinkRepository";
 import { LocalSubscriptionRepository } from "@/repositories/LocalSubscriptionRepository";
+import type { IAnalyticsRepository } from "@/domain/repositories/IAnalyticsRepository";
+import { AsyncStorageAnalyticsRepository } from "@/repositories/AsyncStorageAnalyticsRepository";
 import { getStoredToken, signInWithGoogle } from "@/repositories/googleAuth";
 
 interface RepositoryContextType {
@@ -21,6 +23,7 @@ interface RepositoryContextType {
   watchedProgressRepository: IWatchedProgressRepository;
   streamingLinkRepository: IStreamingLinkRepository;
   subscriptionRepository: ISubscriptionRepository;
+  analyticsRepository: IAnalyticsRepository;
 }
 
 const RepositoryContext = createContext<RepositoryContextType | undefined>(
@@ -43,6 +46,7 @@ export function RepositoryProvider({ children }: RepositoryProviderProps): React
       watchedProgressRepository: new AsyncStorageWatchedProgressRepository(),
       streamingLinkRepository: new StaticStreamingLinkRepository(),
       subscriptionRepository: new LocalSubscriptionRepository(),
+      analyticsRepository: new AsyncStorageAnalyticsRepository(),
     };
   }, []);
 

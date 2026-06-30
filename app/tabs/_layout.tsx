@@ -6,6 +6,8 @@ import type { TabParamList } from "@/app/navigation/types";
 
 import HomeScreen from "./home";
 import FavoritesScreen from "./favorites";
+import AnalyticsScreen from "./analytics";
+import RoadmapScreen from "./roadmap";
 
 const Stack = createStackNavigator<TabParamList>();
 
@@ -26,6 +28,16 @@ export default function TabNavigator(): ReactElement {
           name="Favorites"
           component={FavoritesScreen}
           options={{ title: "Favorites" }}
+        />
+        <Stack.Screen
+          name="Analytics"
+          component={AnalyticsScreen}
+          options={{ title: "Analytics" }}
+        />
+        <Stack.Screen
+          name="Roadmap"
+          component={RoadmapScreen}
+          options={{ title: "Roadmap" }}
         />
       </Stack.Navigator>
     </View>

@@ -1,12 +1,12 @@
 import { Image } from "expo-image";
 import type { ReactElement } from "react";
-import { Pressable, ScrollView, Share, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import type { Season } from "@/domain/entities/Movie";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 import Toast from "react-native-toast-message";
-import { createMediaShareUrl } from "@/domain/utils/shareMedia";
+import { useShare } from "@/hooks/useShare";
 import { StreamingLinks } from "@/components/premium/StreamingLinks";
 import { PremiumGate } from "@/components/premium/PremiumGate";
 import type { StreamingLink } from "@/domain/entities/StreamingPlatform";
@@ -98,10 +98,9 @@ export function DetailsView({
   const metadata = formatMetadata({ releaseDate, seasons, mediaType });
   const episodeProgressPercent = seriesProgress.total > 0 ? Math.round((seriesProgress.watched / seriesProgress.total) * 100) : 0;
 
+  const share = useShare();
   const handleShare = (): void => {
-    const url = createMediaShareUrl({ id, mediaType, title, imageSrc, description, cast, releaseDate, whereToWatch, seasons });
-    const sharePromise = Share.share({ title, message: url });
-    void sharePromise.catch(() => {
+    void share({ id, mediaType, title, imageSrc, description, cast, releaseDate, whereToWatch, seasons }).catch(() => {
       Toast.show({
         type: "info",
         text1: "Share unavailable",
