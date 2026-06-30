@@ -7,6 +7,8 @@ import type { ReactElement } from "react";
 
 import { ManualSeriesSeasonsSchema } from "@/domain/entities/ManualFavorite";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
+import { PlatformEnum, type Platform } from "@/domain/entities/Favorite";
+import { getStreamingPlatformLabel } from "@/domain/entities/StreamingPlatform";
 
 const RequiredText = (label: string) => z.string().trim().min(1, `${label} is required`);
 const RequiredCsvText = (label: string) =>
@@ -46,9 +48,7 @@ export const AddFavoriteFormSchema = z
         { message: "Invalid URL format" }
       )
       .optional(),
-    platform: z
-      .enum(["Spotify", "Deezer", "Tidal", "Netflix", "Hulu", "Disney+"])
-      .optional(), // Optional per product decision
+    platform: PlatformEnum.optional(), // Optional per product decision
     description: RequiredText("Description"),
     cast: RequiredCsvText("Cast"),
     releaseDate: RequiredText("Release date"),
@@ -236,12 +236,13 @@ export function AddFavoriteForm({ onSubmit }: AddFavoriteFormProps): ReactElemen
             }}
           >
             <Picker.Item label="Select Platform (optional)" value="" />
-            <Picker.Item label="Spotify" value="Spotify" />
-            <Picker.Item label="Deezer" value="Deezer" />
-            <Picker.Item label="Tidal" value="Tidal" />
-            <Picker.Item label="Netflix" value="Netflix" />
-            <Picker.Item label="Hulu" value="Hulu" />
-            <Picker.Item label="Disney+" value="Disney+" />
+            {PlatformEnum.options.map((platform) => (
+              <Picker.Item
+                key={platform}
+                label={getStreamingPlatformLabel(platform as Platform)}
+                value={platform}
+              />
+            ))}
           </Picker>
           {errors.platform && (
             <Text

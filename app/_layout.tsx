@@ -20,6 +20,7 @@ import { LeftHeaderContent } from "@/components/common/LeftHeaderContent";
 import { client } from "@/constants/RQClient";
 import { SeasonSchema } from "@/domain/entities/Movie";
 import { RepositoryProvider } from "@/providers/RepositoryProvider";
+import { SubscriptionProvider } from "@/providers/SubscriptionProvider";
 import { ThemePreferenceProvider, useThemePreference } from "@/providers/ThemePreferenceProvider";
 import { safeParseSharedMediaPayload } from "@/domain/utils/mediaShare";
 import NotFoundScreen from "./+not-found";
@@ -377,10 +378,12 @@ export default function RootLayout(): ReactElement | null {
   return (
     <QueryClientProvider client={client}>
       <RepositoryProvider>
-        <ThemePreferenceProvider>
+        <SubscriptionProvider>
+          <ThemePreferenceProvider>
           <RootNavigator />
           <ThemedToast />
-        </ThemePreferenceProvider>
+          </ThemePreferenceProvider>
+        </SubscriptionProvider>
       </RepositoryProvider>
     </QueryClientProvider>
   );

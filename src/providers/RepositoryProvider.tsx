@@ -3,11 +3,15 @@ import type { IFavoriteRepository } from "@/domain/repositories/IFavoriteReposit
 import type { IMovieRepository } from "@/domain/repositories/IMovieRepository";
 import type { IBackupRepository } from "@/domain/repositories/IBackupRepository";
 import type { IWatchedProgressRepository } from "@/domain/repositories/IWatchedProgressRepository";
+import type { IStreamingLinkRepository } from "@/domain/repositories/IStreamingLinkRepository";
+import type { ISubscriptionRepository } from "@/domain/repositories/ISubscriptionRepository";
 import type { Favorite } from "@/domain/entities/Favorite";
 import { AsyncStorageFavoriteRepository } from "@/repositories/AsyncStorageFavoriteRepository";
 import { APIMovieRepository } from "@/repositories/APIMovieRepository";
 import { GoogleDriveBackupRepository } from "@/repositories/GoogleDriveBackupRepository";
 import { AsyncStorageWatchedProgressRepository } from "@/repositories/AsyncStorageWatchedProgressRepository";
+import { StaticStreamingLinkRepository } from "@/repositories/StaticStreamingLinkRepository";
+import { LocalSubscriptionRepository } from "@/repositories/LocalSubscriptionRepository";
 import { getStoredToken, signInWithGoogle } from "@/repositories/googleAuth";
 
 interface RepositoryContextType {
@@ -15,6 +19,8 @@ interface RepositoryContextType {
   movieRepository: IMovieRepository;
   backupRepository: IBackupRepository<Favorite>;
   watchedProgressRepository: IWatchedProgressRepository;
+  streamingLinkRepository: IStreamingLinkRepository;
+  subscriptionRepository: ISubscriptionRepository;
 }
 
 const RepositoryContext = createContext<RepositoryContextType | undefined>(
@@ -35,6 +41,8 @@ export function RepositoryProvider({ children }: RepositoryProviderProps): React
         getStoredToken,
       }),
       watchedProgressRepository: new AsyncStorageWatchedProgressRepository(),
+      streamingLinkRepository: new StaticStreamingLinkRepository(),
+      subscriptionRepository: new LocalSubscriptionRepository(),
     };
   }, []);
 
