@@ -19,7 +19,10 @@ import { HeaderContainer } from "@/containers/HeaderContainer";
 import { LeftHeaderContent } from "@/components/common/LeftHeaderContent";
 import { client } from "@/constants/RQClient";
 import { SeasonSchema } from "@/domain/entities/Movie";
-import { RepositoryProvider } from "@/providers/RepositoryProvider";
+import { SubscriptionProvider } from "@/providers/SubscriptionProvider";
+import { PublishingProvider } from "@/providers/PublishingProvider";
+import { AnalyticsProvider } from "@/providers/AnalyticsProvider";
+import { RepositoryProvider, useRepositories } from "@/providers/RepositoryProvider";
 import { ThemePreferenceProvider, useThemePreference } from "@/providers/ThemePreferenceProvider";
 import { safeParseSharedMediaPayload } from "@/domain/utils/mediaShare";
 import NotFoundScreen from "./+not-found";
@@ -27,6 +30,7 @@ import TabNavigator from "./tabs/_layout";
 import SearchScreen from "./home/search/query";
 import DetailsScreen from "./home/details/[id]";
 import EpisodeListScreen from "./home/details/episodes";
+import PublicProfileScreen from "./home/profile/[handle]";
 import type { RootStackParamList } from "./navigation/types";
 
 interface ToastInfoProps {
@@ -184,6 +188,11 @@ const linking: LinkingOptions<RootStackParamList> = {
         screens: {
           Home: 'home',
           Favorites: 'favorites',
+          Analytics: 'analytics',
+          Roadmap: 'roadmap',
+          Rewind: 'rewind',
+          Publish: 'publish',
+          Social: 'social',
         },
       },
       Search: 'search',
@@ -266,6 +275,7 @@ const linking: LinkingOptions<RootStackParamList> = {
         },
       },
       NotFound: '404',
+      PublicProfile: { path: 'u/:handle', parse: { handle: String } },
     },
   },
 };
@@ -358,10 +368,48 @@ function RootNavigator(): ReactElement {
               ),
             })}
           />
+          <Stack.Screen
+            name="PublicProfile"
+            component={PublicProfileScreen}
+            options={({ navigation, route }) => ({
+              title: route.params.handle,
+              headerStyle: {
+                backgroundColor: palette.shellBackground,
+                borderBottomColor: palette.shellBorder,
+                borderBottomWidth: 1,
+                elevation: 0,
+                shadowOpacity: 0,
+              },
+              headerShadowVisible: false,
+              headerTintColor: palette.text,
+              headerLeft: () => (
+                <LeftHeaderContent
+                  showBackButton
+                  onBackPress={handleBackPress(navigation)}
+                  tintColor={palette.text}
+                  backgroundColor={palette.shellBackground}
+                />
+              ),
+            })}
+          />
           <Stack.Screen name="NotFound" component={NotFoundScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </ThemeProvider>
+  );
+}
+
+function AppProviders({ children }: { children: React.ReactNode }): ReactElement {
+  const { analyticsRepository } = useRepositories();
+
+  return (
+    <SubscriptionProvider>
+      <AnalyticsProvider repository={analyticsRepository}>
+        <ThemePreferenceProvider>
+          {children}
+        </ThemePreferenceProvider>
+      </AnalyticsProvider>
+    </SubscriptionProvider>
   );
 }
 
@@ -377,10 +425,12 @@ export default function RootLayout(): ReactElement | null {
   return (
     <QueryClientProvider client={client}>
       <RepositoryProvider>
-        <ThemePreferenceProvider>
-          <RootNavigator />
-          <ThemedToast />
-        </ThemePreferenceProvider>
+        <PublishingProvider>
+          <AppProviders>
+            <RootNavigator />
+            <ThemedToast />
+          </AppProviders>
+        </PublishingProvider>
       </RepositoryProvider>
     </QueryClientProvider>
   );

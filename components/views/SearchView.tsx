@@ -2,6 +2,8 @@ import { type ReactElement } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 
 import MasonryList, { type MasonryItemData } from "@/components/Masonry";
+import { EmptyState } from "@/components/common/EmptyState";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 interface SearchViewProps {
@@ -42,7 +44,7 @@ export function SearchView({
     return (
       <View style={{ backgroundColor: palette.shellBackground, flex: 1 }}>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
-          <Text style={{ color: palette.text, fontSize: 18 }}>Searching for &quot;{query}&quot;...</Text>
+          <EmptyState title={`Searching for "${query}"...`} />
         </View>
       </View>
     );
@@ -52,8 +54,10 @@ export function SearchView({
     return (
       <View style={{ backgroundColor: palette.shellBackground, flex: 1 }}>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
-          <Text style={{ color: palette.text, fontSize: 18 }}>Error searching for &quot;{query}&quot;</Text>
-          <Text style={{ color: palette.shellMutedText, fontSize: 14, marginTop: 10 }}>{errorMessage}</Text>
+          <EmptyState
+            title={`Error searching for "${query}"`}
+            message={errorMessage}
+          />
           <TouchableOpacity
             onPress={hasReachedMaxRetries ? onGoHome : onRetrySearch}
             disabled={!hasReachedMaxRetries && isRetrying}
@@ -84,21 +88,29 @@ export function SearchView({
     );
   }
 
-  return (
-    <View style={{ flex: 1, minHeight: 0, backgroundColor: palette.shellBackground }}>
-      <View style={{ flex: 1, minHeight: 0 }}>
-        <MasonryList
-          data={data}
-          isFavorites={false}
-          showLayoutToggle={false}
-          forceListOnMobile
-          topInset={16}
-          favoriteIds={favoriteIds}
-          onAddFavorite={onAddFavorite}
-          onRemoveFavorite={onRemoveFavorite}
-          onOpenDetails={onOpenDetails}
-        />
+  if (data.length === 0) {
+    return (
+      <View style={{ backgroundColor: palette.shellBackground, flex: 1 }}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
+          <EmptyState
+            icon={<IconSymbol name="magnifyingglass" size={48} color={palette.shellMutedText} />}
+            title={`No results for "${query}"`}
+            message="Try a different title or check your spelling."
+          />
+        </View>
       </View>
+    );
+  }
+
+  return (
+    <View style={{ backgroundColor: palette.shellBackground, flex: 1 }}>
+      <MasonryList
+        data={data}
+        favoriteIds={favoriteIds}
+        onAddFavorite={onAddFavorite}
+        onRemoveFavorite={onRemoveFavorite}
+        onOpenDetails={onOpenDetails}
+      />
     </View>
   );
 }

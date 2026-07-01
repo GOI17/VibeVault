@@ -42,6 +42,7 @@ const MAPPING = {
   'tv': 'live-tv',
   'eye.fill': 'visibility',
   'eye': 'visibility-off',
+  'photo': 'photo',
 } as const satisfies Record<string, MaterialIconName>;
 
 type IconSymbolName = keyof typeof MAPPING;

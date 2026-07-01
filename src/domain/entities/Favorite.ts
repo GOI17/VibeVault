@@ -1,5 +1,9 @@
 import { z } from "zod";
 import { MovieSchema, SeasonSchema } from "./Movie";
+import {
+  StreamingPlatformEnum,
+  safeParseStreamingPlatform,
+} from "./StreamingPlatform";
 
 /**
  * Media type enum for favorites
@@ -9,16 +13,13 @@ export const MediaTypeEnum = z.enum(["movie", "series"]);
 export type MediaType = z.infer<typeof MediaTypeEnum>;
 
 /**
- * Platform options for favorites
+ * Platform options for favorites.
+ *
+ * Reuses the streaming-video platform enum so favorites can link directly to
+ * Netflix, Prime Video, Disney+, etc. Legacy music-only values (Spotify,
+ * Deezer, Tidal) are dropped during migration.
  */
-export const PlatformEnum = z.enum([
-  "Spotify",
-  "Deezer",
-  "Tidal",
-  "Netflix",
-  "Hulu",
-  "Disney+",
-]);
+export const PlatformEnum = StreamingPlatformEnum;
 export type Platform = z.infer<typeof PlatformEnum>;
 
 export const FavoriteSourceEnum = z.enum(["catalog", "manual"]);
@@ -120,6 +121,20 @@ export type FavoriteInput = z.infer<typeof FavoriteInputSchema>;
 export const FavoriteArraySchema = z.array(FavoriteSchema);
 
 /**
+ * Migration-time schema.
+ *
+ * Accepts any string in the platform field and drops unknown/legacy values
+ * (e.g. Spotify, Deezer, Tidal) instead of failing validation. This keeps the
+ * rest of a stored favorite intact when the supported platform list changes.
+ */
+export const FavoriteMigrationSchema = FavoriteSchema.extend({
+  platform: z.preprocess(
+    (value) => safeParseStreamingPlatform(value),
+    PlatformEnum.optional()
+  ),
+});
+
+/**
  * Legacy Favorite schema for backward compatibility
  * Handles old data format that might not have addedAt or mediaType
  */
@@ -169,6 +184,11 @@ export function safeValidateFavorite(
   return { success: false, error: result.error };
 }
 
+function normalizeLegacyPlatform(platform?: string): Platform | undefined {
+  if (!platform) return undefined;
+  return safeParseStreamingPlatform(platform);
+}
+
 /**
  * Converts legacy favorite format to new format
  * Handles migration from old data structures
@@ -190,24 +210,15 @@ export function migrateLegacyFavorite(data: unknown): Favorite {
     addedAt = new Date().toISOString();
   }
 
+  const platform = normalizeLegacyPlatform(parsed.platform);
+
   return {
     id: parsed.id,
     title: parsed.primaryTitle, // Map primaryTitle → title
     mediaType: parsed.mediaType ?? "movie", // Default to movie if not present
     url: parsed.url,
-    platform: (() => {
-      if (!parsed.platform) return undefined;
-      const parsedPlatform = PlatformEnum.safeParse(parsed.platform);
-      return parsedPlatform.success ? parsedPlatform.data : undefined;
-    })(),
-    source: inferFavoriteSource({
-      id: parsed.id,
-      platform: (() => {
-        if (!parsed.platform) return undefined;
-        const parsedPlatform = PlatformEnum.safeParse(parsed.platform);
-        return parsedPlatform.success ? parsedPlatform.data : undefined;
-      })(),
-    }),
+    platform,
+    source: inferFavoriteSource({ id: parsed.id, platform }),
     addedAt,
   };
 }
@@ -222,16 +233,16 @@ export function validateAndMigrateFavorites(data: unknown): Favorite[] {
   }
 
   return data.map((item) => {
-    // Try new schema first
-    const newResult = FavoriteSchema.safeParse(item);
-    if (newResult.success) {
+    // Try migration schema first so unknown/legacy platforms are dropped.
+    const migrationResult = FavoriteMigrationSchema.safeParse(item);
+    if (migrationResult.success) {
       return {
-        ...newResult.data,
+        ...migrationResult.data,
         source:
-          newResult.data.source ||
+          migrationResult.data.source ||
           inferFavoriteSource({
-            id: newResult.data.id,
-            platform: newResult.data.platform,
+            id: migrationResult.data.id,
+            platform: migrationResult.data.platform,
           }),
       };
     }

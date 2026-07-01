@@ -1,12 +1,18 @@
 import { Image } from "expo-image";
 import type { ReactElement } from "react";
-import { Pressable, ScrollView, Share, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import type { Season } from "@/domain/entities/Movie";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 import Toast from "react-native-toast-message";
-import { createMediaShareUrl } from "@/domain/utils/shareMedia";
+import { useShare } from "@/hooks/useShare";
+import { useShareCardImage } from "@/hooks/useShareCardImage";
+import { ShareableTitleCard } from "@/components/premium/ShareableTitleCard";
+import { ShareActions } from "@/components/premium/ShareActions";
+import { StreamingLinks } from "@/components/premium/StreamingLinks";
+import { PremiumGate } from "@/components/premium/PremiumGate";
+import type { StreamingLink } from "@/domain/entities/StreamingPlatform";
 
 interface DetailsViewProps {
   id: string;
@@ -17,7 +23,9 @@ interface DetailsViewProps {
   cast?: string[];
   releaseDate?: string;
   whereToWatch?: string[];
+  streamingLinks?: StreamingLink[];
   seasons?: Season[];
+  onShareImage?: () => void;
   imageSrc?: string;
   mediaType: "movie" | "series";
   isFavorite: boolean;
@@ -75,7 +83,9 @@ export function DetailsView({
   cast,
   releaseDate,
   whereToWatch,
+  streamingLinks,
   seasons,
+  onShareImage,
   imageSrc,
   mediaType,
   isFavorite,
@@ -93,10 +103,11 @@ export function DetailsView({
   const metadata = formatMetadata({ releaseDate, seasons, mediaType });
   const episodeProgressPercent = seriesProgress.total > 0 ? Math.round((seriesProgress.watched / seriesProgress.total) * 100) : 0;
 
-  const handleShare = (): void => {
-    const url = createMediaShareUrl({ id, mediaType, title, imageSrc, description, cast, releaseDate, whereToWatch, seasons });
-    const sharePromise = Share.share({ title, message: url });
-    void sharePromise.catch(() => {
+  const share = useShare();
+  const { ref: cardRef, captureAndShare } = useShareCardImage();
+
+  const handleShareLink = (): void => {
+    void share({ id, mediaType, title, imageSrc, description, cast, releaseDate, whereToWatch, seasons }).catch(() => {
       Toast.show({
         type: "info",
         text1: "Share unavailable",
@@ -104,6 +115,16 @@ export function DetailsView({
         visibilityTime: 2000,
         position: "top",
       });
+    });
+  };
+
+  const handleShareImage = (): void => {
+    void captureAndShare({
+      title,
+      year: releaseDate?.slice(0, 4),
+      tagline: description,
+      imageSrc,
+      whereToWatch,
     });
   };
 
@@ -236,25 +257,7 @@ export function DetailsView({
                 <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>Episodes</Text>
               </Pressable>
             ) : (
-              <Pressable
-                onPress={handleShare}
-                accessibilityRole="button"
-                accessibilityLabel={`Share ${title}`}
-                style={{
-                  flex: 1,
-                  minHeight: 42,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: palette.shellBorder,
-                  flexDirection: "row",
-                  gap: 8,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <IconSymbol name="square.and.arrow.up" color={palette.text} size={18} />
-                <Text style={{ color: palette.text, fontSize: 15, fontWeight: "700" }}>Share</Text>
-              </Pressable>
+              <ShareActions onShareLink={handleShareLink} onShareImage={handleShareImage} />
             )}
           </View>
 
@@ -305,6 +308,15 @@ export function DetailsView({
           <View>
             <DetailRow label="Cast" value={cast && cast.length > 0 ? cast.join(", ") : "Not available"} />
             <DetailRow label="Where to Watch" value={whereToWatch && whereToWatch.length > 0 ? whereToWatch.join(", ") : "Not available"} />
+            <View style={{ borderTopColor: palette.shellBorder, borderTopWidth: 1, paddingVertical: 10, gap: 10 }}>
+              <Text style={{ color: palette.shellMutedText, fontSize: 14 }}>Watch Now</Text>
+              <PremiumGate
+                title="Premium Streaming Links"
+                description="Upgrade to premium to open Netflix, Prime Video, Disney+ and more directly from this title."
+              >
+                <StreamingLinks links={streamingLinks ?? []} />
+              </PremiumGate>
+            </View>
             <View
               style={{
                 borderTopColor: palette.shellBorder,
@@ -318,6 +330,27 @@ export function DetailsView({
               <Text style={{ color: palette.text, flex: 0.64, fontSize: 14 }}>{releaseDate || "Not available"}</Text>
             </View>
           </View>
+        </View>
+
+        {
+          /* Hidden card used as the source for the share-image capture. */
+        }
+        <View
+          ref={cardRef}
+          style={{
+            position: "absolute",
+            opacity: 0,
+            pointerEvents: "none",
+            left: -9999,
+          }}
+        >
+          <ShareableTitleCard
+            title={title}
+            year={releaseDate?.slice(0, 4)}
+            tagline={description}
+            imageSrc={imageSrc}
+            whereToWatch={whereToWatch}
+          />
         </View>
       </View>
     </ScrollView>

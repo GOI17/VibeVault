@@ -12,6 +12,8 @@ type ThemePalette = ReturnType<typeof useThemePreference>["palette"];
 interface HeaderProps {
   searchQuery: string;
   suggestions: MovieSuggestion[];
+  isLoadingSuggestions?: boolean;
+  suggestionsError?: Error | null;
   menuOpen: boolean;
   isCompact: boolean;
   topInset: number;
@@ -27,6 +29,8 @@ interface HeaderProps {
   onCloseMenu: () => void;
   onPrimaryNavigation: () => void;
   onOpenSettings: () => void;
+  onOpenPublish: () => void;
+  onOpenSocial: () => void;
   onToggleTheme: () => void;
   onBackPress: () => void;
 }
@@ -34,6 +38,8 @@ interface HeaderProps {
 export default function Header({
   searchQuery,
   suggestions,
+  isLoadingSuggestions,
+  suggestionsError,
   menuOpen,
   isCompact,
   topInset,
@@ -49,6 +55,8 @@ export default function Header({
   onCloseMenu,
   onPrimaryNavigation,
   onOpenSettings,
+  onOpenPublish,
+  onOpenSocial,
   onToggleTheme,
   onBackPress,
 }: HeaderProps): ReactElement {
@@ -68,6 +76,8 @@ export default function Header({
         <SearchInputWithSuggestions
           value={searchQuery}
           suggestions={suggestions}
+          isLoadingSuggestions={isLoadingSuggestions}
+          suggestionsError={suggestionsError}
           onChangeText={onSearchQueryChange}
           onSubmit={onSubmitSearch}
           onPressSuggestion={onPressSuggestion}
@@ -123,6 +133,24 @@ export default function Header({
               accessibilityLabel={primaryNavigationLabel}
             >
               <Text style={[styles.menuText, { color: palette.text }]}>{primaryNavigationLabel}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={onOpenPublish}
+              accessibilityRole="button"
+              accessibilityLabel="Publish"
+            >
+              <Text style={[styles.menuText, { color: palette.text }]}>Publish</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={onOpenSocial}
+              accessibilityRole="button"
+              accessibilityLabel="Social"
+            >
+              <Text style={[styles.menuText, { color: palette.text }]}>Social</Text>
             </TouchableOpacity>
 
             <TouchableOpacity

@@ -99,6 +99,10 @@ export class AsyncStorageWatchedProgressRepository implements IWatchedProgressRe
     return Array.from(showIds);
   }
 
+  async exportStore(): Promise<WatchedProgressStore> {
+    return this.readStore();
+  }
+
   private async readStore(): Promise<WatchedProgressStore> {
     const storage = await AsyncStorage.getItem(STORAGE_KEY);
 

@@ -1,8 +1,10 @@
 import type { ReactElement } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import MasonryList, { type MasonryItemData } from "@/components/Masonry";
+import { EmptyState } from "@/components/common/EmptyState";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 interface HomeViewProps {
@@ -30,7 +32,7 @@ export function HomeView({
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: palette.shellBackground }} edges={["left", "right"]}>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
-          <Text style={{ color: palette.text, fontSize: 18 }}>Loading movies...</Text>
+          <EmptyState title="Loading movies..." />
         </View>
       </SafeAreaView>
     );
@@ -40,8 +42,10 @@ export function HomeView({
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: palette.shellBackground }} edges={["left", "right"]}>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
-          <Text style={{ color: palette.text, fontSize: 18 }}>Error loading movies</Text>
-          <Text style={{ color: palette.homeMutedText, fontSize: 14, marginTop: 10 }}>{errorMessage}</Text>
+          <EmptyState
+            title="Error loading movies"
+            message={errorMessage}
+          />
         </View>
       </SafeAreaView>
     );
@@ -50,16 +54,24 @@ export function HomeView({
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: palette.shellBackground }} edges={["left", "right"]}>
       <View style={{ flex: 1 }}>
-        <MasonryList
-          data={movies}
-          isFavorites={false}
-          showLayoutToggle={false}
-          topInset={16}
-          favoriteIds={favoriteIds}
-          onAddFavorite={onAddFavorite}
-          onRemoveFavorite={onRemoveFavorite}
-          onOpenDetails={onOpenDetails}
-        />
+        {movies.length === 0 ? (
+          <EmptyState
+            icon={<IconSymbol name="movieclapper" size={48} color={palette.shellMutedText} />}
+            title="No movies to show"
+            message="Pull to refresh or search for something to watch."
+          />
+        ) : (
+          <MasonryList
+            data={movies}
+            isFavorites={false}
+            showLayoutToggle={false}
+            topInset={16}
+            favoriteIds={favoriteIds}
+            onAddFavorite={onAddFavorite}
+            onRemoveFavorite={onRemoveFavorite}
+            onOpenDetails={onOpenDetails}
+          />
+        )}
       </View>
     </SafeAreaView>
   );

@@ -11,6 +11,7 @@ import { Image } from "expo-image";
 import type { PosterQueueItem } from "./PosterQueue";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { EmptyState } from "@/components/common/EmptyState";
 import { classifySwipeGesture, type SwipeDirection } from "./PosterQueue.gesture";
 
 interface PosterQueueViewProps {
@@ -68,7 +69,19 @@ export function PosterQueueView({
     );
   }
 
-  if (items.length === 0 || currentIndex < 0 || currentIndex >= items.length) {
+  if (items.length === 0) {
+    return (
+      <View style={[styles.messageContainer, { backgroundColor: palette.shellBackground }]}>
+        <EmptyState
+          icon={<IconSymbol name="movieclapper" size={48} color={palette.shellMutedText} />}
+          title="No items to explore"
+          message="Search or browse to find movies and series to track."
+        />
+      </View>
+    );
+  }
+
+  if (currentIndex < 0 || currentIndex >= items.length) {
     return null;
   }
 

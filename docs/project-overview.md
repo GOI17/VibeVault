@@ -19,3 +19,7 @@ VibeVault is a React Native + Expo app for discovering movies and series, managi
 | Details | The full metadata screen for a title. |
 | Favorite | A locally persisted saved title. |
 | Manual favorite | A user-created favorite not sourced from the catalog feed. |
+
+## Monetization Direction
+
+VibeVault is intended to be an ad-free freemium app. See `docs/freemium-strategy.md` for the tier plan, premium features (notifications, streaming deep links, unlimited history), data-source licensing guardrails, and implementation phases.

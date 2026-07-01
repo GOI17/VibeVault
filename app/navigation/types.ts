@@ -5,6 +5,11 @@ import type { NavigatorScreenParams } from "@react-navigation/native";
 export type TabParamList = {
   Home: undefined;
   Favorites: undefined;
+  Analytics: undefined;
+  Roadmap: undefined;
+  Rewind: undefined;
+  Publish: undefined;
+  Social: undefined;
 };
 
 export type RootStackParamList = {
@@ -28,4 +33,5 @@ export type RootStackParamList = {
     seasons?: Season[];
   };
   NotFound: undefined;
+  PublicProfile: { handle: string };
 };

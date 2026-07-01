@@ -1,5 +1,6 @@
 import React, { type ReactElement, type ReactNode } from "react";
 import {
+  ActivityIndicator,
   StyleSheet,
   Text,
   TextInput,
@@ -14,10 +15,13 @@ import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 interface SearchInputWithSuggestionsProps {
   value: string;
   suggestions: MovieSuggestion[];
+  isLoadingSuggestions?: boolean;
+  suggestionsError?: Error | null;
   onChangeText: (value: string) => void;
   onSubmit: () => void;
   onPressSuggestion: (suggestion: MovieSuggestion) => void;
   onFillSuggestion: (suggestion: MovieSuggestion) => void;
+  onRetrySuggestions?: () => void;
   leadingAccessory?: ReactNode;
 }
 
@@ -30,10 +34,13 @@ function formatSuggestionMetadata(suggestion: MovieSuggestion): string {
 export function SearchInputWithSuggestions({
   value,
   suggestions,
+  isLoadingSuggestions = false,
+  suggestionsError = null,
   onChangeText,
   onSubmit,
   onPressSuggestion,
   onFillSuggestion,
+  onRetrySuggestions,
   leadingAccessory,
 }: SearchInputWithSuggestionsProps): ReactElement {
   const inputRef = React.useRef<TextInput>(null);
@@ -42,7 +49,7 @@ export function SearchInputWithSuggestions({
   const [isFocused, setIsFocused] = React.useState(false);
   const { palette } = useThemePreference();
   const hasValue = displayValue.trim().length > 0;
-  const shouldShowSuggestions = isFocused && suggestions.length > 0;
+  const shouldShowSuggestions = isFocused && (suggestions.length > 0 || isLoadingSuggestions || Boolean(suggestionsError));
 
   React.useEffect(() => {
     setDisplayValue(value);
@@ -170,33 +177,55 @@ export function SearchInputWithSuggestions({
             },
           ]}
         >
-          {suggestions.map((suggestion) => (
-            <View key={suggestion.id} style={[styles.suggestionRow, { borderBottomColor: palette.shellBorder }]}>
-              <TouchableOpacity
-                style={styles.suggestionTextAction}
-                onPress={() => handlePressSuggestion(suggestion)}
-                accessibilityRole="button"
-                accessibilityLabel={`Open details for ${suggestion.title}`}
-              >
-                <Text style={[styles.suggestionTitle, { color: palette.text }]} numberOfLines={1}>
-                  {suggestion.title}
-                </Text>
-                <Text style={[styles.suggestionMetadata, { color: palette.shellMutedText }]} numberOfLines={1}>
-                  {formatSuggestionMetadata(suggestion)}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.fillAction, { borderColor: palette.shellBorder }]}
-                onPress={() => handleFillSuggestion(suggestion)}
-                accessibilityRole="button"
-                accessibilityLabel={`Fill search with ${suggestion.title}`}
-                hitSlop={8}
-              >
-                <Text style={[styles.fillActionText, { color: palette.shellMutedText }]}>Fill</Text>
-              </TouchableOpacity>
+          {isLoadingSuggestions ? (
+            <View style={styles.loadingRow}>
+              <ActivityIndicator color={palette.tint} />
+              <Text style={[styles.loadingText, { color: palette.shellMutedText }]}>Loading suggestions...</Text>
             </View>
-          ))}
+          ) : suggestionsError ? (
+            <View style={styles.errorRow}>
+              <Text style={[styles.errorText, { color: palette.tint }]} numberOfLines={2}>
+                Could not load suggestions.
+              </Text>
+              {onRetrySuggestions ? (
+                <TouchableOpacity
+                  onPress={onRetrySuggestions}
+                  accessibilityRole="button"
+                  accessibilityLabel="Retry suggestions"
+                >
+                  <Text style={[styles.retryText, { color: palette.text }]}>Retry</Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
+          ) : (
+            suggestions.map((suggestion) => (
+              <View key={suggestion.id} style={[styles.suggestionRow, { borderBottomColor: palette.shellBorder }]}>
+                <TouchableOpacity
+                  style={styles.suggestionTextAction}
+                  onPress={() => handlePressSuggestion(suggestion)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Open details for ${suggestion.title}`}
+                >
+                  <Text style={[styles.suggestionTitle, { color: palette.text }]} numberOfLines={1}>
+                    {suggestion.title}
+                  </Text>
+                  <Text style={[styles.suggestionMetadata, { color: palette.shellMutedText }]} numberOfLines={1}>
+                    {formatSuggestionMetadata(suggestion)}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.fillAction, { borderColor: palette.shellBorder }]}
+                  onPress={() => handleFillSuggestion(suggestion)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Fill search with ${suggestion.title}`}
+                  hitSlop={8}
+                >
+                  <Text style={[styles.fillActionText, { color: palette.shellMutedText }]}>Fill</Text>
+                </TouchableOpacity>
+              </View>
+            ))
+          )}
         </View>
       )}
     </View>
@@ -242,62 +271,78 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 14,
-    paddingVertical: 0,
     minWidth: 0,
+    fontSize: 16,
+    lineHeight: 20,
+    padding: 0,
+    margin: 0,
   },
   suggestionsPanel: {
     position: "absolute",
-    top: 44,
+    top: "100%",
     left: 0,
     right: 0,
     borderWidth: 1,
     borderTopWidth: 0,
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOpacity: 0.16,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
     zIndex: 30,
+    elevation: 5,
   },
   suggestionRow: {
-    minHeight: 54,
     flexDirection: "row",
     alignItems: "center",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    paddingLeft: 14,
-    paddingRight: 8,
-    gap: 10,
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
   },
   suggestionTextAction: {
     flex: 1,
     minWidth: 0,
-    paddingVertical: 9,
+    gap: 2,
   },
   suggestionTitle: {
-    fontSize: 14,
-    fontWeight: "700",
+    fontSize: 15,
+    fontWeight: "600",
   },
   suggestionMetadata: {
     fontSize: 12,
-    marginTop: 2,
   },
   fillAction: {
-    minWidth: 48,
-    minHeight: 34,
-    borderWidth: 1,
-    borderRadius: 17,
-    alignItems: "center",
-    justifyContent: "center",
     paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
   },
   fillActionText: {
     fontSize: 12,
+    fontWeight: "700",
+  },
+  loadingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    paddingVertical: 16,
+  },
+  loadingText: {
+    fontSize: 14,
+  },
+  errorRow: {
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    gap: 8,
+    alignItems: "center",
+  },
+  errorText: {
+    fontSize: 14,
+    textAlign: "center",
+  },
+  retryText: {
+    fontSize: 14,
     fontWeight: "700",
   },
 });
