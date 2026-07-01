@@ -20,6 +20,7 @@ import { LeftHeaderContent } from "@/components/common/LeftHeaderContent";
 import { client } from "@/constants/RQClient";
 import { SeasonSchema } from "@/domain/entities/Movie";
 import { SubscriptionProvider } from "@/providers/SubscriptionProvider";
+import { PublishingProvider } from "@/providers/PublishingProvider";
 import { AnalyticsProvider } from "@/providers/AnalyticsProvider";
 import { RepositoryProvider, useRepositories } from "@/providers/RepositoryProvider";
 import { ThemePreferenceProvider, useThemePreference } from "@/providers/ThemePreferenceProvider";
@@ -186,6 +187,11 @@ const linking: LinkingOptions<RootStackParamList> = {
         screens: {
           Home: 'home',
           Favorites: 'favorites',
+          Analytics: 'analytics',
+          Roadmap: 'roadmap',
+          Rewind: 'rewind',
+          Publish: 'publish',
+          Social: 'social',
         },
       },
       Search: 'search',
@@ -393,10 +399,12 @@ export default function RootLayout(): ReactElement | null {
   return (
     <QueryClientProvider client={client}>
       <RepositoryProvider>
-        <AppProviders>
-          <RootNavigator />
-          <ThemedToast />
-        </AppProviders>
+        <PublishingProvider>
+          <AppProviders>
+            <RootNavigator />
+            <ThemedToast />
+          </AppProviders>
+        </PublishingProvider>
       </RepositoryProvider>
     </QueryClientProvider>
   );

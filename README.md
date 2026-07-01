@@ -52,3 +52,8 @@ Start with [`AGENTS.md`](AGENTS.md), then use [`docs/agent-guide.md`](docs/agent
 ## License
 
 MIT — see `LICENSE`.
+
+
+## Backend
+
+P4/P5 publication backend lives in `backend/` — Fastify + SQLite + JWT.

@@ -56,9 +56,9 @@ Current state:
 - Notifications: ⏸️ deferred until WAU threshold.
 - Unlimited export: partially available via local export; premium-gated logic deferred.
 
-## P4 — Publishing Platform 🚧 (backend scaffolding)
+## P4 — Publishing Platform 🚧 (backend + client scaffolding)
 
-Backend scaffolding implemented in `backend/`.
+Backend scaffolding and client contracts implemented.
 
 | Component | Status | Evidence |
 |---|---|---|
@@ -69,13 +69,15 @@ Backend scaffolding implemented in `backend/`.
 | Public profile endpoints | ✅ | `GET /api/u/:handle`, `GET/PUT /api/me/profile` |
 | Public list endpoints | ✅ | `GET /api/lists/:id`, CRUD `/api/me/lists`, `GET /api/u/:handle/lists` |
 | Published rewind endpoints | ✅ | `POST/GET /api/me/rewinds/:year`, `GET /api/rewind/:handle/:year` |
-| Client contracts/adapters | ⏸️ deferred | Needs `src/domain` contracts + repository adapter |
-| UI for publish/public views | ⏸️ deferred | Expo screens not yet built |
+| Domain contracts | ✅ | `src/domain/entities/PublicProfile.ts`, `PublishedList.ts`, `PublishedRewind.ts` |
+| Repository adapter | ✅ | `src/repositories/NetworkPublishingRepository.ts` |
+| Provider + hooks | ✅ | `src/providers/PublishingProvider.tsx`, `hooks/usePublishedLists.ts`, `hooks/usePublishedRewind.ts` |
+| Publish UI | ✅ | `app/tabs/publish/index.tsx`, `containers/PublishContainer.tsx` |
 | Deployment/hosting | ⏸️ deferred | Local SQLite file; choose hosting before production |
 
-## P5 — Social Network 🚧 (planned)
+## P5 — Social Network 🚧 (backend + client scaffolding)
 
-Backend data model and endpoints in place; client UI deferred.
+Backend data model, endpoints, and minimal client UI in place.
 
 | Component | Status | Evidence |
 |---|---|---|
@@ -83,8 +85,11 @@ Backend data model and endpoints in place; client UI deferred.
 | Activities table | ✅ | `backend/src/schema.sql` (`activities`) |
 | Follow/unfollow endpoints | ✅ | `POST/DELETE /api/me/follows/:handle` |
 | Followers/following lists | ✅ | `GET /api/u/:handle/followers`, `GET /api/u/:handle/following` |
-| Activity feed | ✅ | `GET /api/me/feed` |
-| Client social UI | ⏸️ deferred | Needs P4 validation first |
+| Activity feed endpoint | ✅ | `GET /api/me/feed` |
+| Domain contracts | ✅ | `src/domain/entities/SocialActivity.ts`, `IPublishingRepository.ts` |
+| Hooks | ✅ | `hooks/useActivityFeed.ts`, `hooks/useSocialFollow.ts` |
+| Social UI | ✅ | `app/tabs/social/index.tsx`, `containers/SocialFeedContainer.tsx` |
+| Rich interactions | ⏸️ deferred | Comments, reactions, notifications after P4 validation |
 
 ## Decision log applied
 

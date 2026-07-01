@@ -67,9 +67,14 @@ const RewindBody = z.object({
  */
 export async function registerRoutes(fastify, _options) {
   // ---- Auth ----
-  fastify.post('/auth/google', async (request, _reply) => {
+  fastify.post('/auth/google', async (request, reply) => {
     const body = GoogleAuthBody.parse(request.body);
-    const google = await verifyGoogleIdToken(body.idToken);
+    let google;
+    try {
+      google = await verifyGoogleIdToken(body.idToken);
+    } catch (_err) {
+      return reply.code(401).send({ error: 'Invalid Google ID token' });
+    }
     const handleBase = (body.displayName || google.name || 'user')
       .toLowerCase()
       .replace(/[^a-z0-9_]+/g, '_')

@@ -119,6 +119,16 @@ export function HeaderContainer(): React.ReactElement {
     navigation.navigate("Tabs", { screen: "Favorites" });
   }, [closeMenu, navigation]);
 
+  const goToSocial = React.useCallback(() => {
+    closeMenu();
+    navigation.navigate("Tabs", { screen: "Social" });
+  }, [closeMenu, navigation]);
+
+  const goToPublish = React.useCallback(() => {
+    closeMenu();
+    navigation.navigate("Tabs", { screen: "Publish" });
+  }, [closeMenu, navigation]);
+
   const goToHome = React.useCallback(() => {
     closeMenu();
     navigation.navigate("Tabs", { screen: "Home" });
@@ -171,6 +181,8 @@ export function HeaderContainer(): React.ReactElement {
       onCloseMenu={closeMenu}
       onPrimaryNavigation={isFavoritesRoute ? goToHome : goToFavorites}
       onOpenSettings={openSettingsPlaceholder}
+      onOpenSocial={goToSocial}
+      onOpenPublish={goToPublish}
       onToggleTheme={handleToggleTheme}
       onBackPress={handleBackPress}
     />

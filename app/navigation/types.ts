@@ -8,6 +8,8 @@ export type TabParamList = {
   Analytics: undefined;
   Roadmap: undefined;
   Rewind: undefined;
+  Publish: undefined;
+  Social: undefined;
 };
 
 export type RootStackParamList = {

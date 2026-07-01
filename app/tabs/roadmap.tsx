@@ -26,12 +26,12 @@ const PHASES = [
   },
   {
     name: "P4 — Publishing Platform",
-    status: "Deferred (needs backend)",
+    status: "Backend + client scaffolding done",
     goal: "Public profiles, public lists, published rewinds.",
   },
   {
     name: "P5 — Social Network",
-    status: "Deferred indefinitely",
+    status: "Planned; minimal UI in place",
     goal: "Followers, feeds, comments, reactions.",
   },
 ];

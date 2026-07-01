@@ -29,6 +29,8 @@ interface HeaderProps {
   onCloseMenu: () => void;
   onPrimaryNavigation: () => void;
   onOpenSettings: () => void;
+  onOpenPublish: () => void;
+  onOpenSocial: () => void;
   onToggleTheme: () => void;
   onBackPress: () => void;
 }
@@ -53,6 +55,8 @@ export default function Header({
   onCloseMenu,
   onPrimaryNavigation,
   onOpenSettings,
+  onOpenPublish,
+  onOpenSocial,
   onToggleTheme,
   onBackPress,
 }: HeaderProps): ReactElement {
@@ -129,6 +133,24 @@ export default function Header({
               accessibilityLabel={primaryNavigationLabel}
             >
               <Text style={[styles.menuText, { color: palette.text }]}>{primaryNavigationLabel}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={onOpenPublish}
+              accessibilityRole="button"
+              accessibilityLabel="Publish"
+            >
+              <Text style={[styles.menuText, { color: palette.text }]}>Publish</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={onOpenSocial}
+              accessibilityRole="button"
+              accessibilityLabel="Social"
+            >
+              <Text style={[styles.menuText, { color: palette.text }]}>Social</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
