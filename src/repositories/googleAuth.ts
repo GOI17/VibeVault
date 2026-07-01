@@ -1,6 +1,5 @@
 import * as WebBrowser from "expo-web-browser";
 import * as AuthSession from "expo-auth-session";
-import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 import { z } from "zod";
 
@@ -65,8 +64,8 @@ export async function signInWithGoogle(): Promise<AuthSession.AuthSessionResult 
     });
 
     if (result.type === "success") {
-      await SecureStore.setItemAsync("google_access_token", result.params.access_token);
-      await SecureStore.setItemAsync("google_refresh_token", result.params.refresh_token || "");
+      await setSecureItem("google_access_token", result.params.access_token);
+      await setSecureItem("google_refresh_token", result.params.refresh_token || "");
       return result;
     }
 
@@ -78,11 +77,11 @@ export async function signInWithGoogle(): Promise<AuthSession.AuthSessionResult 
 }
 
 export async function getStoredToken(): Promise<string | null> {
-  return SecureStore.getItemAsync("google_access_token");
+  return getSecureItem("google_access_token");
 }
 
 export async function refreshToken(): Promise<string | null> {
-  const refreshTokenValue = await SecureStore.getItemAsync("google_refresh_token");
+  const refreshTokenValue = await getSecureItem("google_refresh_token");
   if (!refreshTokenValue) return null;
   return refreshTokenValue;
 }

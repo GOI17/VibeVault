@@ -1,4 +1,4 @@
-import * as SecureStore from "expo-secure-store";
+import { setSecureItem, getSecureItem, deleteSecureItem } from "./secureStorage";
 
 import type { IPublishingRepository } from "@/domain/repositories/IPublishingRepository";
 import type { PublicProfile, PublicProfileUpdate } from "@/domain/entities/PublicProfile";
@@ -60,15 +60,15 @@ export class NetworkPublishingRepository implements IPublishingRepository {
   }
 
   async setAuthToken(token: string): Promise<void> {
-    await SecureStore.setItemAsync(AUTH_TOKEN_KEY, token);
+    await setSecureItem(AUTH_TOKEN_KEY, token);
   }
 
   async getAuthToken(): Promise<string | null> {
-    return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+    return getSecureItem(AUTH_TOKEN_KEY);
   }
 
   async clearAuthToken(): Promise<void> {
-    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+    await deleteSecureItem(AUTH_TOKEN_KEY);
   }
 
   private async authCall(method: string, path: string, body?: unknown): Promise<unknown> {
