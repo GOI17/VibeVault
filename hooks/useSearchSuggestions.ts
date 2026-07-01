@@ -12,6 +12,7 @@ const SUGGESTION_DEBOUNCE_MS = 250;
 interface UseSearchSuggestionsResult {
   suggestions: MovieSuggestion[];
   isLoading: boolean;
+  error: Error | null;
   normalizedQuery: string;
   canSuggest: boolean;
 }
@@ -33,7 +34,7 @@ export function useSearchSuggestions(query: string): UseSearchSuggestionsResult 
   const hasFreshSuggestions = canSuggest && debouncedQuery === normalizedQuery;
   const canFetchSuggestions = hasFreshSuggestions && debouncedQuery.length >= MIN_SUGGESTION_QUERY_LENGTH;
 
-  const { data, isFetching } = useQuery({
+  const { data, isFetching, error } = useQuery({
     ...queryOptions.movies.suggestions(debouncedQuery),
     queryFn: () => movieRepository.suggest(debouncedQuery),
     enabled: canFetchSuggestions,
@@ -42,6 +43,7 @@ export function useSearchSuggestions(query: string): UseSearchSuggestionsResult 
   return {
     suggestions: canFetchSuggestions ? data?.slice(0, MAX_SUGGESTIONS) ?? [] : [],
     isLoading: isFetching,
+    error: error instanceof Error ? error : null,
     normalizedQuery: debouncedQuery,
     canSuggest,
   };

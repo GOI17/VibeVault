@@ -73,10 +73,10 @@ Milestone: any tracking action takes fewer than 3 taps.
 | Manual favorites | ✅ |
 | Update progress | ✅ |
 
-Remaining polish (non-blocking):
-- Search suggestions latency and error states.
-- Empty states for all flows.
-- Gesture / accessibility pass on poster queue.
+Completed polish:
+- Empty states for Home, Favorites, Search, EpisodeList, and PosterQueue.
+- Search suggestions loading and error states with retry.
+- Accessibility labels on PosterQueue cards.
 
 ### P2 — Shareability ✅
 

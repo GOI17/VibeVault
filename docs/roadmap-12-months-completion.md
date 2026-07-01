@@ -17,7 +17,7 @@ implemented in the codebase and which remain intentionally deferred.
 | Dashboard | `Analytics` tab screen | `app/tabs/analytics.tsx` |
 | Export | JSON/CSV export via share sheet | `app/tabs/analytics.tsx`, `src/repositories/ExpoExportRepository.ts` |
 
-## P1 — Core Tracking ✅ (with non-blocking polish)
+## P1 — Core Tracking ✅
 
 | Feature | Status | Evidence |
 |---|---|---|
@@ -28,8 +28,13 @@ implemented in the codebase and which remain intentionally deferred.
 | Manual favorites | ✅ | `components/forms/AddFavoriteForm.tsx` |
 | Update progress | ✅ | `containers/DetailsContainer.tsx`, `containers/EpisodeListContainer.tsx` |
 
-Non-blocking polish remains (latency, empty states, accessibility) and is
-tracked informally in `docs/roadmap-12-months.md`.
+Polish completed:
+- Empty states: `components/common/EmptyState.tsx`, `components/views/HomeView.tsx`,
+  `components/views/FavoritesView.tsx`, `components/views/SearchView.tsx`,
+  `components/views/EpisodeListView.tsx`, `components/views/PosterQueueView.tsx`.
+- Search suggestions loading/error states with retry: `hooks/useSearchSuggestions.ts`,
+  `components/navigation/SearchInputWithSuggestions.tsx`.
+- PosterQueue accessibility labels: `components/views/PosterQueueView.tsx`.
 
 ## P2 — Shareability ✅
 

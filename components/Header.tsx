@@ -12,6 +12,8 @@ type ThemePalette = ReturnType<typeof useThemePreference>["palette"];
 interface HeaderProps {
   searchQuery: string;
   suggestions: MovieSuggestion[];
+  isLoadingSuggestions?: boolean;
+  suggestionsError?: Error | null;
   menuOpen: boolean;
   isCompact: boolean;
   topInset: number;
@@ -34,6 +36,8 @@ interface HeaderProps {
 export default function Header({
   searchQuery,
   suggestions,
+  isLoadingSuggestions,
+  suggestionsError,
   menuOpen,
   isCompact,
   topInset,
@@ -68,6 +72,8 @@ export default function Header({
         <SearchInputWithSuggestions
           value={searchQuery}
           suggestions={suggestions}
+          isLoadingSuggestions={isLoadingSuggestions}
+          suggestionsError={suggestionsError}
           onChangeText={onSearchQueryChange}
           onSubmit={onSubmitSearch}
           onPressSuggestion={onPressSuggestion}

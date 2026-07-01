@@ -5,8 +5,9 @@ import { View, Pressable, Text, StyleSheet, useWindowDimensions } from "react-na
 
 import type { FavoriteSource } from "@/domain/entities/Favorite";
 import type { Season } from "@/domain/entities/Movie";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
-import { EmptyState } from "./EmptyState";
+import { EmptyState } from "@/components/common/EmptyState";
 import { MasonryItem } from "./MasonryItem";
 
 export interface MasonryItemData {
@@ -73,7 +74,11 @@ export default function MasonryList({
           : 2;
 
   if (!data.length && !isFavoritesLoading && isFavorites) {
-    return <EmptyState />;
+    return <EmptyState
+              icon={<IconSymbol name="heart" size={48} color={palette.shellMutedText} />}
+              title="No favorites yet"
+              message="Double-tap items to add them here."
+            />;
   }
 
   const favoriteMembershipKey = JSON.stringify({

@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactElement } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 export interface EpisodeListEpisodeViewModel {
@@ -45,10 +46,11 @@ export function EpisodeListView({
   if (!selectedSeason) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: palette.shellBackground, padding: 20 }}>
-        <Text style={{ color: palette.text, fontSize: 18, fontWeight: "700" }}>No episodes available</Text>
-        <Text style={{ color: palette.shellMutedText, marginTop: 8, textAlign: "center" }}>
-          This series does not include season information yet.
-        </Text>
+        <EmptyState
+          icon={<IconSymbol name="tv" size={48} color={palette.shellMutedText} />}
+          title="No episodes available"
+          message="This series does not include season information yet."
+        />
       </View>
     );
   }

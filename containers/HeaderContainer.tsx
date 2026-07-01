@@ -55,7 +55,7 @@ export function HeaderContainer(): React.ReactElement {
   const [searchQuery, setSearchQuery] = React.useState("");
   const lastSyncedSearchQueryRef = React.useRef<string | null>(null);
   const [menuOpen, setMenuOpen] = React.useState(false);
-  const { suggestions } = useSearchSuggestions(searchQuery);
+  const { suggestions, isLoading: isLoadingSuggestions, error: suggestionsError } = useSearchSuggestions(searchQuery);
   const { theme: activeTheme, palette, toggleTheme } = useThemePreference();
   const isCompact = width < 390;
   const toggleLabel = activeTheme === "light" ? "Toggle dark mode" : "Toggle light mode";
@@ -154,6 +154,8 @@ export function HeaderContainer(): React.ReactElement {
     <Header
       searchQuery={searchQuery}
       suggestions={suggestions}
+      isLoadingSuggestions={isLoadingSuggestions}
+      suggestionsError={suggestionsError}
       menuOpen={menuOpen}
       isCompact={isCompact}
       topInset={insets.top}

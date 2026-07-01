@@ -4,6 +4,7 @@ import { Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
 import MasonryList from "@/components/Masonry";
 import type { MasonryItemData } from "@/components/Masonry";
 import { LoadingState, ErrorState } from "@/components/FeedbackStates";
+import { EmptyState } from "@/components/common/EmptyState";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import type { MediaType } from "@/constants/query";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
@@ -171,9 +172,16 @@ export function FavoritesView({
       </Modal>
 
       <View style={{ flex: 1 }}>
-        <MasonryList
-          data={masonryData}
-          isFavorites
+        {masonryData.length === 0 ? (
+          <EmptyState
+            icon={<IconSymbol name="heart" size={48} color={palette.shellMutedText} />}
+            title="No favorites yet"
+            message="Double-tap movies on the home screen or add custom entries."
+          />
+        ) : (
+          <MasonryList
+            data={masonryData}
+            isFavorites
           isFavoritesLoading={isLoading}
           showLayoutToggle={false}
           forceListOnMobile
@@ -183,6 +191,7 @@ export function FavoritesView({
           onRemoveFavorite={onRemoveFavorite}
           onOpenDetails={onOpenDetails}
         />
+        )}
       </View>
     </View>
   );
