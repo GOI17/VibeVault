@@ -30,6 +30,7 @@ import TabNavigator from "./tabs/_layout";
 import SearchScreen from "./home/search/query";
 import DetailsScreen from "./home/details/[id]";
 import EpisodeListScreen from "./home/details/episodes";
+import PublicProfileScreen from "./home/profile/[handle]";
 import type { RootStackParamList } from "./navigation/types";
 
 interface ToastInfoProps {
@@ -274,6 +275,7 @@ const linking: LinkingOptions<RootStackParamList> = {
         },
       },
       NotFound: '404',
+      PublicProfile: { path: 'u/:handle', parse: { handle: String } },
     },
   },
 };
@@ -347,6 +349,30 @@ function RootNavigator(): ReactElement {
             component={EpisodeListScreen}
             options={({ navigation, route }) => ({
               title: route.params.title ?? "Episodes",
+              headerStyle: {
+                backgroundColor: palette.shellBackground,
+                borderBottomColor: palette.shellBorder,
+                borderBottomWidth: 1,
+                elevation: 0,
+                shadowOpacity: 0,
+              },
+              headerShadowVisible: false,
+              headerTintColor: palette.text,
+              headerLeft: () => (
+                <LeftHeaderContent
+                  showBackButton
+                  onBackPress={handleBackPress(navigation)}
+                  tintColor={palette.text}
+                  backgroundColor={palette.shellBackground}
+                />
+              ),
+            })}
+          />
+          <Stack.Screen
+            name="PublicProfile"
+            component={PublicProfileScreen}
+            options={({ navigation, route }) => ({
+              title: route.params.handle,
               headerStyle: {
                 backgroundColor: palette.shellBackground,
                 borderBottomColor: palette.shellBorder,

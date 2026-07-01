@@ -33,4 +33,5 @@ export type RootStackParamList = {
     seasons?: Season[];
   };
   NotFound: undefined;
+  PublicProfile: { handle: string };
 };

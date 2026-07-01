@@ -1,12 +1,15 @@
 import { type ReactElement } from "react";
-import { ScrollView, Text, View, ActivityIndicator } from "react-native";
+import { useNavigation, type NavigationProp } from "@react-navigation/native";
+import { ScrollView, Text, View, ActivityIndicator, Pressable } from "react-native";
 
 import { useActivityFeed } from "@/hooks/useActivityFeed";
+import type { RootStackParamList } from "@/app/navigation/types";
 import { useThemePreference } from "@/providers/ThemePreferenceProvider";
 
 export function SocialFeedContainer(): ReactElement {
   const { palette } = useThemePreference();
   const { activities, isLoading, error } = useActivityFeed();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   return (
     <ScrollView
@@ -31,7 +34,9 @@ export function SocialFeedContainer(): ReactElement {
           }}
         >
           <Text style={{ color: palette.text, fontWeight: "700" }}>{activity.displayName}</Text>
-          <Text style={{ color: palette.shellMutedText }}>@{activity.handle}</Text>
+          <Pressable onPress={() => navigation.navigate("PublicProfile", { handle: activity.handle })} accessibilityRole="link" accessibilityLabel={`Open profile of ${activity.handle}`}>
+            <Text style={{ color: palette.shellMutedText }}>@{activity.handle}</Text>
+          </Pressable>
           <Text style={{ color: palette.text, marginTop: 4 }}>{activity.kind.replace("_", " ")}</Text>
           <Text style={{ color: palette.shellMutedText, fontSize: 12, marginTop: 4 }}>{activity.createdAt}</Text>
         </View>
