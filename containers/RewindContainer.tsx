@@ -18,13 +18,6 @@ export function RewindContainer(): ReactElement {
     queryFn: () => favoriteRepository.getAll(),
   });
 
-  // Watched progress store is private; expose a summary method on the repo if needed.
-  // For now, compute from available public methods.
-  const { data: shows = [] } = useQuery({
-    queryKey: ["watched-progress", "shows"],
-    queryFn: () => watchedProgressRepository.getAllWatchedShows(),
-  });
-
   const { data: progressStore } = useQuery({
     queryKey: ["watched-progress", "store"],
     queryFn: () => watchedProgressRepository.exportStore(),
