@@ -34,8 +34,12 @@ Without retention, any monetization fails.
 - Proprietary video / streaming
 - Marketplace
 - Complex ads
-- Backend social graph (followers, feeds, comments, reactions)
-- Public URLs / server-rendered profiles
+- Full social graph (followers, feeds, comments, reactions) until P5
+- Server-side rendering / SEO profiles
+
+P4 introduces public URLs for profiles, lists, and rewinds using a lightweight
+read-mostly backend. The social graph (follows, feeds, reactions) stays in P5 and
+remains gated by P4 validation.
 
 Anything that does not directly increase activation, retention, or organic distribution is out of scope.
 
@@ -109,7 +113,7 @@ Gate: **100+ WAU**.
 
 Implementation starts only after P0-P2 are stable and WAU threshold is met.
 
-### P4 — Publishing Platform (post-12 months)
+### P4 — Publishing Platform 🚧 (scaffolding)
 
 Goal: optional public profiles, public lists, and published rewinds.
 
@@ -118,20 +122,27 @@ Requires a backend of **publication**, not a social network. Read-mostly, optimi
 - `vibevault.app/lists/:id`
 - `vibevault.app/rewind/:handle/:year`
 
-Deferred until retention justifies the backend investment.
+Backend scaffolding: `backend/`
+- Node.js + Fastify + SQLite (`better-sqlite3`) + Zod + JWT
+- Tables: `users`, `public_profiles`, `published_lists`, `published_list_items`, `published_rewinds`
+- Endpoints for auth, profiles, lists, rewinds
 
-### P5 — Social Network (post-12 months)
+Gated until retention justifies the hosting investment.
+
+### P5 — Social Network 🚧 (planned)
 
 Goal: followers, activity feeds, comments, reactions.
 
-Deferred indefinitely until P4 proves that users want public presence.
+Requires P4 publishing backend. Data model already includes `follows` and `activities` tables, plus endpoints for follow/unfollow and an activity feed, so the backend can scale into a social graph once P4 validates public presence.
+
+Deferred until P4 proves that users want public presence.
 
 ## Decision Log
 
 1. **No backend in P0-P2.** Everything is local-first to preserve focus on retention.
 2. **Monetization is P3, not P0.** Revenue comes after product-market fit signals.
-3. **Social ≠ publishing.** Publishing (public lists/profiles) is kept in vision but deferred; social graph is out of 12-month scope.
-4. **Rewind is device-generated.** No public URLs until backend arrives.
+3. **Social ≠ publishing.** Publishing (public lists/profiles) is P4 with a read-mostly backend; the social graph (followers, feeds, reactions) is P5 and remains gated until P4 validates demand.
+4. **Rewind is device-generated in P2.** P4 adds optional published rewinds with public URLs once the backend is deployed.
 5. **Premium features are convenience, not lock-in.** Core tracking remains free; deep links, notifications, and export are premium.
 
 ## How we evaluate success

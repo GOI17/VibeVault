@@ -56,13 +56,35 @@ Current state:
 - Notifications: ⏸️ deferred until WAU threshold.
 - Unlimited export: partially available via local export; premium-gated logic deferred.
 
-## P4 — Publishing Platform ⏸️ (deferred)
+## P4 — Publishing Platform 🚧 (backend scaffolding)
 
-Requires backend. No server-side implementation exists yet.
+Backend scaffolding implemented in `backend/`.
 
-## P5 — Social Network ⏸️ (deferred indefinitely)
+| Component | Status | Evidence |
+|---|---|---|
+| Server + CORS | ✅ | `backend/src/server.js` |
+| SQLite schema | ✅ | `backend/src/schema.sql` |
+| Migrations | ✅ | `backend/src/migrate.js` |
+| JWT auth + Google login link | ✅ | `backend/src/jwt.js`, `backend/src/google.js`, `POST /api/auth/google` |
+| Public profile endpoints | ✅ | `GET /api/u/:handle`, `GET/PUT /api/me/profile` |
+| Public list endpoints | ✅ | `GET /api/lists/:id`, CRUD `/api/me/lists`, `GET /api/u/:handle/lists` |
+| Published rewind endpoints | ✅ | `POST/GET /api/me/rewinds/:year`, `GET /api/rewind/:handle/:year` |
+| Client contracts/adapters | ⏸️ deferred | Needs `src/domain` contracts + repository adapter |
+| UI for publish/public views | ⏸️ deferred | Expo screens not yet built |
+| Deployment/hosting | ⏸️ deferred | Local SQLite file; choose hosting before production |
 
-Requires backend and P4 validation. No implementation.
+## P5 — Social Network 🚧 (planned)
+
+Backend data model and endpoints in place; client UI deferred.
+
+| Component | Status | Evidence |
+|---|---|---|
+| Follows table | ✅ | `backend/src/schema.sql` (`follows`) |
+| Activities table | ✅ | `backend/src/schema.sql` (`activities`) |
+| Follow/unfollow endpoints | ✅ | `POST/DELETE /api/me/follows/:handle` |
+| Followers/following lists | ✅ | `GET /api/u/:handle/followers`, `GET /api/u/:handle/following` |
+| Activity feed | ✅ | `GET /api/me/feed` |
+| Client social UI | ⏸️ deferred | Needs P4 validation first |
 
 ## Decision log applied
 
